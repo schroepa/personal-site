@@ -1,32 +1,32 @@
 ---
-import { ViewTransitions } from 'astro:transitions';
-import CustomCursor from '@/components/astro/CustomCursor.astro';
-import GrainOverlay from '@/components/astro/GrainOverlay.astro';
-import BaselineGrid from '@/components/astro/BaselineGrid.astro';
-import '@/styles/global.css';
-import '@/styles/typography.css';
-import '@/styles/animations.css';
-import '@/styles/prose.css';
+import { ViewTransitions } from "astro:transitions"
+import CustomCursor from "@/components/astro/CustomCursor.astro"
+import GrainOverlay from "@/components/astro/GrainOverlay.astro"
+import BaselineGrid from "@/components/astro/BaselineGrid.astro"
+import "@/styles/global.css"
+import "@/styles/typography.css"
+import "@/styles/animations.css"
+import "@/styles/prose.css"
 
 interface Props {
-  title?: string;
-  description?: string;
+  title?: string
+  description?: string
 }
 
 const {
-  title = 'Patrick Schröder — UI Designer & Developer',
-  description = 'Personal site of Patrick Schröder, UI Designer and Frontend Developer.',
-} = Astro.props;
+  title = "Patrick Schröder — UI Designer & Developer",
+  description = "Personal site of Patrick Schröder, UI Designer and Frontend Developer.",
+} = Astro.props
 
 const navLinks = [
-  { href: '/', label: 'Start' },
-  { href: '/blog', label: 'Blog' },
-  { href: '/projects', label: 'Projekte' },
-];
+  { href: "/", label: "Start" },
+  { href: "/blog", label: "Blog" },
+  { href: "/projects", label: "Projekte" },
+]
 ---
 
 <!doctype html>
-<html lang="de" class="scroll-smooth overflow-x-hidden">
+<html lang="de" class="overflow-x-hidden scroll-smooth">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -35,35 +35,41 @@ const navLinks = [
     <title>{title}</title>
     <ViewTransitions />
   </head>
-  <body class="relative min-h-screen bg-background text-foreground antialiased overflow-x-hidden">
+  <body
+    class="relative min-h-screen overflow-x-hidden bg-background text-foreground antialiased"
+  >
     <CustomCursor />
     <GrainOverlay />
     <BaselineGrid />
 
     <!-- Header -->
-    <header class="fixed top-0 left-0 right-0 z-50 px-6 py-5">
-      <nav class="max-w-5xl mx-auto flex items-center justify-between">
+    <header
+      class="fixed top-0 right-0 left-0 z-50 border-b border-foreground/5 bg-background/50 px-6 py-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)] backdrop-blur-2xl backdrop-saturate-200 supports-[backdrop-filter]:bg-background/40"
+    >
+      <nav class="mx-auto flex max-w-5xl items-center justify-between">
         <a
           href="/"
-          class="t-label text-foreground no-underline hover:opacity-60 transition-opacity duration-200"
+          class="font-medium text-foreground no-underline transition-opacity duration-200 hover:opacity-60"
           data-magnetic
           data-cursor="link"
         >
-          PS
+          PTRCKSCHRDTR
         </a>
-        <ul class="flex items-center gap-8 list-none m-0 p-0">
-          {navLinks.map((link) => (
-            <li>
-              <a
-                href={link.href}
-                class="t-small text-muted-foreground hover:text-foreground transition-colors duration-200 no-underline"
-                data-magnetic
-                data-cursor="link"
-              >
-                {link.label}
-              </a>
-            </li>
-          ))}
+        <ul class="m-0 flex list-none items-center gap-8 p-0">
+          {
+            navLinks.map((link) => (
+              <li>
+                <a
+                  href={link.href}
+                  class="text-muted-foreground no-underline transition-colors duration-200 hover:text-foreground"
+                  data-magnetic
+                  data-cursor="link"
+                >
+                  {link.label}
+                </a>
+              </li>
+            ))
+          }
         </ul>
       </nav>
     </header>
@@ -74,23 +80,27 @@ const navLinks = [
     </main>
 
     <!-- Footer -->
-    <footer class="px-6 py-12 mt-24 border-t border-border">
-      <div class="max-w-5xl mx-auto flex items-center justify-between">
-        <span class="t-small text-muted-foreground">© {new Date().getFullYear()} Patrick Schröder</span>
-        <span class="t-small text-muted-foreground">Gebaut mit Astro & shadcn/ui</span>
+    <footer class="mt-24 border-t border-border px-6 py-12">
+      <div class="mx-auto flex max-w-5xl items-center justify-between">
+        <span class="t-small text-muted-foreground"
+          >© {new Date().getFullYear()} Patrick Schröder</span
+        >
+        <span class="t-small text-muted-foreground"
+          >Gebaut mit Astro & shadcn/ui</span
+        >
       </div>
     </footer>
 
     <script>
-      import { initMagneticButtons } from '@/scripts/magnetic';
-      import { initTextReveal } from '@/scripts/textReveal';
-      import { initScrollAnimations } from '@/scripts/scrollAnimations';
+      import { initMagneticButtons } from "@/scripts/magnetic"
+      import { initTextReveal } from "@/scripts/textReveal"
+      import { initScrollAnimations } from "@/scripts/scrollAnimations"
 
-      document.addEventListener('astro:page-load', () => {
-        initMagneticButtons();
-        initTextReveal();
-        initScrollAnimations();
-      });
+      document.addEventListener("astro:page-load", () => {
+        initMagneticButtons()
+        initTextReveal()
+        initScrollAnimations()
+      })
     </script>
   </body>
 </html>

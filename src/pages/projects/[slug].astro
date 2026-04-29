@@ -21,5 +21,14 @@ const { Content } = await render(project);
   date={project.data.date}
   tags={project.data.tags}
 >
+  {project.data.coverImage && (
+    <figure class="mb-12 rounded-xl overflow-hidden shadow-sm">
+      <img 
+        src={project.data.coverImage} 
+        alt={project.data.title}
+        class="w-full h-auto object-cover max-h-[70vh]" 
+      />
+    </figure>
+  )}
   <Content />
 </PostLayout>

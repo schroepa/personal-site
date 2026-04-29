@@ -34,7 +34,8 @@ const formatDate = (date: Date) =>
 <BaseLayout>
   <!-- Hero -->
   <section
-    class="relative flex min-h-screen flex-col px-6 pt-32 pb-24"
+    style="height: 100vh; max-height: 100vh;"
+    class="relative flex flex-col px-6 pt-32 pb-24"
     data-scroll="depth"
   >
     <HeroMesh />
@@ -290,6 +291,7 @@ const formatDate = (date: Date) =>
 </BaseLayout>
 
 <style>
+
   .scroll-indicator {
     animation: scroll-line 2s ease-in-out infinite;
   }

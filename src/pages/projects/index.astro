@@ -2,6 +2,7 @@
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { getCollection } from 'astro:content';
 
 const allProjects = await getCollection('projects');
@@ -23,24 +24,35 @@ const sorted = allProjects.sort((a, b) => {
         </p>
       </header>
 
-      <div class="grid md:grid-cols-2 gap-6">
+      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {sorted.map((project) => (
           <a href={`/projects/${project.id.replace(/\.md$/, '')}`} class="group block no-underline" data-cursor="link">
             <Card
               data-scroll="fade-up"
               client:visible
-              className="h-full transition-all duration-300 group-hover:border-foreground/20 group-hover:bg-muted/50"
+              className="h-full overflow-hidden transition-all duration-300 group-hover:border-foreground/20 group-hover:bg-muted/50"
             >
+              {project.data.coverImage && (
+                <div class="-mx-6 -mt-6 border-b border-border overflow-hidden rounded-t-xl">
+                  <AspectRatio ratio={4/3}>
+                    <img 
+                      src={project.data.coverImage} 
+                      alt={project.data.title}
+                      class="object-cover w-full h-full transition-transform duration-500 group-hover:scale-105"
+                    />
+                  </AspectRatio>
+                </div>
+              )}
               <CardHeader>
                 <div class="flex items-start justify-between gap-2">
-                  <CardTitle className="t-h3 mb-2">
+                  <CardTitle className="t-h4 mb-2">
                     {project.data.title}
                   </CardTitle>
                   {project.data.featured && (
                     <Badge variant="default" client:visible>Featured</Badge>
                   )}
                 </div>
-                <CardDescription className="t-body text-muted-foreground">
+                <CardDescription className="t-small text-muted-foreground line-clamp-2">
                   {project.data.description}
                 </CardDescription>
               </CardHeader>

@@ -1,4 +1,5 @@
 ---
+
 ---
 
 <div class="mesh-container" aria-hidden="true">
@@ -16,9 +17,10 @@
     height: 124%;
     z-index: 0;
     pointer-events: none;
-    filter: blur(40px);
-    opacity: 0.38;
+    filter: blur(80px);
+    opacity: 0.58;
     will-change: transform;
+    overflow: hidden;
   }
 
   .mesh-orb {
@@ -33,7 +35,7 @@
     top: 20%;
     left: 15%;
     background: var(--mesh-warm);
-    animation: orb-drift-1 18s ease-in-out infinite alternate;
+    animation: orb-drift-1 9s ease-in-out infinite alternate;
   }
 
   /* Orb 2 — cool, oben rechts */
@@ -70,31 +72,63 @@
   }
 
   @keyframes orb-drift-1 {
-    0%   { transform: translate(0%, 0%)   scale(1)    rotate(0deg);  }
-    33%  { transform: translate(8%, -6%)  scale(1.05) rotate(2deg);  }
-    66%  { transform: translate(-5%, 8%)  scale(0.96) rotate(-1deg); }
-    100% { transform: translate(6%, 5%)   scale(1.03) rotate(3deg);  }
+    0% {
+      transform: translate(0%, 0%) scale(1) rotate(0deg);
+    }
+    33% {
+      transform: translate(8%, -6%) scale(1.05) rotate(2deg);
+    }
+    66% {
+      transform: translate(-5%, 8%) scale(0.96) rotate(-1deg);
+    }
+    100% {
+      transform: translate(6%, 5%) scale(1.03) rotate(3deg);
+    }
   }
 
   @keyframes orb-drift-2 {
-    0%   { transform: translate(0%, 0%)   scale(1)    rotate(0deg);  }
-    40%  { transform: translate(-9%, 5%)  scale(1.04) rotate(-3deg); }
-    80%  { transform: translate(5%, -8%)  scale(0.97) rotate(2deg);  }
-    100% { transform: translate(-4%, 6%)  scale(1.02) rotate(-2deg); }
+    0% {
+      transform: translate(0%, 0%) scale(1) rotate(0deg);
+    }
+    40% {
+      transform: translate(-9%, 5%) scale(1.04) rotate(-3deg);
+    }
+    80% {
+      transform: translate(5%, -8%) scale(0.97) rotate(2deg);
+    }
+    100% {
+      transform: translate(-4%, 6%) scale(1.02) rotate(-2deg);
+    }
   }
 
   @keyframes orb-drift-3 {
-    0%   { transform: translate(0%, 0%)   scale(1)    rotate(0deg);  }
-    35%  { transform: translate(-7%, -4%) scale(1.06) rotate(1deg);  }
-    70%  { transform: translate(6%, 7%)   scale(0.95) rotate(-3deg); }
-    100% { transform: translate(-3%, -6%) scale(1.04) rotate(2deg);  }
+    0% {
+      transform: translate(0%, 0%) scale(1) rotate(0deg);
+    }
+    35% {
+      transform: translate(-7%, -4%) scale(1.06) rotate(1deg);
+    }
+    70% {
+      transform: translate(6%, 7%) scale(0.95) rotate(-3deg);
+    }
+    100% {
+      transform: translate(-3%, -6%) scale(1.04) rotate(2deg);
+    }
   }
 
   @keyframes orb-drift-4 {
-    0%   { transform: translate(0%, 0%)   scale(1)    rotate(0deg);  }
-    45%  { transform: translate(7%, -5%)  scale(1.03) rotate(-2deg); }
-    75%  { transform: translate(-6%, 6%)  scale(0.98) rotate(3deg);  }
-    100% { transform: translate(5%, -4%)  scale(1.05) rotate(-1deg); }
+    0% {
+      transform: translate(0%, 0%) scale(1) rotate(0deg);
+    }
+    45% {
+      transform: translate(7%, -5%) scale(1.03) rotate(-2deg);
+    }
+    75% {
+      transform: translate(-6%, 6%) scale(0.98) rotate(3deg);
+    }
+    100% {
+      transform: translate(5%, -4%) scale(1.05) rotate(-1deg);
+    }
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -108,45 +142,46 @@
 </style>
 
 <script>
-  (function () {
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    if (!window.matchMedia('(pointer: fine)').matches) return;
+  ;(function () {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return
+    if (!window.matchMedia("(pointer: fine)").matches) return
 
-    const container = document.querySelector<HTMLElement>('.mesh-container');
-    const hero = container?.closest<HTMLElement>('section');
-    if (!container || !hero) return;
+    const container = document.querySelector<HTMLElement>(".mesh-container")
+    const hero = container?.closest<HTMLElement>("section")
+    if (!container || !hero) return
 
-    const MAX_X = 6;
-    const MAX_Y = 4;
-    const LERP  = 0.035;
+    const MAX_X = 6
+    const MAX_Y = 4
+    const LERP = 0.035
 
-    let targetX = 0, targetY = 0;
-    let currentX = 0, currentY = 0;
-    let rafId: number;
+    let targetX = 0,
+      targetY = 0
+    let currentX = 0,
+      currentY = 0
+    let rafId: number
 
-    hero.addEventListener('pointermove', (e: PointerEvent) => {
-      const rect = hero.getBoundingClientRect();
-      targetX = ((e.clientX - rect.left) / rect.width  - 0.5) * MAX_X * 2;
-      targetY = ((e.clientY - rect.top)  / rect.height - 0.5) * MAX_Y * 2;
-    });
+    hero.addEventListener("pointermove", (e: PointerEvent) => {
+      const rect = hero.getBoundingClientRect()
+      targetX = ((e.clientX - rect.left) / rect.width - 0.5) * MAX_X * 2
+      targetY = ((e.clientY - rect.top) / rect.height - 0.5) * MAX_Y * 2
+    })
 
-    hero.addEventListener('pointerleave', () => {
-      targetX = 0;
-      targetY = 0;
-    });
+    hero.addEventListener("pointerleave", () => {
+      targetX = 0
+      targetY = 0
+    })
 
     function tick(): void {
-      currentX += (targetX - currentX) * LERP;
-      currentY += (targetY - currentY) * LERP;
-      container!.style.transform =
-        `translate(${currentX.toFixed(3)}%, ${currentY.toFixed(3)}%)`;
-      rafId = requestAnimationFrame(tick);
+      currentX += (targetX - currentX) * LERP
+      currentY += (targetY - currentY) * LERP
+      container!.style.transform = `translate(${currentX.toFixed(3)}%, ${currentY.toFixed(3)}%)`
+      rafId = requestAnimationFrame(tick)
     }
 
-    tick();
+    tick()
 
-    document.addEventListener('astro:before-swap', () => {
-      cancelAnimationFrame(rafId);
-    });
-  })();
+    document.addEventListener("astro:before-swap", () => {
+      cancelAnimationFrame(rafId)
+    })
+  })()
 </script>
