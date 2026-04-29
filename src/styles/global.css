@@ -2,6 +2,7 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 @import "@fontsource-variable/geist";
+@import "@fontsource/geist-mono";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -130,4 +131,55 @@
   html {
     @apply font-sans;
     }
+}
+
+/* ─── Additive: Font Variables ───────────────────────────────────────────── */
+
+@theme {
+  --font-mono: 'Geist Mono', monospace;
+}
+
+/* ─── Additive: Typografie-Skala (Major Third, 1.250) ────────────────────── */
+
+:root {
+  --text-xs:   0.64rem;
+  --text-sm:   0.8rem;
+  --text-base: 1rem;
+  --text-md:   1.25rem;
+  --text-lg:   1.563rem;
+  --text-xl:   1.953rem;
+  --text-2xl:  2.441rem;
+  --text-3xl:  3.052rem;
+
+  --leading-tight:  1.1;
+  --leading-snug:   1.3;
+  --leading-normal: 1.6;
+  --leading-loose:  1.8;
+
+  --tracking-tight:  -0.03em;
+  --tracking-snug:   -0.01em;
+  --tracking-normal:  0em;
+  --tracking-wide:    0.06em;
+}
+
+@theme {
+  --font-size-scale-xs:   0.64rem;
+  --font-size-scale-sm:   0.8rem;
+  --font-size-scale-md:   1.25rem;
+  --font-size-scale-lg:   1.563rem;
+  --font-size-scale-xl:   1.953rem;
+  --font-size-scale-2xl:  2.441rem;
+  --font-size-scale-3xl:  3.052rem;
+}
+
+/* ─── Mesh Color Tokens ──────────────────────────────────────────────────── */
+
+:root {
+  --mesh-warm: oklch(0.88 0.04 75);
+  --mesh-cool: oklch(0.88 0.03 145);
+}
+
+.dark {
+  --mesh-warm: oklch(0.28 0.04 75);
+  --mesh-cool: oklch(0.28 0.03 145);
 }
