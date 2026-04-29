@@ -1,0 +1,60 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { getCollection } from 'astro:content';
+
+const allProjects = await getCollection('projects');
+const sorted = allProjects.sort((a, b) => {
+  if (a.data.featured && !b.data.featured) return -1;
+  if (!a.data.featured && b.data.featured) return 1;
+  return b.data.date.getTime() - a.data.date.getTime();
+});
+---
+
+<BaseLayout title="Projekte — Patrick Schröder" description="Ausgewählte Arbeiten aus Design und Entwicklung.">
+  <div class="px-6 pt-32 pb-24">
+    <div class="max-w-5xl mx-auto">
+      <header class="mb-16">
+        <h1 class="t-h1 mb-4" data-reveal="lines">Projekte</h1>
+        <p class="t-lead text-muted-foreground">
+          Ausgewählte Arbeiten aus den Bereichen Interface Design,
+          Frontend-Entwicklung und Design-Systems.
+        </p>
+      </header>
+
+      <div class="grid md:grid-cols-2 gap-6">
+        {sorted.map((project) => (
+          <a href={`/projects/${project.id.replace(/\.md$/, '')}`} class="group block no-underline" data-cursor="link">
+            <Card
+              data-scroll="fade-up"
+              client:visible
+              className="h-full transition-all duration-300 group-hover:border-foreground/20 group-hover:bg-muted/50"
+            >
+              <CardHeader>
+                <div class="flex items-start justify-between gap-2">
+                  <CardTitle className="t-h3 mb-2">
+                    {project.data.title}
+                  </CardTitle>
+                  {project.data.featured && (
+                    <Badge variant="default" client:visible>Featured</Badge>
+                  )}
+                </div>
+                <CardDescription className="t-body text-muted-foreground">
+                  {project.data.description}
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div class="flex flex-wrap gap-2">
+                  {project.data.tags.map((tag) => (
+                    <Badge variant="outline" client:visible>{tag}</Badge>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </a>
+        ))}
+      </div>
+    </div>
+  </div>
+</BaseLayout>

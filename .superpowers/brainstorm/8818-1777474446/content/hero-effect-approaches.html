@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hero Effect – Ansätze</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Geist', -apple-system, system-ui, sans-serif;
+    background: #111;
+    color: #eee;
+    padding: 32px 24px 64px;
+  }
+
+  h1 { font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase; color: #666; margin-bottom: 8px; font-weight: 500; }
+  .subtitle { font-size: 22px; font-weight: 400; color: #e5e5e5; margin-bottom: 8px; line-height: 1.3; }
+  .note { font-size: 13px; color: #555; margin-bottom: 48px; }
+
+  .options-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+
+  .opt {
+    border: 1.5px solid #222;
+    border-radius: 12px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: border-color 250ms ease, transform 200ms ease;
+    background: #161616;
+  }
+  .opt:hover { border-color: #444; transform: translateY(-2px); }
+  .opt.selected { border-color: #888; }
+
+  .preview {
+    height: 340px;
+    position: relative;
+    overflow: hidden;
+    background: #ffffff;
+  }
+
+  /* ── Hero text inside each preview ── */
+  .hero-text {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 28px 28px 32px;
+    z-index: 10;
+  }
+  .hero-label {
+    font-size: 9px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #999;
+    margin-bottom: 10px;
+  }
+  .hero-h1 {
+    font-size: 22px;
+    font-weight: 500;
+    line-height: 1.15;
+    letter-spacing: -0.025em;
+    color: #111;
+    margin-bottom: 10px;
+  }
+  .hero-line {
+    width: 100%;
+    height: 1px;
+    background: #e0e0e0;
+    margin-bottom: 12px;
+  }
+  .hero-lead {
+    font-size: 13px;
+    color: #666;
+    line-height: 1.5;
+  }
+
+  /* ─────────────────────────────────────────────────── */
+  /* OPTION A: Radial Glow Drift (reine Atmosphäre)     */
+  /* ─────────────────────────────────────────────────── */
+
+  .preview-a {
+    background: #ffffff;
+  }
+
+  .preview-a::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 70% 60% at 20% 30%, oklch(0.97 0.008 80 / 0.9) 0%, transparent 65%),
+      radial-gradient(ellipse 50% 50% at 80% 70%, oklch(0.96 0.006 100 / 0.7) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 40% at 55% 15%, oklch(0.98 0.005 60 / 0.6) 0%, transparent 55%);
+    animation: drift-a 14s ease-in-out infinite alternate;
+    z-index: 1;
+  }
+
+  @keyframes drift-a {
+    0%   { opacity: 1; transform: scale(1) translate(0, 0); }
+    33%  { opacity: 0.85; transform: scale(1.04) translate(-2%, 2%); }
+    66%  { opacity: 0.95; transform: scale(0.97) translate(3%, -1%); }
+    100% { opacity: 1; transform: scale(1.02) translate(-1%, 3%); }
+  }
+
+  /* ─────────────────────────────────────────────────── */
+  /* OPTION B: Cursor-reaktives Spotlight               */
+  /* ─────────────────────────────────────────────────── */
+
+  .preview-b {
+    background: #ffffff;
+  }
+
+  .spotlight {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background: radial-gradient(
+      circle 280px at var(--mx, 50%) var(--my, 40%),
+      oklch(0.95 0.012 85 / 0.55) 0%,
+      oklch(0.97 0.007 90 / 0.2) 35%,
+      transparent 65%
+    );
+    transition: background 80ms linear;
+  }
+
+  /* ─────────────────────────────────────────────────── */
+  /* OPTION C: Flowing Mesh (Gemini-näheste Variante)   */
+  /* ─────────────────────────────────────────────────── */
+
+  .preview-c {
+    background: #ffffff;
+  }
+
+  .preview-c::before {
+    content: '';
+    position: absolute;
+    inset: -20%;
+    width: 140%;
+    height: 140%;
+    background:
+      radial-gradient(ellipse 55% 45% at 15% 25%, oklch(0.95 0.016 75 / 0.85) 0%, transparent 55%),
+      radial-gradient(ellipse 45% 55% at 85% 20%, oklch(0.96 0.010 110 / 0.7) 0%, transparent 50%),
+      radial-gradient(ellipse 65% 35% at 60% 85%, oklch(0.97 0.008 55 / 0.65) 0%, transparent 55%),
+      radial-gradient(ellipse 40% 60% at 30% 75%, oklch(0.95 0.012 95 / 0.6) 0%, transparent 50%);
+    animation: mesh-flow 18s ease-in-out infinite;
+    z-index: 1;
+    filter: blur(8px);
+  }
+
+  @keyframes mesh-flow {
+    0%   { transform: translate(0%, 0%) rotate(0deg) scale(1); }
+    25%  { transform: translate(3%, -2%) rotate(2deg) scale(1.02); }
+    50%  { transform: translate(-2%, 3%) rotate(-1deg) scale(0.98); }
+    75%  { transform: translate(2%, 2%) rotate(1deg) scale(1.03); }
+    100% { transform: translate(0%, 0%) rotate(0deg) scale(1); }
+  }
+
+  /* ── Option labels ── */
+  .opt-info {
+    padding: 20px 22px;
+  }
+  .opt-letter {
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #555;
+    margin-bottom: 6px;
+  }
+  .opt-title {
+    font-size: 15px;
+    font-weight: 500;
+    color: #ddd;
+    margin-bottom: 6px;
+  }
+  .opt-desc {
+    font-size: 12.5px;
+    color: #555;
+    line-height: 1.5;
+  }
+  .opt.selected .opt-letter { color: #aaa; }
+  .opt.selected .opt-title  { color: #fff; }
+
+  .footer-note {
+    margin-top: 40px;
+    font-size: 12px;
+    color: #444;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+
+<h1>Hero Hintergrund-Effekt</h1>
+<p class="subtitle">Drei Ansätze — alle subtil, alle animiert, alle innerhalb des Farbsystems</p>
+<p class="note">Klick auf eine Karte zum Auswählen · Die Animationen laufen live</p>
+
+<div class="options-grid">
+
+  <!-- A: Radial Glow Drift -->
+  <div class="opt" data-choice="a" onclick="toggleSelect(this)">
+    <div class="preview preview-a">
+      <div class="hero-text">
+        <div class="hero-label">UI Designer &amp; Frontend Dev</div>
+        <div class="hero-h1">Interfaces die man<br>spürt, bevor man<br>sie versteht.</div>
+        <div class="hero-line"></div>
+        <div class="hero-lead">Typografie, Bewegung und Interaktion.</div>
+      </div>
+    </div>
+    <div class="opt-info">
+      <div class="opt-letter">Option A</div>
+      <div class="opt-title">Atmospheric Drift</div>
+      <div class="opt-desc">2–3 weiche Farbwolken in Warm-Weiß-Tönen driften sehr langsam. Subtilste Variante — kaum sichtbar, nur spürbar.</div>
+    </div>
+  </div>
+
+  <!-- B: Cursor Spotlight -->
+  <div class="opt" data-choice="b" onclick="toggleSelect(this)">
+    <div class="preview preview-b" id="spotlightPreview">
+      <div class="spotlight" id="spotlight"></div>
+      <div class="hero-text">
+        <div class="hero-label">UI Designer &amp; Frontend Dev</div>
+        <div class="hero-h1">Interfaces die man<br>spürt, bevor man<br>sie versteht.</div>
+        <div class="hero-line"></div>
+        <div class="hero-lead">Typografie, Bewegung und Interaktion.</div>
+      </div>
+    </div>
+    <div class="opt-info">
+      <div class="opt-letter">Option B</div>
+      <div class="opt-title">Cursor Spotlight</div>
+      <div class="opt-desc">Ein warmes, unscharfes Licht folgt dem Cursor — bei Ruhe kaum sichtbar, im Bewegung ein feines Aufleuchten.</div>
+    </div>
+  </div>
+
+  <!-- C: Flowing Mesh -->
+  <div class="opt" data-choice="c" onclick="toggleSelect(this)">
+    <div class="preview preview-c">
+      <div class="hero-text">
+        <div class="hero-label">UI Designer &amp; Frontend Dev</div>
+        <div class="hero-h1">Interfaces die man<br>spürt, bevor man<br>sie versteht.</div>
+        <div class="hero-line"></div>
+        <div class="hero-lead">Typografie, Bewegung und Interaktion.</div>
+      </div>
+    </div>
+    <div class="opt-info">
+      <div class="opt-letter">Option C</div>
+      <div class="opt-title">Flowing Mesh</div>
+      <div class="opt-desc">Mehrere überlagerte Farbfelder rotieren und fließen langsam ineinander — am nächsten am Gemini-Effekt, aber in deinem Farbsystem.</div>
+    </div>
+  </div>
+
+</div>
+
+<p class="footer-note">Farben: ausschließlich aus dem bestehenden OKLCH-System · prefers-reduced-motion: alle Animationen deaktivierbar</p>
+
+<script>
+  // Spotlight follows cursor within preview B
+  const preview = document.getElementById('spotlightPreview');
+  const spotlight = document.getElementById('spotlight');
+
+  preview.addEventListener('mousemove', (e) => {
+    const rect = preview.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width * 100).toFixed(1);
+    const y = ((e.clientY - rect.top) / rect.height * 100).toFixed(1);
+    spotlight.style.background = `radial-gradient(circle 280px at ${x}% ${y}%, oklch(0.95 0.012 85 / 0.55) 0%, oklch(0.97 0.007 90 / 0.2) 35%, transparent 65%)`;
+  });
+
+  preview.addEventListener('mouseleave', () => {
+    spotlight.style.background = `radial-gradient(circle 280px at 50% 40%, oklch(0.95 0.012 85 / 0.25) 0%, transparent 60%)`;
+  });
+
+  // Selection toggle (mirrors server helper logic for standalone use)
+  function toggleSelect(el) {
+    document.querySelectorAll('.opt').forEach(o => o.classList.remove('selected'));
+    el.classList.add('selected');
+    if (window.recordChoice) window.recordChoice(el.dataset.choice, el.querySelector('.opt-title').textContent);
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,31 @@
+---
+---
+
+<div id="reading-progress" aria-hidden="true"></div>
+
+<style>
+  #reading-progress {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background-color: var(--foreground);
+    transform-origin: left center;
+    transform: scaleX(0);
+    z-index: 9997;
+    animation: reading-progress linear both;
+    animation-timeline: scroll(root block);
+  }
+
+  @keyframes reading-progress {
+    from { transform: scaleX(0); }
+    to   { transform: scaleX(1); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    #reading-progress {
+      display: none;
+    }
+  }
+</style>

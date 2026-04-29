@@ -1,0 +1,48 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import ReadingProgress from '@/components/astro/ReadingProgress.astro';
+import { Badge } from '@/components/ui/badge';
+
+interface Props {
+  title: string;
+  description?: string;
+  date: Date;
+  tags?: string[];
+}
+
+const { title, description, date, tags = [] } = Astro.props;
+
+const formattedDate = new Intl.DateTimeFormat('de-DE', {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+}).format(date);
+---
+
+<BaseLayout title={title} description={description}>
+  <ReadingProgress />
+
+  <article class="px-6 pt-32 pb-24">
+    <div class="max-w-5xl mx-auto">
+      <header class="mb-12 max-w-2xl">
+        <h1 class="t-h1 mb-4" data-reveal="lines">{title}</h1>
+        <div class="flex items-center gap-4 mt-6">
+          <time class="t-small text-muted-foreground" datetime={date.toISOString()}>
+            {formattedDate}
+          </time>
+          {tags.length > 0 && (
+            <div class="flex flex-wrap gap-2">
+              {tags.map((tag) => (
+                <Badge variant="secondary" client:visible>{tag}</Badge>
+              ))}
+            </div>
+          )}
+        </div>
+      </header>
+
+      <div class="prose t-prose">
+        <slot />
+      </div>
+    </div>
+  </article>
+</BaseLayout>

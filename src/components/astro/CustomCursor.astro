@@ -1,0 +1,140 @@
+---
+---
+
+<div id="cursor-dot" aria-hidden="true"></div>
+<div id="cursor-ring" aria-hidden="true"></div>
+
+<style>
+  #cursor-dot,
+  #cursor-ring {
+    position: fixed;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    z-index: 9998;
+    border-radius: 50%;
+    /* start off-screen until JS moves them */
+    transform: translate(-200px, -200px);
+  }
+
+  #cursor-dot {
+    width: 6px;
+    height: 6px;
+    background-color: var(--foreground);
+    transition: opacity 200ms ease;
+  }
+
+  #cursor-ring {
+    width: 28px;
+    height: 28px;
+    border: 1.5px solid var(--foreground);
+    opacity: 0.5;
+    /* JS handles transform; CSS handles size/color/opacity transitions */
+    transition:
+      opacity 200ms ease,
+      width 200ms ease,
+      height 200ms ease,
+      background-color 200ms ease,
+      border-color 200ms ease,
+      border-radius 200ms ease,
+      border-width 200ms ease;
+  }
+
+  /* ── Hover state: link ────────────────────────────────────────────────── */
+  body[data-cursor-state="link"] #cursor-ring {
+    width: 48px;
+    height: 48px;
+    opacity: 1;
+    border-color: var(--foreground);
+  }
+
+  body[data-cursor-state="link"] #cursor-dot {
+    opacity: 0;
+  }
+
+  /* ── Hover state: button ──────────────────────────────────────────────── */
+  body[data-cursor-state="button"] #cursor-ring {
+    width: 44px;
+    height: 44px;
+    background-color: color-mix(in oklch, var(--foreground) 15%, transparent);
+    border-color: transparent;
+    opacity: 1;
+  }
+
+  /* ── Hover state: text (caret) ────────────────────────────────────────── */
+  body[data-cursor-state="text"] #cursor-ring {
+    width: 2px;
+    height: 26px;
+    border-radius: 1px;
+    border-width: 0;
+    background-color: var(--foreground);
+    opacity: 0.8;
+  }
+
+  @media (pointer: coarse) {
+    #cursor-dot,
+    #cursor-ring { display: none; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    #cursor-dot,
+    #cursor-ring { display: none; }
+  }
+</style>
+
+<script>
+  (function () {
+    if (window.matchMedia('(pointer: coarse)').matches) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    document.documentElement.style.cursor = 'none';
+
+    const dot  = document.getElementById('cursor-dot')  as HTMLElement;
+    const ring = document.getElementById('cursor-ring') as HTMLElement;
+
+    let mouseX = -200;
+    let mouseY = -200;
+    let ringX  = -200;
+    let ringY  = -200;
+
+    document.addEventListener('pointermove', (e: PointerEvent) => {
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+    });
+
+    function lerp(a: number, b: number, t: number): number {
+      return a + (b - a) * t;
+    }
+
+    function getRingHalfSize(): number {
+      // read the current rendered size so centering stays correct during transitions
+      return ring.offsetWidth / 2;
+    }
+
+    function tick(): void {
+      ringX = lerp(ringX, mouseX, 0.12);
+      ringY = lerp(ringY, mouseY, 0.12);
+
+      const rh = getRingHalfSize();
+      dot.style.transform  = `translate(${mouseX - 3}px, ${mouseY - 3}px)`;
+      ring.style.transform = `translate(${ringX - rh}px, ${ringY - rh}px)`;
+
+      requestAnimationFrame(tick);
+    }
+
+    tick();
+
+    document.addEventListener('mouseover', (e: MouseEvent) => {
+      const target = (e.target as HTMLElement).closest('[data-cursor]');
+      if (target) {
+        document.body.dataset.cursorState = (target as HTMLElement).dataset.cursor ?? '';
+      } else {
+        delete document.body.dataset.cursorState;
+      }
+    });
+
+    document.addEventListener('mouseleave', () => {
+      delete document.body.dataset.cursorState;
+    });
+  })();
+</script>

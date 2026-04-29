@@ -1,0 +1,68 @@
+/* ─── Semantic Typography Classes ─────────────────────────────────────────── */
+
+.t-hero {
+  font-size: var(--text-3xl);
+  line-height: var(--leading-tight);
+  letter-spacing: var(--tracking-tight);
+  font-weight: 500;
+}
+
+.t-h1 {
+  font-size: var(--text-2xl);
+  line-height: var(--leading-tight);
+  letter-spacing: var(--tracking-tight);
+  font-weight: 500;
+}
+
+.t-h2 {
+  font-size: var(--text-xl);
+  line-height: var(--leading-snug);
+  letter-spacing: var(--tracking-snug);
+  font-weight: 500;
+}
+
+.t-h3 {
+  font-size: var(--text-lg);
+  line-height: var(--leading-snug);
+  letter-spacing: var(--tracking-normal);
+  font-weight: 500;
+}
+
+.t-lead {
+  font-size: var(--text-md);
+  line-height: var(--leading-normal);
+  letter-spacing: var(--tracking-normal);
+  font-weight: 400;
+}
+
+.t-body {
+  font-size: var(--text-base);
+  line-height: var(--leading-normal);
+  font-weight: 400;
+}
+
+.t-small {
+  font-size: var(--text-sm);
+  line-height: var(--leading-normal);
+  font-weight: 400;
+}
+
+.t-label {
+  font-size: var(--text-xs);
+  line-height: var(--leading-normal);
+  letter-spacing: var(--tracking-wide);
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.t-mono {
+  font-size: var(--text-sm);
+  font-family: var(--font-mono);
+  line-height: var(--leading-normal);
+}
+
+.t-prose {
+  max-width: 65ch;
+  font-size: var(--text-base);
+  line-height: var(--leading-loose);
+}

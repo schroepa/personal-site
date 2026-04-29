@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hero Effect v2</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: -apple-system, system-ui, sans-serif;
+    background: #111;
+    color: #eee;
+    padding: 32px 24px 64px;
+  }
+
+  h1 { font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: #555; margin-bottom: 6px; font-weight: 500; }
+  .subtitle { font-size: 20px; font-weight: 400; color: #e0e0e0; margin-bottom: 6px; line-height: 1.3; }
+  .note { font-size: 12px; color: #555; margin-bottom: 40px; }
+  .note em { color: #888; font-style: normal; }
+
+  .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+
+  .card {
+    border: 1.5px solid #222;
+    border-radius: 10px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: border-color 200ms, transform 200ms;
+  }
+  .card:hover { border-color: #444; transform: translateY(-2px); }
+  .card.selected { border-color: #777; }
+
+  /* ── Preview area ── */
+  .preview {
+    height: 300px;
+    position: relative;
+    overflow: hidden;
+    background: #faf9f7;  /* slight warm white, like the site */
+  }
+
+  /* ── Hero typography inside preview ── */
+  .ht {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    padding: 24px 24px 28px;
+    z-index: 10;
+  }
+  .ht-label {
+    font-size: 8px; letter-spacing: 0.14em; text-transform: uppercase;
+    color: #999; margin-bottom: 8px;
+  }
+  .ht-h1 {
+    font-size: 19px; font-weight: 500; line-height: 1.2;
+    letter-spacing: -0.025em; color: #111; margin-bottom: 10px;
+  }
+  .ht-rule { width: 100%; height: 1px; background: #ddd; margin-bottom: 10px; }
+  .ht-lead { font-size: 12px; color: #666; line-height: 1.5; }
+
+  /* ──────────────────────────────────────────────
+     A: ATMOSPHERIC DRIFT
+     3 soft orbs drifting — warm tawny tones
+  ────────────────────────────────────────────── */
+  .bg-a {
+    position: absolute; inset: 0; z-index: 1;
+    background:
+      radial-gradient(ellipse 65% 55% at 18% 28%,
+        rgba(210, 190, 155, 0.45) 0%, transparent 62%),
+      radial-gradient(ellipse 50% 60% at 82% 65%,
+        rgba(195, 205, 180, 0.35) 0%, transparent 58%),
+      radial-gradient(ellipse 55% 40% at 55% 10%,
+        rgba(220, 200, 165, 0.30) 0%, transparent 55%);
+    animation: drift 16s ease-in-out infinite alternate;
+  }
+  @keyframes drift {
+    0%   { transform: scale(1)    translate(0%,  0%);  opacity: 1;    }
+    40%  { transform: scale(1.05) translate(-3%, 2%);  opacity: 0.88; }
+    70%  { transform: scale(0.97) translate(4%, -2%);  opacity: 0.95; }
+    100% { transform: scale(1.03) translate(-1%, 3%);  opacity: 1;    }
+  }
+
+  /* ──────────────────────────────────────────────
+     B: CURSOR SPOTLIGHT
+     Warm glow that tracks the mouse
+  ────────────────────────────────────────────── */
+  .bg-b {
+    position: absolute; inset: 0; z-index: 1;
+    background: radial-gradient(
+      circle 220px at 50% 38%,
+      rgba(215, 195, 150, 0.50) 0%,
+      rgba(220, 205, 170, 0.18) 38%,
+      transparent 62%
+    );
+    transition: background 60ms linear;
+  }
+
+  /* ──────────────────────────────────────────────
+     C: FLOWING MESH
+     Multiple overlapping colour fields, rotating
+     — closest to Gemini feel
+  ────────────────────────────────────────────── */
+  .bg-c {
+    position: absolute;
+    inset: -30%; width: 160%; height: 160%;
+    z-index: 1;
+    filter: blur(22px);
+    background:
+      radial-gradient(ellipse 50% 45% at 12% 20%,
+        rgba(200, 175, 130, 0.60) 0%, transparent 55%),
+      radial-gradient(ellipse 42% 52% at 88% 18%,
+        rgba(170, 195, 165, 0.50) 0%, transparent 52%),
+      radial-gradient(ellipse 60% 38% at 62% 90%,
+        rgba(210, 185, 145, 0.55) 0%, transparent 55%),
+      radial-gradient(ellipse 38% 58% at 28% 78%,
+        rgba(185, 200, 160, 0.45) 0%, transparent 50%);
+    animation: mesh 20s ease-in-out infinite;
+  }
+  @keyframes mesh {
+    0%   { transform: translate(0%,   0%)  rotate(0deg)  scale(1);    }
+    25%  { transform: translate(4%,  -3%)  rotate(3deg)  scale(1.04); }
+    50%  { transform: translate(-3%,  4%)  rotate(-2deg) scale(0.97); }
+    75%  { transform: translate(3%,   3%)  rotate(2deg)  scale(1.03); }
+    100% { transform: translate(0%,   0%)  rotate(0deg)  scale(1);    }
+  }
+
+  /* ── sliders ── */
+  .intensity-row {
+    padding: 14px 20px 0;
+    background: #161616;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .intensity-row label { font-size: 10px; color: #555; white-space: nowrap; }
+  .intensity-row input[type=range] { flex: 1; accent-color: #666; }
+
+  /* ── card labels ── */
+  .info { padding: 16px 20px 20px; background: #161616; }
+  .tag  { font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; color: #555; margin-bottom: 4px; }
+  .name { font-size: 15px; font-weight: 500; color: #ddd; margin-bottom: 4px; }
+  .desc { font-size: 12px; color: #555; line-height: 1.5; }
+  .card.selected .name { color: #fff; }
+  .card.selected .tag  { color: #888; }
+
+  .footer { margin-top: 36px; font-size: 11px; color: #3a3a3a; text-align: center; }
+</style>
+</head>
+<body>
+
+<h1>Hero Hintergrund-Effekt — v2</h1>
+<p class="subtitle">Intensitäten erhöht damit die Richtung klar wird</p>
+<p class="note">In der Produktion werden alle Effekte auf ~30–40% zurückgedreht · <em>Klick zum Auswählen, Slider zum Testen</em></p>
+
+<div class="grid">
+
+  <!-- A -->
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="preview" id="previewA">
+      <div class="bg-a" id="bgA"></div>
+      <div class="ht">
+        <div class="ht-label">UI Designer &amp; Frontend Dev</div>
+        <div class="ht-h1">Interfaces die man spürt,<br>bevor man sie versteht.</div>
+        <div class="ht-rule"></div>
+        <div class="ht-lead">Typografie, Bewegung, Interaktion.</div>
+      </div>
+    </div>
+    <div class="intensity-row">
+      <label>Intensität</label>
+      <input type="range" min="0" max="100" value="45"
+        oninput="setOpacity('bgA', this.value)" onclick="event.stopPropagation()">
+    </div>
+    <div class="info">
+      <div class="tag">Option A</div>
+      <div class="name">Atmospheric Drift</div>
+      <div class="desc">3 Farbwolken driften langsam — rein autonom, kein Input nötig.</div>
+    </div>
+  </div>
+
+  <!-- B -->
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="preview" id="previewB">
+      <div class="bg-b" id="bgB"></div>
+      <div class="ht">
+        <div class="ht-label">UI Designer &amp; Frontend Dev</div>
+        <div class="ht-h1">Interfaces die man spürt,<br>bevor man sie versteht.</div>
+        <div class="ht-rule"></div>
+        <div class="ht-lead">Typografie, Bewegung, Interaktion.</div>
+      </div>
+    </div>
+    <div class="intensity-row">
+      <label>Intensität</label>
+      <input type="range" min="0" max="100" value="50"
+        oninput="setOpacity('bgB', this.value)" onclick="event.stopPropagation()">
+    </div>
+    <div class="info">
+      <div class="tag">Option B</div>
+      <div class="name">Cursor Spotlight</div>
+      <div class="desc">Warmes Licht folgt dem Cursor. ← Maus über Vorschau bewegen.</div>
+    </div>
+  </div>
+
+  <!-- C -->
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="preview" id="previewC">
+      <div class="bg-c" id="bgC"></div>
+      <div class="ht">
+        <div class="ht-label">UI Designer &amp; Frontend Dev</div>
+        <div class="ht-h1">Interfaces die man spürt,<br>bevor man sie versteht.</div>
+        <div class="ht-rule"></div>
+        <div class="ht-lead">Typografie, Bewegung, Interaktion.</div>
+      </div>
+    </div>
+    <div class="intensity-row">
+      <label>Intensität</label>
+      <input type="range" min="0" max="100" value="55"
+        oninput="setOpacity('bgC', this.value)" onclick="event.stopPropagation()">
+    </div>
+    <div class="info">
+      <div class="tag">Option C</div>
+      <div class="name">Flowing Mesh</div>
+      <div class="desc">Mehrere Farbfelder fließen ineinander — nächste Variante zum Gemini-Effekt.</div>
+    </div>
+  </div>
+
+</div>
+
+<p class="footer">Farbtöne: warme Sandgelb / Salbeigrün-Töne · alle aus dem OKLCH-Spektrum deines Systems</p>
+
+<script>
+  // Spotlight tracking for B
+  const previewB = document.getElementById('previewB');
+  const bgB = document.getElementById('bgB');
+  let bOpacity = 0.50;
+
+  previewB.addEventListener('mousemove', e => {
+    const r = previewB.getBoundingClientRect();
+    const x = ((e.clientX - r.left) / r.width * 100).toFixed(1);
+    const y = ((e.clientY - r.top)  / r.height * 100).toFixed(1);
+    bgB.style.background = `radial-gradient(circle 220px at ${x}% ${y}%, rgba(215,195,150,${bOpacity}) 0%, rgba(220,205,170,${bOpacity*0.36}) 38%, transparent 62%)`;
+  });
+  previewB.addEventListener('mouseleave', () => {
+    bgB.style.background = `radial-gradient(circle 220px at 50% 38%, rgba(215,195,150,${bOpacity*0.3}) 0%, transparent 55%)`;
+  });
+
+  // Opacity sliders
+  function setOpacity(id, val) {
+    const el = document.getElementById(id);
+    el.style.opacity = val / 100;
+    if (id === 'bgB') bOpacity = (val / 100) * 0.5;
+  }
+
+  // Selection
+  function toggleSelect(el) {
+    document.querySelectorAll('.card').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+    if (window.recordChoice) window.recordChoice(el.dataset.choice, el.querySelector('.name').textContent.trim());
+  }
+</script>
+</body>
+</html>

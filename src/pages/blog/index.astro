@@ -1,0 +1,63 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { getCollection } from 'astro:content';
+
+const posts = await getCollection('blog', ({ data }) => !data.draft);
+const sorted = posts.sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+
+const formatDate = (date: Date) =>
+  new Intl.DateTimeFormat('de-DE', { year: 'numeric', month: 'long', day: 'numeric' }).format(date);
+---
+
+<BaseLayout title="Blog — Patrick Schröder" description="Gedanken zu Design, Frontend und Tooling.">
+  <div class="px-6 pt-32 pb-24">
+    <div class="max-w-5xl mx-auto">
+      <header class="mb-16">
+        <h1 class="t-h1 mb-4" data-reveal="lines">Blog</h1>
+        <p class="t-lead text-muted-foreground">
+          Gedanken zu Design, Frontend-Entwicklung und den Tools dazwischen.
+        </p>
+      </header>
+
+      <div class="grid gap-4">
+        {sorted.map((post) => (
+          <a href={`/blog/${post.id.replace(/\.md$/, '')}`} class="group block no-underline" data-cursor="link">
+            <Card
+              data-scroll="fade-up"
+              client:visible
+              className="transition-all duration-300 group-hover:border-foreground/20 group-hover:bg-muted/50"
+            >
+              <CardHeader>
+                <div class="flex items-start justify-between gap-6">
+                  <div class="flex-1 min-w-0">
+                    <CardTitle className="t-h3 mb-2">
+                      {post.data.title}
+                    </CardTitle>
+                    <CardDescription className="t-body text-muted-foreground">
+                      {post.data.description}
+                    </CardDescription>
+                    {post.data.tags && post.data.tags.length > 0 && (
+                      <div class="flex flex-wrap gap-2 mt-4">
+                        {post.data.tags.map((tag) => (
+                          <Badge variant="secondary" client:visible>{tag}</Badge>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                  <time
+                    class="t-small text-muted-foreground shrink-0 mt-1"
+                    datetime={post.data.date.toISOString()}
+                  >
+                    {formatDate(post.data.date)}
+                  </time>
+                </div>
+              </CardHeader>
+            </Card>
+          </a>
+        ))}
+      </div>
+    </div>
+  </div>
+</BaseLayout>

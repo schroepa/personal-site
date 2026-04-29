@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mesh Varianten</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: -apple-system, system-ui, sans-serif;
+    background: #111;
+    color: #eee;
+    padding: 32px 24px 64px;
+  }
+
+  h1 { font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: #555; margin-bottom: 6px; font-weight: 500; }
+  .subtitle { font-size: 20px; font-weight: 400; color: #e0e0e0; margin-bottom: 6px; }
+  .note { font-size: 12px; color: #555; margin-bottom: 40px; }
+
+  .split { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+
+  .card {
+    border: 1.5px solid #222;
+    border-radius: 10px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: border-color 200ms, transform 200ms;
+  }
+  .card:hover { border-color: #444; transform: translateY(-2px); }
+  .card.selected { border-color: #888; }
+
+  .preview {
+    height: 380px;
+    position: relative;
+    overflow: hidden;
+    background: #faf9f7;
+  }
+
+  /* ── Hero text ── */
+  .ht {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    padding: 28px 28px 32px;
+    z-index: 10;
+  }
+  .ht-label { font-size: 8px; letter-spacing: 0.14em; text-transform: uppercase; color: #999; margin-bottom: 9px; }
+  .ht-h1 { font-size: 21px; font-weight: 500; line-height: 1.18; letter-spacing: -0.025em; color: #111; margin-bottom: 10px; }
+  .ht-rule { width: 100%; height: 1px; background: #e0e0e0; margin-bottom: 10px; }
+  .ht-lead { font-size: 12px; color: #666; line-height: 1.5; }
+
+  /* ─────────────────────────────────────────────
+     VERSION A: Nur autonome Animation
+  ───────────────────────────────────────────── */
+  .mesh-auto {
+    position: absolute;
+    inset: -30%; width: 160%; height: 160%;
+    z-index: 1;
+    filter: blur(24px);
+    background:
+      radial-gradient(ellipse 50% 45% at 12% 20%, rgba(200,175,130,0.58) 0%, transparent 55%),
+      radial-gradient(ellipse 42% 52% at 88% 18%, rgba(170,195,165,0.48) 0%, transparent 52%),
+      radial-gradient(ellipse 60% 38% at 62% 90%, rgba(210,185,145,0.52) 0%, transparent 55%),
+      radial-gradient(ellipse 38% 58% at 28% 78%, rgba(185,200,160,0.44) 0%, transparent 50%);
+    animation: mesh-a 20s ease-in-out infinite;
+  }
+  @keyframes mesh-a {
+    0%   { transform: translate(0%,  0%)  rotate(0deg)  scale(1);    }
+    25%  { transform: translate(4%, -3%)  rotate(3deg)  scale(1.04); }
+    50%  { transform: translate(-3%, 4%)  rotate(-2deg) scale(0.97); }
+    75%  { transform: translate(3%,  3%)  rotate(2deg)  scale(1.03); }
+    100% { transform: translate(0%,  0%)  rotate(0deg)  scale(1);    }
+  }
+
+  /* ─────────────────────────────────────────────
+     VERSION B: Autonome Animation + Cursor-Einfluss
+     — Cursor verschiebt den Mesh-Schwerpunkt leicht
+  ───────────────────────────────────────────── */
+  .mesh-cursor {
+    position: absolute;
+    inset: -30%; width: 160%; height: 160%;
+    z-index: 1;
+    filter: blur(24px);
+    background:
+      radial-gradient(ellipse 50% 45% at 12% 20%, rgba(200,175,130,0.58) 0%, transparent 55%),
+      radial-gradient(ellipse 42% 52% at 88% 18%, rgba(170,195,165,0.48) 0%, transparent 52%),
+      radial-gradient(ellipse 60% 38% at 62% 90%, rgba(210,185,145,0.52) 0%, transparent 55%),
+      radial-gradient(ellipse 38% 58% at 28% 78%, rgba(185,200,160,0.44) 0%, transparent 50%);
+    animation: mesh-b 20s ease-in-out infinite;
+    transition: transform 1200ms cubic-bezier(0.25, 1, 0.5, 1);
+    will-change: transform;
+  }
+  @keyframes mesh-b {
+    0%   { transform: translate(var(--cx,0%), var(--cy,0%)) rotate(0deg)  scale(1);    }
+    25%  { transform: translate(calc(var(--cx,0%) + 4%), calc(var(--cy,0%) + -3%)) rotate(3deg)  scale(1.04); }
+    50%  { transform: translate(calc(var(--cx,0%) + -3%), calc(var(--cy,0%) + 4%)) rotate(-2deg) scale(0.97); }
+    75%  { transform: translate(calc(var(--cx,0%) + 3%), calc(var(--cy,0%) + 3%)) rotate(2deg)  scale(1.03); }
+    100% { transform: translate(var(--cx,0%), var(--cy,0%)) rotate(0deg)  scale(1);    }
+  }
+
+  /* ── Info panels ── */
+  .slider-row {
+    padding: 12px 20px 0;
+    background: #161616;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .slider-row label { font-size: 10px; color: #555; white-space: nowrap; }
+  .slider-row input { flex: 1; accent-color: #666; }
+
+  .info { padding: 16px 20px 20px; background: #161616; }
+  .tag  { font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; color: #555; margin-bottom: 4px; }
+  .name { font-size: 15px; font-weight: 500; color: #ddd; margin-bottom: 6px; }
+  .desc { font-size: 12px; color: #555; line-height: 1.6; }
+  .card.selected .name { color: #fff; }
+
+  .pill {
+    display: inline-block;
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 20px;
+    margin-top: 8px;
+    background: #1e1e1e;
+    border: 1px solid #2a2a2a;
+    color: #666;
+  }
+
+  .footer { margin-top: 36px; font-size: 11px; color: #333; text-align: center; line-height: 1.7; }
+</style>
+</head>
+<body>
+
+<h1>Flowing Mesh — Vergleich</h1>
+<p class="subtitle">Autonom vs. Cursor-reaktiv</p>
+<p class="note">Bewege die Maus über die rechte Vorschau um den Cursor-Einfluss zu spüren</p>
+
+<div class="split">
+
+  <!-- Autonom -->
+  <div class="card" data-choice="auto" onclick="toggleSelect(this)">
+    <div class="preview">
+      <div class="mesh-auto" id="meshAuto"></div>
+      <div class="ht">
+        <div class="ht-label">UI Designer &amp; Frontend Dev</div>
+        <div class="ht-h1">Interfaces die man spürt,<br>bevor man sie versteht.</div>
+        <div class="ht-rule"></div>
+        <div class="ht-lead">Typografie, Bewegung, Interaktion.</div>
+      </div>
+    </div>
+    <div class="slider-row">
+      <label>Intensität</label>
+      <input type="range" min="10" max="100" value="55"
+        oninput="setOp('meshAuto', this.value)" onclick="event.stopPropagation()">
+    </div>
+    <div class="info">
+      <div class="tag">Variante 1</div>
+      <div class="name">Rein autonom</div>
+      <div class="desc">Die Farbfelder driften mit einem 20s-Zyklus langsam und endlos. Kein User-Input nötig — läuft immer.</div>
+      <span class="pill">Einfacher zu implementieren</span>
+    </div>
+  </div>
+
+  <!-- Cursor-reaktiv -->
+  <div class="card" data-choice="cursor" onclick="toggleSelect(this)">
+    <div class="preview" id="meshPreview">
+      <div class="mesh-cursor" id="meshCursor"></div>
+      <div class="ht">
+        <div class="ht-label">UI Designer &amp; Frontend Dev</div>
+        <div class="ht-h1">Interfaces die man spürt,<br>bevor man sie versteht.</div>
+        <div class="ht-rule"></div>
+        <div class="ht-lead">Typografie, Bewegung, Interaktion.</div>
+      </div>
+    </div>
+    <div class="slider-row">
+      <label>Intensität</label>
+      <input type="range" min="10" max="100" value="55"
+        oninput="setOp('meshCursor', this.value)" onclick="event.stopPropagation()">
+    </div>
+    <div class="info">
+      <div class="tag">Variante 2</div>
+      <div class="name">Autonom + Cursor-Einfluss</div>
+      <div class="desc">Gleiche autonome Drift, aber der Mausschwerpunkt zieht den Mesh leicht in seine Richtung — sehr träge (1.2s Ease), nie sprunghaft.</div>
+      <span class="pill">Passt zu deinem Custom Cursor System</span>
+    </div>
+  </div>
+
+</div>
+
+<p class="footer">
+  In Produktion: Intensität ~25–35% · filter: blur(32px) · prefers-reduced-motion deaktiviert alles<br>
+  Implementierung: reines CSS + ~30 Zeilen JS · kein Canvas, kein WebGL
+</p>
+
+<script>
+  const meshEl  = document.getElementById('meshCursor');
+  const preview = document.getElementById('meshPreview');
+
+  let targetX = 0, targetY = 0;
+  let currentX = 0, currentY = 0;
+  const MAX_SHIFT = 6; // max % shift from cursor
+
+  preview.addEventListener('mousemove', e => {
+    const r = preview.getBoundingClientRect();
+    const nx = (e.clientX - r.left) / r.width;  // 0..1
+    const ny = (e.clientY - r.top)  / r.height;
+    targetX = (nx - 0.5) * MAX_SHIFT;
+    targetY = (ny - 0.5) * MAX_SHIFT;
+  });
+
+  preview.addEventListener('mouseleave', () => {
+    targetX = 0;
+    targetY = 0;
+  });
+
+  function lerp(a, b, t) { return a + (b - a) * t; }
+
+  function tick() {
+    currentX = lerp(currentX, targetX, 0.04); // very lazy — feels weighty
+    currentY = lerp(currentY, targetY, 0.04);
+    meshEl.style.setProperty('--cx', currentX.toFixed(2) + '%');
+    meshEl.style.setProperty('--cy', currentY.toFixed(2) + '%');
+    requestAnimationFrame(tick);
+  }
+  tick();
+
+  function setOp(id, val) {
+    document.getElementById(id).style.opacity = val / 100;
+  }
+
+  function toggleSelect(el) {
+    document.querySelectorAll('.card').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+    if (window.recordChoice) window.recordChoice(el.dataset.choice, el.querySelector('.name').textContent.trim());
+  }
+</script>
+</body>
+</html>
