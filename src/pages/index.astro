@@ -1,17 +1,186 @@
 ---
-import Layout from "@/layouts/main.astro"
-import { Button } from "@/components/ui/button"
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { getCollection } from 'astro:content';
+import HeroMesh from '@/components/astro/HeroMesh.astro';
+
+const allPosts = await getCollection('blog', ({ data }) => !data.draft);
+const latestPosts = allPosts
+  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime())
+  .slice(0, 3);
+
+const allProjects = await getCollection('projects');
+const featuredProjects = allProjects
+  .filter((p) => p.data.featured)
+  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+
+const formatDate = (date: Date) =>
+  new Intl.DateTimeFormat('de-DE', { year: 'numeric', month: 'short' }).format(date);
 ---
 
-<Layout>
-  <div class="flex min-h-svh p-6">
-    <div class="flex max-w-md min-w-0 flex-col gap-4 text-sm leading-loose">
-      <div>
-        <h1 class="font-medium">Project ready!</h1>
-        <p>You may now add components and start building.</p>
-        <p>We've already added the button component for you.</p>
-        <Button client:load className="mt-2">Button</Button>
+<BaseLayout>
+  <!-- Hero -->
+  <section
+    class="relative min-h-screen flex flex-col px-6 pt-32 pb-24"
+    data-scroll="depth"
+  >
+    <HeroMesh />
+
+    <div class="relative z-10 max-w-5xl mx-auto w-full flex flex-col justify-center flex-1">
+      <!-- Top row: label + counter -->
+      <div class="flex items-center justify-between mb-16">
+        <span class="t-label text-muted-foreground">UI Designer &amp; Frontend Developer</span>
+        <span class="t-label text-muted-foreground tabular-nums">2025</span>
+      </div>
+
+      <!-- Headline -->
+      <h1 class="t-hero mb-8 max-w-4xl" data-reveal="words">
+        Interfaces die man spürt, bevor man sie versteht.
+      </h1>
+
+      <!-- Divider -->
+      <div class="w-full h-px bg-border mb-8"></div>
+
+      <!-- Lead + CTA row -->
+      <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-8">
+        <p class="t-lead text-muted-foreground max-w-lg" data-reveal="words">
+          Ich gestalte und baue digitale Produkte mit Fokus auf
+          Typografie, Bewegung und Interaktion.
+        </p>
+        <div class="flex items-center gap-4 shrink-0">
+          <Button data-magnetic data-cursor="button" client:visible>
+            <a href="/projects" class="no-underline">Projekte ansehen</a>
+          </Button>
+          <a
+            href="/blog"
+            class="t-small text-muted-foreground hover:text-foreground transition-colors duration-200 underline underline-offset-4"
+            data-cursor="link"
+          >
+            Blog lesen
+          </a>
+        </div>
       </div>
     </div>
-  </div>
-</Layout>
+
+    <!-- Scroll indicator -->
+    <div class="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 opacity-30">
+      <div class="w-px h-10 bg-foreground origin-top scroll-indicator"></div>
+    </div>
+  </section>
+
+  <!-- Latest Blog Posts -->
+  {latestPosts.length > 0 && (
+    <section class="px-6 py-24">
+      <div class="max-w-5xl mx-auto">
+        <div class="flex items-baseline justify-between mb-12">
+          <h2 class="t-h2">Zuletzt geschrieben</h2>
+          <a
+            href="/blog"
+            class="t-small text-muted-foreground hover:text-foreground transition-colors duration-200 underline underline-offset-4"
+            data-cursor="link"
+          >
+            Alle Posts
+          </a>
+        </div>
+        <div class="grid gap-4">
+          {latestPosts.map((post) => (
+            <a href={`/blog/${post.id.replace(/\.md$/, '')}`} class="group block no-underline" data-cursor="link">
+              <Card
+                data-scroll="fade-up"
+                client:visible
+                className="transition-all duration-300 group-hover:border-foreground/20 group-hover:bg-muted/50"
+              >
+                <CardHeader>
+                  <div class="flex items-start justify-between gap-4">
+                    <div class="flex-1">
+                      <CardTitle className="t-h3 mb-2">
+                        {post.data.title}
+                      </CardTitle>
+                      <CardDescription className="t-body text-muted-foreground">
+                        {post.data.description}
+                      </CardDescription>
+                    </div>
+                    <time class="t-label text-muted-foreground shrink-0 mt-1">
+                      {formatDate(post.data.date)}
+                    </time>
+                  </div>
+                  {post.data.tags && post.data.tags.length > 0 && (
+                    <div class="flex flex-wrap gap-2 mt-4">
+                      {post.data.tags.map((tag) => (
+                        <Badge variant="secondary" client:visible>{tag}</Badge>
+                      ))}
+                    </div>
+                  )}
+                </CardHeader>
+              </Card>
+            </a>
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
+
+  <!-- Featured Projects -->
+  {featuredProjects.length > 0 && (
+    <section class="px-6 py-24 border-t border-border">
+      <div class="max-w-5xl mx-auto">
+        <div class="flex items-baseline justify-between mb-12">
+          <h2 class="t-h2">Ausgewählte Projekte</h2>
+          <a
+            href="/projects"
+            class="t-small text-muted-foreground hover:text-foreground transition-colors duration-200 underline underline-offset-4"
+            data-cursor="link"
+          >
+            Alle Projekte
+          </a>
+        </div>
+        <div class="grid md:grid-cols-2 gap-6">
+          {featuredProjects.map((project) => (
+            <a href={`/projects/${project.id.replace(/\.md$/, '')}`} class="group block no-underline" data-cursor="link">
+              <Card
+                data-scroll="fade-up"
+                client:visible
+                className="h-full transition-all duration-300 group-hover:border-foreground/20 group-hover:bg-muted/50"
+              >
+                <CardHeader>
+                  <CardTitle className="t-h3 mb-2">
+                    {project.data.title}
+                  </CardTitle>
+                  <CardDescription className="t-body text-muted-foreground">
+                    {project.data.description}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div class="flex flex-wrap gap-2">
+                    {project.data.tags.map((tag) => (
+                      <Badge variant="outline" client:visible>{tag}</Badge>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </a>
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
+</BaseLayout>
+
+<style>
+  .scroll-indicator {
+    animation: scroll-line 2s ease-in-out infinite;
+  }
+
+  @keyframes scroll-line {
+    0%, 100% { transform: scaleY(0); opacity: 0; }
+    50% { transform: scaleY(1); opacity: 1; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .scroll-indicator {
+      animation: none;
+    }
+  }
+</style>
