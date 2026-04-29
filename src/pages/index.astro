@@ -1,40 +1,52 @@
 ---
-import BaseLayout from '@/layouts/BaseLayout.astro';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Kbd } from '@/components/ui/kbd';
-import { Button } from '@/components/ui/button';
-import { UserAvatar } from '@/components/UserAvatar';
-import { Separator } from '@/components/ui/separator';
-import { getCollection } from 'astro:content';
-import HeroMesh from '@/components/astro/HeroMesh.astro';
+import BaseLayout from "@/layouts/BaseLayout.astro"
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { Kbd } from "@/components/ui/kbd"
+import { Button } from "@/components/ui/button"
+import { UserAvatar } from "@/components/UserAvatar"
+import { Separator } from "@/components/ui/separator"
+import { getCollection } from "astro:content"
+import HeroMesh from "@/components/astro/HeroMesh.astro"
 
-const allPosts = await getCollection('blog', ({ data }) => !data.draft);
+const allPosts = await getCollection("blog", ({ data }) => !data.draft)
 const latestPosts = allPosts
   .sort((a, b) => b.data.date.getTime() - a.data.date.getTime())
-  .slice(0, 3);
+  .slice(0, 3)
 
-const allProjects = await getCollection('projects');
+const allProjects = await getCollection("projects")
 const featuredProjects = allProjects
   .filter((p) => p.data.featured)
-  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime())
 
 const formatDate = (date: Date) =>
-  new Intl.DateTimeFormat('de-DE', { year: 'numeric', month: 'short' }).format(date);
+  new Intl.DateTimeFormat("de-DE", { year: "numeric", month: "short" }).format(
+    date
+  )
 ---
 
 <BaseLayout>
   <!-- Hero -->
   <section
-    class="relative min-h-screen flex flex-col px-6 pt-32 pb-24"
+    class="relative flex min-h-screen flex-col px-6 pt-32 pb-24"
     data-scroll="depth"
   >
     <HeroMesh />
 
-    <div class="relative z-10 max-w-5xl mx-auto w-full flex flex-col justify-center flex-1">
+    <div
+      class="relative z-10 mx-auto flex w-full max-w-5xl flex-1 flex-col justify-center"
+    >
       <!-- Top row: label + counter -->
-      <div class="flex items-center justify-between mb-16">
-        <span class="t-label text-muted-foreground">UI Designer &amp; Frontend Developer</span>
+      <div class="mb-16 flex items-center justify-between">
+        <span class="t-label text-muted-foreground"
+          >UI Designer &amp; Frontend Developer</span
+        >
         <span class="t-label text-muted-foreground tabular-nums">2025</span>
       </div>
 
@@ -44,21 +56,23 @@ const formatDate = (date: Date) =>
       </h1>
 
       <!-- Divider -->
-      <div class="w-full h-px bg-border mb-8"></div>
+      <div class="mb-8 h-px w-full bg-border"></div>
 
       <!-- Lead + CTA row -->
-      <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-8">
-        <p class="t-lead text-muted-foreground max-w-lg" data-reveal="words">
-          Ich gestalte und baue digitale Produkte mit Fokus auf
-          Typografie, Bewegung und Interaktion.
+      <div
+        class="flex flex-col gap-8 md:flex-row md:items-end md:justify-between"
+      >
+        <p class="t-lead max-w-lg text-muted-foreground" data-reveal="words">
+          Ich gestalte und baue digitale Produkte mit Fokus auf Typografie,
+          Bewegung und Interaktion.
         </p>
-        <div class="flex items-center gap-4 shrink-0">
+        <div class="flex shrink-0 items-center gap-4">
           <Button data-magnetic data-cursor="button" client:visible>
             <a href="/projects" class="no-underline">Projekte ansehen</a>
           </Button>
           <a
             href="/blog"
-            class="t-small text-muted-foreground hover:text-foreground transition-colors duration-200 underline underline-offset-4"
+            class="t-small text-muted-foreground underline underline-offset-4 transition-colors duration-200 hover:text-foreground"
             data-cursor="link"
           >
             Blog lesen
@@ -68,47 +82,91 @@ const formatDate = (date: Date) =>
     </div>
 
     <!-- Scroll indicator -->
-    <div class="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 opacity-30">
-      <div class="w-px h-10 bg-foreground origin-top scroll-indicator"></div>
+    <div
+      class="absolute bottom-8 left-1/2 flex -translate-x-1/2 flex-col items-center gap-2 opacity-30"
+    >
+      <div class="scroll-indicator h-10 w-px origin-top bg-foreground"></div>
     </div>
   </section>
 
   <!-- About Section -->
-  <section class="px-6 py-24 border-t border-border">
-    <div class="max-w-5xl mx-auto">
-      <div class="grid lg:grid-cols-[1fr_2fr] gap-12 items-start" data-scroll="fade-up">
+  <section class="border-t border-border px-6 py-24">
+    <div class="mx-auto max-w-5xl">
+      <div
+        class="grid items-start gap-12 lg:grid-cols-[1fr_2fr]"
+        data-scroll="fade-up"
+      >
         <div class="flex flex-col gap-6">
-          <UserAvatar className="size-24 lg:size-32" src="/avatar.jpg" alt="Patrick Schrödter" fallback="PS" client:visible />
-          <h2 class="t-h2 max-w-[12ch]">I don’t just draw interfaces. I build systems.</h2>
+          <UserAvatar
+            className="size-24 lg:size-32"
+            src="/avatar.jpg"
+            alt="Patrick Schrödter"
+            fallback="PS"
+            client:visible
+          />
+          <h2 class="t-h2 max-w-[12ch]">
+            I don’t just draw interfaces. I build systems.
+          </h2>
         </div>
-        
+
         <div class="flex flex-col gap-8">
           <div class="flex flex-col gap-6">
-            <p class="t-body text-muted-foreground">
-              Seit über <Kbd client:visible className="h-auto py-0.5 px-2 align-baseline font-mono text-sm font-normal rounded-md border border-border/50 shadow-sm">15 Jahren</Kbd> gestalte ich digitale Produkte an der Schnittstelle von Design und Code. Mein Weg führte mich von der klassischen Systemadministration über High-Growth E-Commerce (DefShop) und Corporate Innovation (Oetker Digital) bis hin zum Aufbau komplexer B2B-Plattformen und Super-Apps.
-            </p>
-            
-            <p class="t-body text-muted-foreground">
-              Ich bezeichne mich selbst gerne als <Kbd client:visible className="h-auto py-0.5 px-2 align-baseline font-mono text-sm font-normal rounded-md border border-border/50 shadow-sm">Design Engineer</Kbd>. Warum? Weil ich die Sprache der Entwickler spreche. Ob ich skalierbare Design-Systeme auf Basis von shadcn/ui und Tailwind CSS entwerfe oder repetitive Design-Ops durch n8n und <Kbd client:visible className="h-auto py-0.5 px-2 align-baseline font-mono text-sm font-normal rounded-md border border-border/50 shadow-sm">KI-Workflows</Kbd> (Claude/Gemini CLI) automatisiere – mein Ziel ist immer ein nahtloser Übergang vom Pixel zum produktiven Code.
+            <p class="t-body text-foreground">
+              Seit über <Kbd
+                client:visible
+                className="h-auto rounded-md border border-border/50 px-2 py-0.5 align-baseline font-mono text-sm font-normal text-foreground"
+                >15 Jahren</Kbd
+              > gestalte ich digitale Produkte an der Schnittstelle von Design und
+              Code. Mein Weg führte mich von der klassischen Systemadministration
+              über High-Growth E-Commerce (DefShop) und Corporate Innovation (Oetker
+              Digital) bis hin zum Aufbau komplexer B2B-Plattformen und Super-Apps.
             </p>
 
-            <p class="t-body text-muted-foreground">
-              Ich glaube fest an die Kraft der physischen Zusammenarbeit. Deshalb findet man mich meistens direkt im <Kbd client:visible className="h-auto py-0.5 px-2 align-baseline font-mono text-sm font-normal rounded-md border border-border/50 shadow-sm">Berliner Office</Kbd>, wo ich am liebsten in cross-funktionalen Teams komplexe Workflows in intuitive Erlebnisse verwandele.
+            <p class="t-body text-foreground">
+              Ich bezeichne mich selbst gerne als <Kbd
+                client:visible
+                className="h-auto rounded-md border border-border/50 px-2 py-0.5 align-baseline font-mono text-sm font-normal text-foreground"
+                >Design Engineer</Kbd
+              >. Warum? Weil ich die Sprache der Entwickler spreche. Ob ich
+              skalierbare Design-Systeme auf Basis von shadcn/ui und Tailwind
+              CSS entwerfe oder repetitive Design-Ops durch n8n und <Kbd
+                client:visible
+                className="h-auto rounded-md border border-border/50 px-2 py-0.5 align-baseline font-mono text-sm font-normal text-foreground"
+                >KI-Workflows</Kbd
+              > (Claude/Gemini CLI) automatisiere – mein Ziel ist immer ein nahtloser
+              Übergang vom Pixel zum produktiven Code.
+            </p>
+
+            <p class="t-body text-foreground">
+              Ich glaube fest an die Kraft der physischen Zusammenarbeit.
+              Deshalb findet man mich meistens direkt im <Kbd
+                client:visible
+                className="h-auto rounded-md border border-border/50 px-2 py-0.5 align-baseline font-mono text-sm font-normal text-foreground"
+                >Berliner Office</Kbd
+              >, wo ich am liebsten in cross-funktionalen Teams komplexe
+              Workflows in intuitive Erlebnisse verwandele.
             </p>
           </div>
 
           <Separator client:visible />
 
-          <div class="grid md:grid-cols-2 gap-8">
+          <div class="grid gap-8 md:grid-cols-2">
             <div class="flex flex-col gap-4">
-              <h3 class="t-label text-foreground">Was mich antreibt?</h3>
+              <h3 class="font-bold text-foreground">Was mich antreibt?</h3>
               <p class="t-body text-muted-foreground">
-                Optimierung. Wenn ein Prozess effizienter, ein System logischer oder ein Interface menschlicher werden kann, bin ich in meinem Element. In meiner Freizeit schraube ich an meinem Proxmox-basierten Homelab oder experimentiere mit Agentic Workflows – immer auf der Suche nach dem nächsten Hebel für besseres Produktdesign.
+                Optimierung. Wenn ein Prozess effizienter, ein System logischer
+                oder ein Interface menschlicher werden kann, bin ich in meinem
+                Element. In meiner Freizeit schraube ich an meinem
+                Proxmox-basierten Homelab oder experimentiere mit Agentic
+                Workflows – immer auf der Suche nach dem nächsten Hebel für
+                besseres Produktdesign.
               </p>
             </div>
             <div class="flex items-end">
-              <p class="t-body font-bold text-foreground">
-                Du suchst jemanden, der Ownership übernimmt und Design als technisches Handwerk versteht? Lass uns in Berlin auf einen Kaffee treffen.
+              <p class="font-medium text-foreground">
+                Du suchst jemanden, der Ownership übernimmt und Design als
+                technisches Handwerk versteht? Lass uns in Berlin auf einen
+                Kaffee treffen.
               </p>
             </div>
           </div>
@@ -118,101 +176,117 @@ const formatDate = (date: Date) =>
   </section>
 
   <!-- Latest Blog Posts -->
-  {latestPosts.length > 0 && (
-    <section class="px-6 py-24">
-      <div class="max-w-5xl mx-auto">
-        <div class="flex items-baseline justify-between mb-12">
-          <h2 class="t-h2">Zuletzt geschrieben</h2>
-          <a
-            href="/blog"
-            class="t-small text-muted-foreground hover:text-foreground transition-colors duration-200 underline underline-offset-4"
-            data-cursor="link"
-          >
-            Alle Posts
-          </a>
-        </div>
-        <div class="grid gap-4">
-          {latestPosts.map((post) => (
-            <a href={`/blog/${post.id.replace(/\.md$/, '')}`} class="group block no-underline" data-cursor="link">
-              <Card
-                data-scroll="fade-up"
-                client:visible
-                className="transition-all duration-300 group-hover:border-foreground/20 group-hover:bg-muted/50"
-              >
-                <CardHeader>
-                  <div class="flex items-start justify-between gap-4">
-                    <div class="flex-1">
-                      <CardTitle className="t-h3 mb-2">
-                        {post.data.title}
-                      </CardTitle>
-                      <CardDescription className="t-body text-muted-foreground">
-                        {post.data.description}
-                      </CardDescription>
-                    </div>
-                    <time class="t-label text-muted-foreground shrink-0 mt-1">
-                      {formatDate(post.data.date)}
-                    </time>
-                  </div>
-                  {post.data.tags && post.data.tags.length > 0 && (
-                    <div class="flex flex-wrap gap-2 mt-4">
-                      {post.data.tags.map((tag) => (
-                        <Badge variant="secondary" client:visible>{tag}</Badge>
-                      ))}
-                    </div>
-                  )}
-                </CardHeader>
-              </Card>
+  {
+    latestPosts.length > 0 && (
+      <section class="px-6 py-24">
+        <div class="mx-auto max-w-5xl">
+          <div class="mb-12 flex items-baseline justify-between">
+            <h2 class="t-h2">Zuletzt geschrieben</h2>
+            <a
+              href="/blog"
+              class="t-small text-muted-foreground underline underline-offset-4 transition-colors duration-200 hover:text-foreground"
+              data-cursor="link"
+            >
+              Alle Posts
             </a>
-          ))}
+          </div>
+          <div class="grid gap-4">
+            {latestPosts.map((post) => (
+              <a
+                href={`/blog/${post.id.replace(/\.md$/, "")}`}
+                class="group block no-underline"
+                data-cursor="link"
+              >
+                <Card
+                  data-scroll="fade-up"
+                  client:visible
+                  className="transition-all duration-300 group-hover:border-foreground/20 group-hover:bg-muted/50"
+                >
+                  <CardHeader>
+                    <div class="flex items-start justify-between gap-4">
+                      <div class="flex-1">
+                        <CardTitle className="t-h3 mb-2">
+                          {post.data.title}
+                        </CardTitle>
+                        <CardDescription className="t-body text-muted-foreground">
+                          {post.data.description}
+                        </CardDescription>
+                      </div>
+                      <time class="t-label mt-1 shrink-0 text-muted-foreground">
+                        {formatDate(post.data.date)}
+                      </time>
+                    </div>
+                    {post.data.tags && post.data.tags.length > 0 && (
+                      <div class="mt-4 flex flex-wrap gap-2">
+                        {post.data.tags.map((tag) => (
+                          <Badge variant="secondary" client:visible>
+                            {tag}
+                          </Badge>
+                        ))}
+                      </div>
+                    )}
+                  </CardHeader>
+                </Card>
+              </a>
+            ))}
+          </div>
         </div>
-      </div>
-    </section>
-  )}
+      </section>
+    )
+  }
 
   <!-- Featured Projects -->
-  {featuredProjects.length > 0 && (
-    <section class="px-6 py-24 border-t border-border">
-      <div class="max-w-5xl mx-auto">
-        <div class="flex items-baseline justify-between mb-12">
-          <h2 class="t-h2">Ausgewählte Projekte</h2>
-          <a
-            href="/projects"
-            class="t-small text-muted-foreground hover:text-foreground transition-colors duration-200 underline underline-offset-4"
-            data-cursor="link"
-          >
-            Alle Projekte
-          </a>
-        </div>
-        <div class="grid md:grid-cols-2 gap-6">
-          {featuredProjects.map((project) => (
-            <a href={`/projects/${project.id.replace(/\.md$/, '')}`} class="group block no-underline" data-cursor="link">
-              <Card
-                data-scroll="fade-up"
-                client:visible
-                className="h-full transition-all duration-300 group-hover:border-foreground/20 group-hover:bg-muted/50"
-              >
-                <CardHeader>
-                  <CardTitle className="t-h3 mb-2">
-                    {project.data.title}
-                  </CardTitle>
-                  <CardDescription className="t-body text-muted-foreground">
-                    {project.data.description}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div class="flex flex-wrap gap-2">
-                    {project.data.tags.map((tag) => (
-                      <Badge variant="outline" client:visible>{tag}</Badge>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
+  {
+    featuredProjects.length > 0 && (
+      <section class="border-t border-border px-6 py-24">
+        <div class="mx-auto max-w-5xl">
+          <div class="mb-12 flex items-baseline justify-between">
+            <h2 class="t-h2">Ausgewählte Projekte</h2>
+            <a
+              href="/projects"
+              class="t-small text-muted-foreground underline underline-offset-4 transition-colors duration-200 hover:text-foreground"
+              data-cursor="link"
+            >
+              Alle Projekte
             </a>
-          ))}
+          </div>
+          <div class="grid gap-6 md:grid-cols-2">
+            {featuredProjects.map((project) => (
+              <a
+                href={`/projects/${project.id.replace(/\.md$/, "")}`}
+                class="group block no-underline"
+                data-cursor="link"
+              >
+                <Card
+                  data-scroll="fade-up"
+                  client:visible
+                  className="h-full transition-all duration-300 group-hover:border-foreground/20 group-hover:bg-muted/50"
+                >
+                  <CardHeader>
+                    <CardTitle className="t-h3 mb-2">
+                      {project.data.title}
+                    </CardTitle>
+                    <CardDescription className="t-body text-muted-foreground">
+                      {project.data.description}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div class="flex flex-wrap gap-2">
+                      {project.data.tags.map((tag) => (
+                        <Badge variant="outline" client:visible>
+                          {tag}
+                        </Badge>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              </a>
+            ))}
+          </div>
         </div>
-      </div>
-    </section>
-  )}
+      </section>
+    )
+  }
 </BaseLayout>
 
 <style>
@@ -221,8 +295,15 @@ const formatDate = (date: Date) =>
   }
 
   @keyframes scroll-line {
-    0%, 100% { transform: scaleY(0); opacity: 0; }
-    50% { transform: scaleY(1); opacity: 1; }
+    0%,
+    100% {
+      transform: scaleY(0);
+      opacity: 0;
+    }
+    50% {
+      transform: scaleY(1);
+      opacity: 1;
+    }
   }
 
   @media (prefers-reduced-motion: reduce) {
