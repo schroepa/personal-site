@@ -24,3 +24,6 @@ pnpm-debug.log*
 
 # vercel
 .vercel
+
+# agent state
+.superpowers/

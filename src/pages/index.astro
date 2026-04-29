@@ -2,7 +2,10 @@
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Kbd } from '@/components/ui/kbd';
 import { Button } from '@/components/ui/button';
+import { UserAvatar } from '@/components/UserAvatar';
+import { Separator } from '@/components/ui/separator';
 import { getCollection } from 'astro:content';
 import HeroMesh from '@/components/astro/HeroMesh.astro';
 
@@ -67,6 +70,50 @@ const formatDate = (date: Date) =>
     <!-- Scroll indicator -->
     <div class="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 opacity-30">
       <div class="w-px h-10 bg-foreground origin-top scroll-indicator"></div>
+    </div>
+  </section>
+
+  <!-- About Section -->
+  <section class="px-6 py-24 border-t border-border">
+    <div class="max-w-5xl mx-auto">
+      <div class="grid lg:grid-cols-[1fr_2fr] gap-12 items-start" data-scroll="fade-up">
+        <div class="flex flex-col gap-6">
+          <UserAvatar className="size-24 lg:size-32" src="/avatar.jpg" alt="Patrick Schrödter" fallback="PS" client:visible />
+          <h2 class="t-h2 max-w-[12ch]">I don’t just draw interfaces. I build systems.</h2>
+        </div>
+        
+        <div class="flex flex-col gap-8">
+          <div class="flex flex-col gap-6">
+            <p class="t-body text-muted-foreground">
+              Seit über <Kbd client:visible className="h-auto py-0.5 px-2 align-baseline font-mono text-sm font-normal rounded-md border border-border/50 shadow-sm">15 Jahren</Kbd> gestalte ich digitale Produkte an der Schnittstelle von Design und Code. Mein Weg führte mich von der klassischen Systemadministration über High-Growth E-Commerce (DefShop) und Corporate Innovation (Oetker Digital) bis hin zum Aufbau komplexer B2B-Plattformen und Super-Apps.
+            </p>
+            
+            <p class="t-body text-muted-foreground">
+              Ich bezeichne mich selbst gerne als <Kbd client:visible className="h-auto py-0.5 px-2 align-baseline font-mono text-sm font-normal rounded-md border border-border/50 shadow-sm">Design Engineer</Kbd>. Warum? Weil ich die Sprache der Entwickler spreche. Ob ich skalierbare Design-Systeme auf Basis von shadcn/ui und Tailwind CSS entwerfe oder repetitive Design-Ops durch n8n und <Kbd client:visible className="h-auto py-0.5 px-2 align-baseline font-mono text-sm font-normal rounded-md border border-border/50 shadow-sm">KI-Workflows</Kbd> (Claude/Gemini CLI) automatisiere – mein Ziel ist immer ein nahtloser Übergang vom Pixel zum produktiven Code.
+            </p>
+
+            <p class="t-body text-muted-foreground">
+              Ich glaube fest an die Kraft der physischen Zusammenarbeit. Deshalb findet man mich meistens direkt im <Kbd client:visible className="h-auto py-0.5 px-2 align-baseline font-mono text-sm font-normal rounded-md border border-border/50 shadow-sm">Berliner Office</Kbd>, wo ich am liebsten in cross-funktionalen Teams komplexe Workflows in intuitive Erlebnisse verwandele.
+            </p>
+          </div>
+
+          <Separator client:visible />
+
+          <div class="grid md:grid-cols-2 gap-8">
+            <div class="flex flex-col gap-4">
+              <h3 class="t-label text-foreground">Was mich antreibt?</h3>
+              <p class="t-body text-muted-foreground">
+                Optimierung. Wenn ein Prozess effizienter, ein System logischer oder ein Interface menschlicher werden kann, bin ich in meinem Element. In meiner Freizeit schraube ich an meinem Proxmox-basierten Homelab oder experimentiere mit Agentic Workflows – immer auf der Suche nach dem nächsten Hebel für besseres Produktdesign.
+              </p>
+            </div>
+            <div class="flex items-end">
+              <p class="t-body font-bold text-foreground">
+                Du suchst jemanden, der Ownership übernimmt und Design als technisches Handwerk versteht? Lass uns in Berlin auf einen Kaffee treffen.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </section>
 

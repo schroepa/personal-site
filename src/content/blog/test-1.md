@@ -1,14 +1,16 @@
 ---
-title: "Typografie ist das Interface"
-description: "Warum gute Schriftsetzung nicht Dekoration ist, sondern Infrastruktur — und wie man sie im Web richtig umsetzt."
-date: 2024-11-12
+title: "Der Aufstieg des Design Engineers: Wie ich KI und shadcn nutze, um die Lücke zwischen Figma und Produktion zu schließen"
+description: "Warum der Design Engineer die Brücke zwischen Figma und Code schließt — und wie man mit shadcn und KI-Workflows skalierbare Systeme baut."
+date: 2026-29-04
 tags: ["Design", "Typografie", "CSS"]
 draft: false
 ---
 
-Es gibt einen Moment im Design-Prozess, der alles entscheidet — und er hat nichts mit Farbe, Layout oder Illustrationen zu tun. Es ist der Moment, in dem man die Schrift wählt und festlegt, wie sie sich verhält.
+In der klassischen Produktentwicklung gibt es oft eine unsichtbare Mauer: Auf der einen Seite steht das Design (Pixel, Vektoren, Figma-Files), auf der anderen das Engineering (React, Tailwind, Logik). Dazwischen liegt der „Handoff“ – ein Prozess, der oft mit Reibungsverlusten, Missverständnissen und „Das geht technisch so nicht“-Sätzen verbunden ist.
 
-Typografie ist nicht Dekoration. Sie ist das Interface selbst.
+Nach 15 Jahren an dieser Schnittstelle sage ich: Diese Mauer muss weg.
+
+Ich begreife mich nicht mehr nur als UI/UX Designer, sondern als Design Engineer. Mein Ziel ist es nicht, ein schönes Bild zu malen, sondern ein funktionierendes System zu bauen. Hier ist mein aktueller Stack und Workflow, mit dem ich diese Lücke schließe.
 
 ## Lesbarkeit ist Respekt
 
@@ -16,34 +18,34 @@ Wenn Nutzer einen Text lesen, interagieren sie mit jedem einzelnen Buchstaben. D
 
 Ein Interface mit schlechter Typografie signalisiert: *Wir haben nicht nachgedacht.* Es zwingt Nutzer, kognitive Arbeit zu leisten, die das Design hätte übernehmen sollen.
 
-## Skalen, nicht Einzelgrößen
+## 1. shadcn/ui: Design-Systeme, die "Developer-First" denken
 
-Der häufigste Fehler ist die willkürliche Festlegung von Schriftgrößen. "12px für Labels, 16px für Text, 24px für Überschriften" — ohne Relation, ohne System.
+Früher haben wir Monate damit verbracht, Buttons und Modals in Figma zu perfektionieren, nur um dann festzustellen, dass die Umsetzung im Code ganz anders aussieht.
 
-Ein durchdachtes Typografiystem arbeitet mit einer Skala. Die *Major Third* (Faktor 1.250) erzeugt Größensprünge, die harmonisch wirken, ohne dramatisch zu sein:
+Heute nutze ich shadcn/ui. Warum? Weil es kein starres Framework ist, sondern eine Sammlung von handwerklich perfekten Komponenten, die auf Tailwind CSS und Radix UI basieren.
 
-```
-10.24px → 12.8px → 16px → 20px → 25px → 31.25px → 39px → 48.8px
-```
+Der Vorteil: Wenn ich in Figma eine Komponente gestalte, weiß ich exakt, wie sie im Code aufgebaut ist.
 
-Jeder Wert hat seinen Platz. Die Abstufungen kommunizieren Hierarchie von selbst.
+Das Ergebnis: Der Handoff ist kein Ratespiel mehr. Ich liefere Komponenten, die technisch bereits validiert sind.
 
-## Variable Fonts ändern alles
+## 2. KI als Hebel: Claude, Gemini und die CLI
 
-Mit Variable Fonts ist font-weight keine diskrete Auswahl mehr, sondern ein Kontinuum. Statt `font-weight: 700` zu schreiben, kann man mit `font-weight: 420` arbeiten — und einen Ton treffen, der zwischen Regular und Medium liegt.
+KI ist für mich kein Ersatz für Kreativität, sondern ein Effizienz-Boost für die Umsetzung. Ich nutze LLMs (vor allem via CLI), um:
 
-Das erlaubt subtile typografische Kontraste, die mit statischen Fonts schlicht nicht möglich sind. Ein Headline-Text bei 480 statt 500 wirkt weniger robust, mehr gelassen. Dieser Unterschied ist winzig — und macht alles aus.
+Rapid Prototyping: Ich generiere funktionale Mockups direkt mit Tailwind-Code, um UX-Hypothesen in Minuten statt Stunden zu testen.
 
-## Zeilenbreite als Kompositionsmittel
+Code-Validierung: „Wie würde ein Engineer diesen komplexen Filter-State in React lösen?“ – Die KI hilft mir, Design-Entscheidungen technisch zu untermauern.
 
-Die optimale Zeilenlänge liegt zwischen 50 und 75 Zeichen. Das ist kein ästhetisches Diktat, sondern Physiologie: Das Auge verliert bei längeren Zeilen den Anfang der nächsten Zeile.
+Automatisierung: Mit Tools wie n8n automatisiere ich repetitive Design-Ops, damit mehr Zeit für das eigentliche Problem-Solving bleibt.
 
-`max-width: 65ch` ist daher keine Einschränkung — es ist eine Entscheidung für den Leser.
+## 3. Warum "In-Office" für Design Engineers entscheidend ist
 
-Aber Zeilenbreite ist auch ein Kompositionsmittel. Kurze Zeilen erzeugen Spannung, Rhythmus, Emphase. Ein einzelner Satz auf der vollen Breite einer Seite ist eine Aussage — über Inhalt und Form gleichzeitig.
+Man kann Systeme remote planen, aber Produkte baut man gemeinsam. Als jemand, der 100 % Präsenz im Unternehmen liebt, weiß ich: Die besten Lösungen entstehen am Whiteboard oder beim schnellen Blick auf den Monitor des Sitznachbarn.
 
-## Was Bewegung mit Schrift macht
+Wenn Design und Engineering im selben Raum sitzen und die gleiche Sprache (Code & Design-Tokens) sprechen, eliminieren wir das „Ping-Pong-Spiel“ der Abstimmungsschleifen.
 
-Wenn Text ins Bild kommt — durch eine Animation, einen Übergang — verändert sich sein Gewicht. Buchstaben, die von unten ins Frame gleiten, wirken anders als solche, die einfach erscheinen.
+## Fazit
 
-Das ist keine Spielerei. Es ist eine weitere Schicht von Bedeutung, die Typografie tragen kann — wenn man ihr vertraut.
+Der moderne Product Designer muss unter die Haube schauen. Wer versteht, wie Tailwind, Git und KI-Workflows funktionieren, baut nicht nur schönere, sondern vor allem bessere Produkte.
+
+Ich nenne es „Hacking with Empathy“. Es ist die Kunst, technisches Verständnis zu nutzen, um die bestmögliche Experience für den Nutzer zu bauen.

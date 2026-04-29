@@ -1,0 +1,53 @@
+---
+
+---
+
+<div class="baseline-grid" aria-hidden="true">
+  <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <!-- Punkt-Raster: 1.6rem (25.6px) Abstand -->
+      <pattern
+        id="dots"
+        width="25.6"
+        height="25.6"
+        patternUnits="userSpaceOnUse"
+      >
+        <circle cx="12.8" cy="12.8" r="1" fill="var(--border)"></circle>
+      </pattern>
+
+      <!-- Kreuz-Raster: Jeder 4. Punkt (102.4px Abstand) wird ein Kreuz -->
+      <pattern
+        id="crosses"
+        width="102.4"
+        height="102.4"
+        patternUnits="userSpaceOnUse"
+      >
+        <!-- Das Kreuz zentriert auf dem ersten Punkt (12.8, 12.8) -->
+        <path
+          d="M12.8,7.8 L12.8,17.8 M7.8,12.8 L17.8,12.8"
+          stroke="var(--border)"
+          stroke-width="1"
+          fill="none"></path>
+      </pattern>
+    </defs>
+
+    <rect width="100%" height="100%" fill="url(#dots)"></rect>
+    <rect width="100%" height="100%" fill="url(#crosses)"></rect>
+  </svg>
+</div>
+
+<style>
+  .baseline-grid {
+    position: absolute;
+    inset: 0;
+    z-index: -1; /* Behind everything */
+    pointer-events: none;
+    opacity: 0.8; /* Etwas stärker als vorher, da Punkte dezenter sind als Linien */
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .baseline-grid {
+      display: none;
+    }
+  }
+</style>

@@ -2,6 +2,7 @@
 import { ViewTransitions } from 'astro:transitions';
 import CustomCursor from '@/components/astro/CustomCursor.astro';
 import GrainOverlay from '@/components/astro/GrainOverlay.astro';
+import BaselineGrid from '@/components/astro/BaselineGrid.astro';
 import '@/styles/global.css';
 import '@/styles/typography.css';
 import '@/styles/animations.css';
@@ -34,9 +35,10 @@ const navLinks = [
     <title>{title}</title>
     <ViewTransitions />
   </head>
-  <body class="min-h-screen bg-background text-foreground antialiased">
+  <body class="relative min-h-screen bg-background text-foreground antialiased">
     <CustomCursor />
     <GrainOverlay />
+    <BaselineGrid />
 
     <!-- Header -->
     <header class="fixed top-0 left-0 right-0 z-50 px-6 py-5">
