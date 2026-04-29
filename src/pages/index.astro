@@ -203,18 +203,18 @@ const formatDate = (date: Date) =>
                   className="transition-all duration-300 group-hover:border-foreground/20 group-hover:bg-muted/50"
                 >
                   <CardHeader>
-                    <div class="flex items-start justify-between gap-4">
-                      <div class="flex-1">
-                        <CardTitle className="t-h3 mb-2">
+                    <div class="flex flex-col gap-3">
+                      <time class="t-label text-muted-foreground">
+                        {formatDate(post.data.date)}
+                      </time>
+                      <div class="flex flex-col gap-2">
+                        <CardTitle className="t-h3">
                           {post.data.title}
                         </CardTitle>
                         <CardDescription className="t-body text-muted-foreground">
                           {post.data.description}
                         </CardDescription>
                       </div>
-                      <time class="t-label mt-1 shrink-0 text-muted-foreground">
-                        {formatDate(post.data.date)}
-                      </time>
                     </div>
                     {post.data.tags && post.data.tags.length > 0 && (
                       <div class="mt-4 flex flex-wrap gap-2">

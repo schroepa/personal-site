@@ -30,28 +30,28 @@ const formatDate = (date: Date) =>
               className="transition-all duration-300 group-hover:border-foreground/20 group-hover:bg-muted/50"
             >
               <CardHeader>
-                <div class="flex items-start justify-between gap-6">
-                  <div class="flex-1 min-w-0">
-                    <CardTitle className="t-h3 mb-2">
+                <div class="flex flex-col gap-3">
+                  <time
+                    class="t-label text-muted-foreground"
+                    datetime={post.data.date.toISOString()}
+                  >
+                    {formatDate(post.data.date)}
+                  </time>
+                  <div class="flex flex-col gap-2">
+                    <CardTitle className="t-h3">
                       {post.data.title}
                     </CardTitle>
                     <CardDescription className="t-body text-muted-foreground">
                       {post.data.description}
                     </CardDescription>
-                    {post.data.tags && post.data.tags.length > 0 && (
-                      <div class="flex flex-wrap gap-2 mt-4">
-                        {post.data.tags.map((tag) => (
-                          <Badge variant="secondary" client:visible>{tag}</Badge>
-                        ))}
-                      </div>
-                    )}
                   </div>
-                  <time
-                    class="t-small text-muted-foreground shrink-0 mt-1"
-                    datetime={post.data.date.toISOString()}
-                  >
-                    {formatDate(post.data.date)}
-                  </time>
+                  {post.data.tags && post.data.tags.length > 0 && (
+                    <div class="flex flex-wrap gap-2 mt-2">
+                      {post.data.tags.map((tag) => (
+                        <Badge variant="secondary" client:visible>{tag}</Badge>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </CardHeader>
             </Card>
