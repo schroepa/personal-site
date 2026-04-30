@@ -11,12 +11,34 @@ import "@/styles/prose.css"
 interface Props {
   title?: string
   description?: string
+  ogImage?: string
+  canonicalURL?: string
 }
 
 const {
   title = "Patrick Schröder — UI Designer & Developer",
   description = "Personal site of Patrick Schröder, UI Designer and Frontend Developer.",
+  ogImage,
+  canonicalURL = Astro.url.href,
 } = Astro.props
+
+const siteName = "ptrckschrdtr.de"
+const siteUrl  = "https://ptrckschrdtr.de"
+const ogImageURL = ogImage
+  ? new URL(ogImage, siteUrl).toString()
+  : `${siteUrl}/og-default.png`
+
+const personSchema = {
+  "@context": "https://schema.org",
+  "@type": "Person",
+  name: "Patrick Schröder",
+  url: siteUrl,
+  jobTitle: "UI Designer & Frontend Developer",
+  sameAs: [
+    // "[PLACEHOLDER: GitHub URL]",
+    // "[PLACEHOLDER: LinkedIn URL]",
+  ],
+}
 
 const navLinks = [
   { href: "/", label: "Start" },
@@ -30,9 +52,31 @@ const navLinks = [
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content={description} />
     <meta name="generator" content={Astro.generator} />
+
+    <!-- Primary -->
     <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalURL} />
+
+    <!-- Open Graph -->
+    <meta property="og:type"        content="website" />
+    <meta property="og:url"         content={canonicalURL} />
+    <meta property="og:site_name"   content={siteName} />
+    <meta property="og:title"       content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image"       content={ogImageURL} />
+    <meta property="og:locale"      content="de_DE" />
+
+    <!-- Twitter / X Card -->
+    <meta name="twitter:card"        content="summary_large_image" />
+    <meta name="twitter:title"       content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image"       content={ogImageURL} />
+
+    <!-- JSON-LD -->
+    <script type="application/ld+json" set:html={JSON.stringify(personSchema)} />
+
     <ViewTransitions />
   </head>
   <body
@@ -81,13 +125,26 @@ const navLinks = [
 
     <!-- Footer -->
     <footer class="mt-24 border-t border-border px-6 py-12">
-      <div class="mx-auto flex max-w-5xl items-center justify-between">
-        <span class="t-small text-muted-foreground"
-          >© {new Date().getFullYear()} Patrick Schröder</span
-        >
-        <span class="t-small text-muted-foreground"
-          >Gebaut mit Astro & shadcn/ui</span
-        >
+      <div class="mx-auto flex max-w-5xl items-center justify-between gap-8 flex-wrap">
+        <span class="t-small text-muted-foreground">
+          © {new Date().getFullYear()} Patrick Schröder
+        </span>
+        <nav aria-label="Rechtliches" class="flex items-center gap-6">
+          <a
+            href="/impressum"
+            class="t-small text-muted-foreground no-underline transition-colors duration-200 hover:text-foreground"
+            data-cursor="link"
+          >
+            Impressum
+          </a>
+          <a
+            href="/datenschutz"
+            class="t-small text-muted-foreground no-underline transition-colors duration-200 hover:text-foreground"
+            data-cursor="link"
+          >
+            Datenschutz
+          </a>
+        </nav>
       </div>
     </footer>
 
