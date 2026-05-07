@@ -8,9 +8,10 @@ interface Props {
   description?: string;
   date: Date;
   tags?: string[];
+  coverImage?: string;
 }
 
-const { title, description, date, tags = [] } = Astro.props;
+const { title, description, date, tags = [], coverImage } = Astro.props;
 
 const formattedDate = new Intl.DateTimeFormat('de-DE', {
   year: 'numeric',
@@ -22,11 +23,32 @@ const formattedDate = new Intl.DateTimeFormat('de-DE', {
 <BaseLayout title={title} description={description}>
   <ReadingProgress />
 
-  <article class="px-6 pt-32 pb-24">
-    <div class="max-w-5xl mx-auto">
-      <header class="mb-12 max-w-2xl">
-        <h1 class="t-h1 mb-4" data-reveal="lines">{title}</h1>
-        <div class="flex items-center gap-4 mt-6">
+  <article class="pb-24">
+
+    <!-- Cover: echtes Bild oder Mesh-Gradient-Fallback -->
+    <div class="cover-wrap">
+      {coverImage ? (
+        <img
+          src={coverImage}
+          alt=""
+          class="cover-img"
+          loading="eager"
+          decoding="async"
+        />
+      ) : (
+        <div class="cover-placeholder" aria-hidden="true">
+          <div class="cp-orb cp-orb-1"></div>
+          <div class="cp-orb cp-orb-2"></div>
+          <div class="cp-orb cp-orb-3"></div>
+        </div>
+      )}
+    </div>
+
+    <div class="max-w-5xl mx-auto px-6">
+      <!-- Header -->
+      <header class="mb-12 max-w-2xl pt-12">
+        <h1 class="t-h1 mb-6" data-reveal="lines">{title}</h1>
+        <div class="flex flex-wrap items-center gap-4">
           <time class="t-small text-muted-foreground" datetime={date.toISOString()}>
             {formattedDate}
           </time>
@@ -40,9 +62,107 @@ const formattedDate = new Intl.DateTimeFormat('de-DE', {
         </div>
       </header>
 
+      <!-- Content -->
       <div class="prose t-prose">
         <slot />
       </div>
     </div>
   </article>
 </BaseLayout>
+
+<style>
+  /* ── Cover container ───────────────────────────────────────────────────── */
+  .cover-wrap {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 21 / 9;
+    overflow: hidden;
+    margin-top: 0; /* header ist fixed, kein pt-32 nötig — cover füllt direkt */
+  }
+
+  .cover-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  /* ── Mesh-Gradient-Fallback ────────────────────────────────────────────── */
+  .cover-placeholder {
+    position: absolute;
+    inset: 0;
+    background: var(--background);
+    overflow: hidden;
+  }
+
+  .cp-orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(60px);
+  }
+
+  .cp-orb-1 {
+    width: 60%;
+    height: 120%;
+    top: -10%;
+    left: -5%;
+    background: var(--mesh-warm);
+    opacity: 0.55;
+    animation: cp-drift-1 14s ease-in-out infinite alternate;
+  }
+
+  .cp-orb-2 {
+    width: 50%;
+    height: 120%;
+    top: -15%;
+    right: -5%;
+    background: var(--mesh-cool);
+    opacity: 0.45;
+    animation: cp-drift-2 18s ease-in-out infinite alternate;
+    animation-delay: -6s;
+  }
+
+  .cp-orb-3 {
+    width: 40%;
+    height: 80%;
+    bottom: -10%;
+    left: 35%;
+    background: var(--mesh-warm);
+    opacity: 0.35;
+    animation: cp-drift-3 12s ease-in-out infinite alternate;
+    animation-delay: -3s;
+  }
+
+  @keyframes cp-drift-1 {
+    0%   { transform: translate(0%, 0%)   scale(1); }
+    100% { transform: translate(6%, 8%)   scale(1.08); }
+  }
+  @keyframes cp-drift-2 {
+    0%   { transform: translate(0%, 0%)   scale(1); }
+    100% { transform: translate(-5%, 6%)  scale(1.06); }
+  }
+  @keyframes cp-drift-3 {
+    0%   { transform: translate(0%, 0%)   scale(1); }
+    100% { transform: translate(4%, -5%)  scale(1.04); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .cp-orb { animation: none; }
+  }
+
+  /* ── Grain overlay auf dem Cover ───────────────────────────────────────── */
+  .cover-wrap::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    filter: url(#grain);
+    opacity: 0.06;
+    mix-blend-mode: overlay;
+    pointer-events: none;
+  }
+
+  /* ── Padding-top kompensiert fixed Header (80px) ───────────────────────── */
+  article {
+    padding-top: 80px;
+  }
+</style>

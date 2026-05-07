@@ -27,33 +27,51 @@ const formatDate = (date: Date) =>
             <Card
               data-scroll="fade-up"
               client:visible
-              className="transition-all duration-300 group-hover:border-foreground/20 group-hover:bg-muted/50"
+              className="overflow-hidden transition-all duration-300 group-hover:border-foreground/20 group-hover:bg-muted/50"
             >
-              <CardHeader>
-                <div class="flex flex-col gap-3">
-                  <time
-                    class="t-label text-muted-foreground"
-                    datetime={post.data.date.toISOString()}
-                  >
-                    {formatDate(post.data.date)}
-                  </time>
-                  <div class="flex flex-col gap-2">
-                    <CardTitle className="t-h3">
-                      {post.data.title}
-                    </CardTitle>
-                    <CardDescription className="t-body text-muted-foreground">
-                      {post.data.description}
-                    </CardDescription>
-                  </div>
-                  {post.data.tags && post.data.tags.length > 0 && (
-                    <div class="flex flex-wrap gap-2 mt-2">
-                      {post.data.tags.map((tag) => (
-                        <Badge variant="secondary" client:visible>{tag}</Badge>
-                      ))}
-                    </div>
+              <div class="flex flex-col sm:flex-row">
+                <!-- Thumbnail -->
+                <div class="thumbnail-wrap sm:w-48 sm:shrink-0">
+                  {post.data.coverImage ? (
+                    <img
+                      src={post.data.coverImage}
+                      alt=""
+                      class="thumbnail-img"
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  ) : (
+                    <div class="thumbnail-placeholder" aria-hidden="true"></div>
                   )}
                 </div>
-              </CardHeader>
+
+                <!-- Text -->
+                <CardHeader className="flex-1">
+                  <div class="flex flex-col gap-3">
+                    <time
+                      class="t-label text-muted-foreground"
+                      datetime={post.data.date.toISOString()}
+                    >
+                      {formatDate(post.data.date)}
+                    </time>
+                    <div class="flex flex-col gap-2">
+                      <CardTitle className="t-h3">
+                        {post.data.title}
+                      </CardTitle>
+                      <CardDescription className="t-body text-muted-foreground">
+                        {post.data.description}
+                      </CardDescription>
+                    </div>
+                    {post.data.tags && post.data.tags.length > 0 && (
+                      <div class="flex flex-wrap gap-2 mt-2">
+                        {post.data.tags.map((tag) => (
+                          <Badge variant="secondary" client:visible>{tag}</Badge>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </CardHeader>
+              </div>
             </Card>
           </a>
         ))}
@@ -61,3 +79,43 @@ const formatDate = (date: Date) =>
     </div>
   </div>
 </BaseLayout>
+
+<style>
+  .thumbnail-wrap {
+    position: relative;
+    overflow: hidden;
+    aspect-ratio: 4 / 3;
+    background: var(--muted);
+  }
+
+  @media (min-width: 640px) {
+    .thumbnail-wrap {
+      aspect-ratio: auto;
+      height: auto;
+      min-height: 120px;
+    }
+  }
+
+  .thumbnail-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 400ms cubic-bezier(0.25, 1, 0.5, 1);
+  }
+
+  .group:hover .thumbnail-img {
+    transform: scale(1.04);
+  }
+
+  /* Gradient-Placeholder wenn kein Bild vorhanden */
+  .thumbnail-placeholder {
+    width: 100%;
+    height: 100%;
+    min-height: 120px;
+    background:
+      radial-gradient(ellipse 80% 80% at 20% 30%, color-mix(in oklch, var(--mesh-warm) 60%, transparent) 0%, transparent 70%),
+      radial-gradient(ellipse 60% 60% at 80% 70%, color-mix(in oklch, var(--mesh-cool) 50%, transparent) 0%, transparent 65%),
+      var(--muted);
+  }
+</style>
