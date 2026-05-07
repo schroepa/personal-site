@@ -87,17 +87,19 @@ const formattedDate = new Intl.DateTimeFormat('de-DE', {
     display: block;
   }
 
-  /* ── Content überlappt das Cover, breite wie der Inhalt ────────────────── */
+  /* ── Content überlappt das Cover, breite am Prosa-Content orientiert ───── */
   .content-wrap {
     position: relative;
     z-index: 10;
     background: var(--background);
-    margin-top: -72px;
     border-radius: 16px 16px 0 0;
-    max-width: 80rem;
+    margin-top: -72px;
     margin-left: auto;
     margin-right: auto;
-    padding: 0 1.5rem;
+    /* 65ch Prosa + 5rem Padding links/rechts */
+    max-width: calc(65ch + 5rem);
+    width: 100%;
+    padding: 0 2.5rem;
   }
 
   /* ── Padding-top: kein separates padding mehr auf article ──────────────── */
