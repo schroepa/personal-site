@@ -1,10 +1,16 @@
 ---
 ---
 
-<div id="cursor-dot" aria-hidden="true"></div>
-<div id="cursor-ring" aria-hidden="true"></div>
+<!-- transition:persist hält die Elemente über View Transitions hinweg am Leben -->
+<div id="cursor-dot"  aria-hidden="true" transition:persist></div>
+<div id="cursor-ring" aria-hidden="true" transition:persist></div>
 
 <style>
+  /* cursor:none via CSS — überlebt View Transitions, kein JS-Reset nötig */
+  @media (pointer: fine) {
+    html { cursor: none !important; }
+  }
+
   #cursor-dot,
   #cursor-ring {
     position: fixed;
@@ -13,7 +19,6 @@
     pointer-events: none;
     z-index: 9998;
     border-radius: 50%;
-    /* start off-screen until JS moves them */
     transform: translate(-200px, -200px);
   }
 
@@ -29,7 +34,6 @@
     height: 28px;
     border: 1.5px solid var(--foreground);
     opacity: 0.5;
-    /* JS handles transform; CSS handles size/color/opacity transitions */
     transition:
       opacity 200ms ease,
       width 200ms ease,
@@ -40,19 +44,17 @@
       border-width 200ms ease;
   }
 
-  /* ── Hover state: link ────────────────────────────────────────────────── */
+  /* ── Hover-States ─────────────────────────────────────────────────────── */
   body[data-cursor-state="link"] #cursor-ring {
     width: 48px;
     height: 48px;
     opacity: 1;
-    border-color: var(--foreground);
   }
 
   body[data-cursor-state="link"] #cursor-dot {
     opacity: 0;
   }
 
-  /* ── Hover state: button ──────────────────────────────────────────────── */
   body[data-cursor-state="button"] #cursor-ring {
     width: 44px;
     height: 44px;
@@ -61,7 +63,6 @@
     opacity: 1;
   }
 
-  /* ── Hover state: text (caret) ────────────────────────────────────────── */
   body[data-cursor-state="text"] #cursor-ring {
     width: 2px;
     height: 26px;
@@ -72,13 +73,13 @@
   }
 
   @media (pointer: coarse) {
-    #cursor-dot,
-    #cursor-ring { display: none; }
+    #cursor-dot, #cursor-ring { display: none; }
+    html { cursor: auto !important; }
   }
 
   @media (prefers-reduced-motion: reduce) {
-    #cursor-dot,
-    #cursor-ring { display: none; }
+    #cursor-dot, #cursor-ring { display: none; }
+    html { cursor: auto !important; }
   }
 </style>
 
@@ -87,54 +88,54 @@
     if (window.matchMedia('(pointer: coarse)').matches) return;
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
-    document.documentElement.style.cursor = 'none';
+    let dot  = document.getElementById('cursor-dot')  as HTMLElement;
+    let ring = document.getElementById('cursor-ring') as HTMLElement;
 
-    const dot  = document.getElementById('cursor-dot')  as HTMLElement;
-    const ring = document.getElementById('cursor-ring') as HTMLElement;
-
-    let mouseX = -200;
-    let mouseY = -200;
-    let ringX  = -200;
-    let ringY  = -200;
-
-    document.addEventListener('pointermove', (e: PointerEvent) => {
-      mouseX = e.clientX;
-      mouseY = e.clientY;
-    });
+    let mouseX = -200, mouseY = -200;
+    let ringX  = -200, ringY  = -200;
+    let rafId: number;
 
     function lerp(a: number, b: number, t: number): number {
       return a + (b - a) * t;
     }
 
-    function getRingHalfSize(): number {
-      // read the current rendered size so centering stays correct during transitions
-      return ring.offsetWidth / 2;
-    }
-
     function tick(): void {
       ringX = lerp(ringX, mouseX, 0.12);
       ringY = lerp(ringY, mouseY, 0.12);
-
-      const rh = getRingHalfSize();
+      const rh = ring.offsetWidth / 2;
       dot.style.transform  = `translate(${mouseX - 3}px, ${mouseY - 3}px)`;
       ring.style.transform = `translate(${ringX - rh}px, ${ringY - rh}px)`;
-
-      requestAnimationFrame(tick);
+      rafId = requestAnimationFrame(tick);
     }
 
-    tick();
+    // Pointer-Position verfolgen
+    document.addEventListener('pointermove', (e: PointerEvent) => {
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+    });
 
+    // Hover-State
     document.addEventListener('mouseover', (e: MouseEvent) => {
       const target = (e.target as HTMLElement).closest('[data-cursor]');
-      if (target) {
-        document.body.dataset.cursorState = (target as HTMLElement).dataset.cursor ?? '';
-      } else {
-        delete document.body.dataset.cursorState;
-      }
+      document.body.dataset.cursorState = target
+        ? (target as HTMLElement).dataset.cursor ?? ''
+        : '';
+      if (!target) delete document.body.dataset.cursorState;
     });
 
     document.addEventListener('mouseleave', () => {
       delete document.body.dataset.cursorState;
     });
+
+    // Nach jeder View-Transition: Element-Referenzen aktualisieren
+    // (transition:persist hält die Elemente, aber nach astro:after-swap
+    // ist sichergestellt, dass das DOM stabil ist)
+    document.addEventListener('astro:after-swap', () => {
+      dot  = document.getElementById('cursor-dot')  as HTMLElement;
+      ring = document.getElementById('cursor-ring') as HTMLElement;
+    });
+
+    // RAF starten — läuft dauerhaft, überlebt Navigationen
+    tick();
   })();
 </script>
