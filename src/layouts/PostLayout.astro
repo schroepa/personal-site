@@ -25,7 +25,7 @@ const formattedDate = new Intl.DateTimeFormat('de-DE', {
 
   <article class="pb-24">
 
-    <!-- Cover: echtes Bild oder Mesh-Gradient-Fallback -->
+    <!-- Cover: startet bei 0px von oben, Nav liegt drüber -->
     <div class="cover-wrap">
       {coverImage ? (
         <img
@@ -44,40 +44,42 @@ const formattedDate = new Intl.DateTimeFormat('de-DE', {
       )}
     </div>
 
-    <div class="max-w-5xl mx-auto px-6">
-      <!-- Header -->
-      <header class="mb-12 max-w-2xl pt-12">
-        <h1 class="t-h1 mb-6" data-reveal="lines">{title}</h1>
-        <div class="flex flex-wrap items-center gap-4">
-          <time class="t-small text-muted-foreground" datetime={date.toISOString()}>
-            {formattedDate}
-          </time>
-          {tags.length > 0 && (
-            <div class="flex flex-wrap gap-2">
-              {tags.map((tag) => (
-                <Badge variant="secondary" client:visible>{tag}</Badge>
-              ))}
-            </div>
-          )}
-        </div>
-      </header>
+    <!-- Content überlappt das Bild nach oben -->
+    <div class="content-wrap">
+      <div class="max-w-5xl mx-auto px-6">
+        <header class="mb-12 max-w-2xl pt-10">
+          <h1 class="t-h1 mb-6" data-reveal="lines">{title}</h1>
+          <div class="flex flex-wrap items-center gap-4">
+            <time class="t-small text-muted-foreground" datetime={date.toISOString()}>
+              {formattedDate}
+            </time>
+            {tags.length > 0 && (
+              <div class="flex flex-wrap gap-2">
+                {tags.map((tag) => (
+                  <Badge variant="secondary" client:visible>{tag}</Badge>
+                ))}
+              </div>
+            )}
+          </div>
+        </header>
 
-      <!-- Content -->
-      <div class="prose t-prose">
-        <slot />
+        <div class="prose t-prose">
+          <slot />
+        </div>
       </div>
     </div>
   </article>
 </BaseLayout>
 
 <style>
-  /* ── Cover container ───────────────────────────────────────────────────── */
+  /* ── Cover: startet direkt bei 0, Nav overlays ─────────────────────────── */
   .cover-wrap {
     position: relative;
     width: 100%;
-    aspect-ratio: 21 / 9;
+    height: 62vh;
+    max-height: 520px;
+    min-height: 280px;
     overflow: hidden;
-    margin-top: 0; /* header ist fixed, kein pt-32 nötig — cover füllt direkt */
   }
 
   .cover-img {
@@ -85,6 +87,20 @@ const formattedDate = new Intl.DateTimeFormat('de-DE', {
     height: 100%;
     object-fit: cover;
     display: block;
+  }
+
+  /* ── Content überlappt das Cover ───────────────────────────────────────── */
+  .content-wrap {
+    position: relative;
+    z-index: 10;
+    background: var(--background);
+    margin-top: -72px;
+    border-radius: 16px 16px 0 0;
+  }
+
+  /* ── Padding-top: kein separates padding mehr auf article ──────────────── */
+  article {
+    padding-top: 0;
   }
 
   /* ── Mesh-Gradient-Fallback ────────────────────────────────────────────── */
