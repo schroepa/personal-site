@@ -46,26 +46,24 @@ const formattedDate = new Intl.DateTimeFormat('de-DE', {
 
     <!-- Content überlappt das Bild nach oben -->
     <div class="content-wrap">
-      <div class="max-w-5xl mx-auto px-6">
-        <header class="mb-12 max-w-2xl pt-10">
-          <h1 class="t-h1 mb-6" data-reveal="lines">{title}</h1>
-          <div class="flex flex-wrap items-center gap-4">
-            <time class="t-small text-muted-foreground" datetime={date.toISOString()}>
-              {formattedDate}
-            </time>
-            {tags.length > 0 && (
-              <div class="flex flex-wrap gap-2">
-                {tags.map((tag) => (
-                  <Badge variant="secondary" client:visible>{tag}</Badge>
-                ))}
-              </div>
-            )}
-          </div>
-        </header>
-
-        <div class="prose t-prose">
-          <slot />
+      <header class="mb-12 max-w-2xl pt-10">
+        <h1 class="t-h1 mb-6" data-reveal="lines">{title}</h1>
+        <div class="flex flex-wrap items-center gap-4">
+          <time class="t-small text-muted-foreground" datetime={date.toISOString()}>
+            {formattedDate}
+          </time>
+          {tags.length > 0 && (
+            <div class="flex flex-wrap gap-2">
+              {tags.map((tag) => (
+                <Badge variant="secondary" client:visible>{tag}</Badge>
+              ))}
+            </div>
+          )}
         </div>
+      </header>
+
+      <div class="prose t-prose">
+        <slot />
       </div>
     </div>
   </article>
@@ -89,13 +87,17 @@ const formattedDate = new Intl.DateTimeFormat('de-DE', {
     display: block;
   }
 
-  /* ── Content überlappt das Cover ───────────────────────────────────────── */
+  /* ── Content überlappt das Cover, breite wie der Inhalt ────────────────── */
   .content-wrap {
     position: relative;
     z-index: 10;
     background: var(--background);
     margin-top: -72px;
     border-radius: 16px 16px 0 0;
+    max-width: 80rem;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 0 1.5rem;
   }
 
   /* ── Padding-top: kein separates padding mehr auf article ──────────────── */
