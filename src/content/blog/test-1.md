@@ -1,8 +1,9 @@
 ---
 title: "Der Aufstieg des Design Engineers: Wie ich KI und shadcn nutze, um die Lücke zwischen Figma und Produktion zu schließen"
 description: "Warum der Design Engineer die Brücke zwischen Figma und Code schließt — und wie man mit shadcn und KI-Workflows skalierbare Systeme baut."
-date: 2026-29-04
+date: 2026-04-09
 tags: ["Design", "Typografie", "CSS"]
+coverImage: "/images/blog/blog-image-04.png"
 draft: false
 ---
 

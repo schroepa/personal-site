@@ -3,7 +3,7 @@ title: "Grainy Gradient Generator — Ein Tool, das ich für diese Seite gebaut 
 description: "Warum ich einen eigenen Gradient-Generator entwickelt habe, wie er technisch funktioniert und was man damit machen kann."
 date: 2026-05-07
 tags: ["CSS", "Canvas API", "Tools", "Design"]
-coverImage: "/images/blog/blog-post-image1.png"
+coverImage: "/images/blog/blog-image-1.png"
 draft: false
 ---
 

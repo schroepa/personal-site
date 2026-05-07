@@ -3,7 +3,7 @@ title: "Wie ich diese Seite gebaut habe — und warum so"
 description: "Tech Stack, Typografie, Micro-Interactions: Die Entscheidungen hinter ptrckschrdtr.de, Schicht für Schicht erklärt."
 date: 2026-05-07
 tags: ["Astro", "Design Systems", "UI Design", "CSS"]
-coverImage: "/images/blog/blog-post-image3.png"
+coverImage: "/images/blog/blog-image-3.png"
 draft: false
 ---
 
