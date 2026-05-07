@@ -1,0 +1,58 @@
+---
+import { ViewTransitions } from "astro:transitions"
+import CustomCursor from "@/components/astro/CustomCursor.astro"
+import "@/styles/global.css"
+import "@/styles/typography.css"
+import "@/styles/animations.css"
+
+interface Props {
+  title?: string
+  description?: string
+}
+
+const {
+  title = "Tool — Patrick Schröder",
+  description = "Ein Tool von Patrick Schröder.",
+} = Astro.props
+
+const canonicalURL = Astro.url.href
+---
+
+<!doctype html>
+<html lang="de" class="overflow-hidden">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content={description} />
+    <meta name="generator" content={Astro.generator} />
+    <link rel="canonical" href={canonicalURL} />
+    <meta property="og:title"       content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url"         content={canonicalURL} />
+    <title>{title}</title>
+    <ViewTransitions />
+  </head>
+  <body class="overflow-hidden bg-background text-foreground antialiased" style="height:100dvh;display:flex;flex-direction:column;">
+    <CustomCursor />
+
+    <!-- Minimal Header -->
+    <header class="flex-shrink-0 h-12 border-b border-border px-5 flex items-center justify-between z-50 bg-background/80 backdrop-blur-xl">
+      <a
+        href="/"
+        class="t-label text-muted-foreground hover:text-foreground transition-colors duration-200 no-underline flex items-center gap-2"
+        data-cursor="link"
+      >
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M11 7H3M3 7L6.5 3.5M3 7L6.5 10.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        ptrckschrdtr.de
+      </a>
+      <span class="t-label text-muted-foreground">{title.replace(" — Patrick Schröder", "")}</span>
+    </header>
+
+    <!-- Tool area: fills remaining height -->
+    <main class="flex-1 overflow-hidden">
+      <slot />
+    </main>
+  </body>
+</html>
