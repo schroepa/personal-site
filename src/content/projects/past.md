@@ -11,15 +11,15 @@ Manchmal gibt es diese Momente, da klickt es einfach. Man sitzt da, das iPad Pro
 
 &nbsp;
 &nbsp;
-![digital-tag gy ptrckschrdtr](/images/gallery/digital-graffiti/past-1.webp)
-![digital-tag gy ptrckschrdtr](/images/gallery/digital-graffiti/past-2.webp)
-![digital-tag gy ptrckschrdtr](/images/gallery/digital-graffiti/past-3.webp)
-![digital-tag gy ptrckschrdtr](/images/gallery/digital-graffiti/past-4.webp)
-![digital-tag gy ptrckschrdtr](/images/gallery/digital-graffiti/past-5.webp)
-![digital-tag gy ptrckschrdtr](/images/gallery/digital-graffiti/past-6.webp)
-![digital-tag gy ptrckschrdtr](/images/gallery/digital-graffiti/past-7.webp)
-![digital-tag gy ptrckschrdtr](/images/gallery/digital-graffiti/past-8.webp)
-![digital-tag gy ptrckschrdtr](/images/gallery/digital-graffiti/past-9.webp)
+![digital-tag gy ptrckschrdtr](/images/gallery/past/past-1.webp)
+![digital-tag gy ptrckschrdtr](/images/gallery/past/past-2.webp)
+![digital-tag gy ptrckschrdtr](/images/gallery/past/past-3.webp)
+![digital-tag gy ptrckschrdtr](/images/gallery/past/past-4.webp)
+![digital-tag gy ptrckschrdtr](/images/gallery/past/past-5.webp)
+![digital-tag gy ptrckschrdtr](/images/gallery/past/past-6.webp)
+![digital-tag gy ptrckschrdtr](/images/gallery/past/past-7.webp)
+![digital-tag gy ptrckschrdtr](/images/gallery/past/past-8.webp)
+![digital-tag gy ptrckschrdtr](/images/gallery/past/past-9.webp)
 
 &nbsp;
 &nbsp;
