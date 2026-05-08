@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { getCollection } from 'astro:content';
+import { readingTime } from '@/lib/reading-time';
 
 const allProjects = await getCollection('projects');
 const sorted = allProjects.sort((a, b) => {
@@ -11,6 +12,9 @@ const sorted = allProjects.sort((a, b) => {
   if (!a.data.featured && b.data.featured) return 1;
   return b.data.date.getTime() - a.data.date.getTime();
 });
+
+const formatDate = (date: Date) =>
+  new Intl.DateTimeFormat('de-DE', { year: 'numeric', month: 'long', day: 'numeric' }).format(date);
 ---
 
 <BaseLayout title="Projekte — Patrick Schröder" description="Ausgewählte Arbeiten aus Design und Entwicklung.">
@@ -44,6 +48,12 @@ const sorted = allProjects.sort((a, b) => {
                 </div>
               )}
               <CardHeader>
+                <div class="flex items-center gap-2 mb-2">
+                  <time class="t-label text-muted-foreground" datetime={project.data.date.toISOString()}>
+                    {formatDate(project.data.date)}
+                  </time>
+                  <span class="t-label text-muted-foreground">· {readingTime(project.body ?? '')} min</span>
+                </div>
                 <div class="flex items-start justify-between gap-2">
                   <CardTitle className="t-h4 mb-2">
                     {project.data.title}
