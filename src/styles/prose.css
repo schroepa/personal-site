@@ -178,7 +178,11 @@
 /* Alle Bilder: volle Breite, zoom-Cursor */
 .article-prose img {
   width: 100%;
-  height: auto;
+  height: 55vh;
+  min-height: 280px;
+  max-height: 560px;
+  object-fit: cover;
+  object-position: center;
   display: block;
   cursor: zoom-in;
 }
