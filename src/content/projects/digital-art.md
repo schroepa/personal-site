@@ -15,8 +15,9 @@ Es sind diese Augenblicke, in denen Wörter zu Formen werden. Ich schreibe sie n
 
 Mein Werkzeugkasten ist mittlerweile digital, aber das Feeling bleibt "Street". Für die neuen Tags habe ich eine Mischung aus High-End-Tools und Eigenkreationen genutzt. Ein großer Teil meines Workflows basiert auf den genialen Brushes von [Snooze One](https://snoozeone.com/), die ich oft noch modifiziere oder mit komplett eigenen Custom-Brushes ergänze, bis sie genau den Widerstand und die Textur haben, die ich brauche. Wenn der Standard-Pinsel nicht reicht, wird eben geschraubt, bis der Strich sitzt.
 
-![Graffiti Tag 09](/images/blog/post-square-09.webp)
-![Graffiti Tag 10](/images/blog/post-square-10.webp)
+![digital-tag gy ptrckschrdtr](/images/gallery/digital-graffiti/IMG_0315.webp)
+
+![digital-tag gy ptrckschrdtr](/images/gallery/digital-graffiti/IMG_0247.webp)
 
 ### Vom Screen auf den Stoff?
 
@@ -26,43 +27,12 @@ Die Arbeit am iPad ist sauber, präzise und erlaubt Experimente, die an der Wand
 
 Der Plan steht: Das Ganze soll auf die Straße, aber anders. Denkt an Plotter-Sticker oder ganz klassisch mit Bleiche auf schwarzen Hoodies und Shirts. Der Kontrast zwischen digitaler Perfektion und der rohen, unberechenbaren Optik von Bleiche auf Stoff reizt mich extrem.
 
-![Graffiti Tag 12](/images/blog/post-square-12.webp)
-![Graffiti Tag 13](/images/blog/post-square-13.webp)
+![digital-tag gy ptrckschrdtr](/images/gallery/digital-graffiti/IMG_0145.webp)
+
+![digital-tag gy ptrckschrdtr](/images/gallery/digital-graffiti/IMG_0139.webp)
+
 &nbsp;
 &nbsp;
 ![digital-tag gy ptrckschrdtr](/images/gallery/digital-graffiti/hello-tag-transparent.webp)
 &nbsp;
 &nbsp;
-
-Digital Art – Lettering, Graffiti, Tags & Styles
-
-## Lesbarkeit ist dann doch nicht immer Respekt
-
-Wenn Nutzer einen Text lesen, interagieren sie mit jedem einzelnen Buchstaben. Die Zeilenhöhe bestimmt, wie leicht das Auge zur nächsten Zeile springt. Der Zeilenabstand entscheidet, ob ein Text zum Lesen einlädt oder abstößt. Die Schriftgröße kommuniziert Hierarchie — noch bevor der Inhalt gelesen wurde.
-
-Ein Interface mit schlechter Typografie signalisiert: *Wir haben nicht nachgedacht.* Es zwingt Nutzer, kognitive Arbeit zu leisten, die das Design hätte übernehmen sollen.
-
-![digital-tag gy ptrckschrdtr](/images/gallery/digital-graffiti/IMG_0315.webp)
-
-![digital-tag gy ptrckschrdtr](/images/gallery/digital-graffiti/IMG_0247.webp)
-
-![digital-tag gy ptrckschrdtr](/images/gallery/digital-graffiti/IMG_0145.webp)
-
-![digital-tag gy ptrckschrdtr](/images/gallery/digital-graffiti/IMG_0139.webp)
-
-![digital-tag gy ptrckschrdtr](/images/gallery/digital-graffiti/post-square-09.webp)
-
-![digital-tag gy ptrckschrdtr](/images/gallery/digital-graffiti/post-square-10.webp)
-
-![digital-tag gy ptrckschrdtr](/images/gallery/digital-graffiti/post-square-11.webp)
-
-![digital-tag gy ptrckschrdtr](/images/gallery/digital-graffiti/post-square-12.webp)
-
-![digital-tag gy ptrckschrdtr](/images/gallery/digital-graffiti/post-square-13.webp)
-
-## Lesbarkeit ist dann doch nicht immer Respekt
-
-Wenn Nutzer einen Text lesen, interagieren sie mit jedem einzelnen Buchstaben. Die Zeilenhöhe bestimmt, wie leicht das Auge zur nächsten Zeile springt. Der Zeilenabstand entscheidet, ob ein Text zum Lesen einlädt oder abstößt. Die Schriftgröße kommuniziert Hierarchie — noch bevor der Inhalt gelesen wurde.
-
-
-![digital-tag gy ptrckschrdtr](/images/gallery/digital-graffiti/IMG_0132.webp)
