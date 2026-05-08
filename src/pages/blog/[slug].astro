@@ -1,18 +1,42 @@
 ---
-import PostLayout from '@/layouts/PostLayout.astro';
-import { getCollection, render } from 'astro:content';
-import type { GetStaticPaths } from 'astro';
+import PostLayout from '@/layouts/PostLayout.astro'
+import { getCollection, render } from 'astro:content'
+import type { GetStaticPaths } from 'astro'
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  const posts = await getCollection('blog', ({ data }) => !data.draft);
-  return posts.map((post) => ({
-    params: { slug: post.id.replace(/\.md$/, '') },
-    props: { post },
-  }));
-};
+  const posts = await getCollection('blog', ({ data }) => !data.draft)
+  const sorted = posts.sort((a, b) => b.data.date.getTime() - a.data.date.getTime())
 
-const { post } = Astro.props;
-const { Content } = await render(post);
+  return sorted.map((post, index) => {
+    const prev = sorted[index + 1] // älter = vorheriger
+    const next = sorted[index - 1] // neuer  = nächster
+
+    return {
+      params: { slug: post.id.replace(/\.md$/, '') },
+      props: {
+        post,
+        prev: prev ? {
+          slug: prev.id.replace(/\.md$/, ''),
+          title: prev.data.title,
+          description: prev.data.description,
+          tags: prev.data.tags ?? [],
+          coverImage: prev.data.coverImage,
+        } : undefined,
+        next: next ? {
+          slug: next.id.replace(/\.md$/, ''),
+          title: next.data.title,
+          description: next.data.description,
+          tags: next.data.tags ?? [],
+          coverImage: next.data.coverImage,
+        } : undefined,
+      },
+    }
+  })
+}
+
+const { post, prev, next } = Astro.props
+const { Content } = await render(post)
+const slug = post.id.replace(/\.md$/, '')
 ---
 
 <PostLayout
@@ -21,6 +45,10 @@ const { Content } = await render(post);
   date={post.data.date}
   tags={post.data.tags}
   coverImage={post.data.coverImage}
+  body={post.body ?? ''}
+  pageUrl={`https://ptrckschrdtr.de/blog/${slug}`}
+  prev={prev}
+  next={next}
 >
   <Content />
 </PostLayout>
