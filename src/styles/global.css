@@ -133,6 +133,13 @@
     }
 }
 
+/* ─── Text-Selektion ─────────────────────────────────────────────────────────── */
+
+::selection {
+  background-color: var(--foreground);
+  color: var(--background);
+}
+
 /* ─── No-Outline System: Cards vollständig unsichtbar ───────────────────────── */
 
 [data-slot="card"] {
