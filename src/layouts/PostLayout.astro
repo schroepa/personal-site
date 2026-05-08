@@ -59,25 +59,26 @@ const formattedDate = new Intl.DateTimeFormat('de-DE', {
 >
   <ReadingProgress />
 
-  <article class="pb-24">
+  <article class="pt-32 pb-24">
 
-    <!-- Cover -->
-    <div class="cover-wrap">
-      {coverImage ? (
+    <!-- Cover: volle Breite, normaler Dokumentfluss, kein Overlap -->
+    {coverImage ? (
+      <div class="cover-wrap">
         <img src={coverImage} alt="" class="cover-img" loading="eager" decoding="async" />
-      ) : (
-        <div class="cover-placeholder" aria-hidden="true">
-          <div class="cp-orb cp-orb-1"></div>
-          <div class="cp-orb cp-orb-2"></div>
-          <div class="cp-orb cp-orb-3"></div>
-        </div>
-      )}
-    </div>
+      </div>
+    ) : (
+      <div class="cover-wrap cover-placeholder" aria-hidden="true">
+        <div class="cp-orb cp-orb-1"></div>
+        <div class="cp-orb cp-orb-2"></div>
+        <div class="cp-orb cp-orb-3"></div>
+      </div>
+    )}
 
-    <!-- Content -->
-    <div class="content-wrap">
-      <header class="mb-12 max-w-2xl pt-10">
-        <h1 class="t-h1 mb-6" data-reveal="lines">{title}</h1>
+    <!-- Content: max-w-5xl, Text auf max-w-2xl, Bilder auf volle Containerbreite -->
+    <div class="mx-auto max-w-5xl px-6">
+
+      <header class="article-header">
+        <h1 class="t-h1 mb-5" data-reveal="lines">{title}</h1>
         <div class="flex flex-wrap items-center gap-3">
           <time class="t-small text-muted-foreground" datetime={date.toISOString()}>
             {formattedDate}
@@ -95,7 +96,8 @@ const formattedDate = new Intl.DateTimeFormat('de-DE', {
         </div>
       </header>
 
-      <div class="prose t-prose">
+      <!-- Prose: Text max-w-2xl, Bilder brechen auf volle max-w-5xl aus -->
+      <div class="article-prose prose">
         <slot />
       </div>
 
@@ -112,47 +114,37 @@ const formattedDate = new Intl.DateTimeFormat('de-DE', {
 </BaseLayout>
 
 <style>
+  /* ── Cover: volle Breite, nach nav ─────────────────────────────────────── */
   .cover-wrap {
     position: relative;
     width: 100%;
-    height: 62vh;
-    max-height: 520px;
-    min-height: 280px;
+    aspect-ratio: 21 / 9;
     overflow: hidden;
+    margin-bottom: 4rem;
   }
+
   .cover-img {
     width: 100%;
     height: 100%;
     object-fit: cover;
     display: block;
   }
-  .content-wrap {
-    position: relative;
-    z-index: 10;
-    background: var(--background);
-    border-radius: 16px 16px 0 0;
-    margin-top: -72px;
-    margin-left: auto;
-    margin-right: auto;
-    max-width: calc(65ch + 5rem);
-    width: 100%;
-    padding: 0 2.5rem;
-  }
 
-  @media (max-width: 639px) {
-    .content-wrap {
-      padding: 0 1.25rem;
-      border-radius: 12px 12px 0 0;
-    }
-  }
-
-  article { padding-top: 0; }
-  .cover-placeholder {
+  .cover-wrap::after {
+    content: '';
     position: absolute;
     inset: 0;
-    background: var(--background);
-    overflow: hidden;
+    filter: url(#grain);
+    opacity: 0.06;
+    mix-blend-mode: overlay;
+    pointer-events: none;
   }
+
+  /* ── Fallback-Placeholder ───────────────────────────────────────────────── */
+  .cover-placeholder {
+    background: var(--background);
+  }
+
   .cp-orb {
     position: absolute;
     border-radius: 50%;
@@ -190,13 +182,70 @@ const formattedDate = new Intl.DateTimeFormat('de-DE', {
   @media (prefers-reduced-motion: reduce) {
     .cp-orb { animation: none; }
   }
-  .cover-wrap::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    filter: url(#grain);
-    opacity: 0.06;
-    mix-blend-mode: overlay;
-    pointer-events: none;
+
+  /* ── Header ─────────────────────────────────────────────────────────────── */
+  .article-header {
+    max-width: 42rem; /* ~max-w-2xl */
+    margin-bottom: 3rem;
+    padding-top: 0.5rem;
+  }
+
+  /* ── Prose: Text constrainen, Bilder ausbrechen lassen ──────────────────── */
+  .article-prose {
+    /* Alle direkten Text-Kinder: auf max-w-2xl beschränken */
+  }
+
+  /* Text-Elemente: max-w-2xl */
+  .article-prose > p,
+  .article-prose > h1,
+  .article-prose > h2,
+  .article-prose > h3,
+  .article-prose > h4,
+  .article-prose > ul,
+  .article-prose > ol,
+  .article-prose > blockquote,
+  .article-prose > pre,
+  .article-prose > hr,
+  .article-prose > table {
+    max-width: 42rem;
+  }
+
+  /* Absatz der NUR ein Bild enthält → volle Breite */
+  .article-prose > p:has(> img:only-child) {
+    max-width: none;
+    margin-left: 0;
+    margin-right: 0;
+    padding: 0;
+  }
+
+  /* figure → volle Breite */
+  .article-prose > figure {
+    max-width: none;
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+  /* Bilder selbst: immer volle Container-Breite */
+  .article-prose img {
+    width: 100%;
+    display: block;
+    height: auto;
+    cursor: zoom-in;
+  }
+
+  .article-prose figcaption {
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-wide);
+    text-transform: uppercase;
+    color: var(--muted-foreground);
+    margin-top: 0.5rem;
+  }
+
+  /* Mobile: weniger Cover-Höhe */
+  @media (max-width: 639px) {
+    .cover-wrap {
+      aspect-ratio: 16 / 9;
+      margin-bottom: 2.5rem;
+    }
   }
 </style>
