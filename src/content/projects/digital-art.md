@@ -1,7 +1,7 @@
 ---
 title: "Digital Art – Lettering, Graffiti, Tags & Styles"
 description: "Lesbarkeit ist dann doch nicht immer Respekt"
-coverImage: "/images/gallery/digital-graffiti/digital-sketch.jpg"
+coverImage: "/images/gallery/digital-graffiti/digital-sketch.webp"
 date: 2024-07-15
 tags: ["UI Design", "Data Visualization", "React", "Recharts"]
 featured: true
@@ -15,5 +15,5 @@ Wenn Nutzer einen Text lesen, interagieren sie mit jedem einzelnen Buchstaben. D
 
 Ein Interface mit schlechter Typografie signalisiert: *Wir haben nicht nachgedacht.* Es zwingt Nutzer, kognitive Arbeit zu leisten, die das Design hätte übernehmen sollen.
 
-![digital-tag gy ptrckschrdtr](/images/gallery/digital-graffiti/post-square-09.png)
+![digital-tag gy ptrckschrdtr](/images/gallery/digital-graffiti/post-square-09.webp)
 
