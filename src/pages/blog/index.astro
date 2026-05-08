@@ -83,27 +83,28 @@ const formatDate = (date: Date) =>
 </BaseLayout>
 
 <style>
-  /* Card-Layout: Thumbnail flush links, Text mit Padding rechts */
+  /* Card-Layout: auf Mobile gestapelt (Thumbnail oben, volle Breite) */
   .card-inner {
     display: flex;
     flex-direction: column;
-    min-height: 140px;
   }
 
   @media (min-width: 640px) {
     .card-inner {
       flex-direction: row;
       align-items: stretch;
+      min-height: 140px;
     }
   }
 
-  /* Thumbnail: stretch über volle Höhe der Card, kein Padding */
+  /* Thumbnail: auf Mobile volle Breite mit 16:9, auf Desktop feste Breite */
   .thumbnail-wrap {
     position: relative;
     overflow: hidden;
     background: var(--muted);
-    aspect-ratio: 3 / 2;
+    aspect-ratio: 16 / 9;
     flex-shrink: 0;
+    width: 100%;
   }
 
   @media (min-width: 640px) {

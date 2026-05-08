@@ -80,10 +80,11 @@
   color: var(--foreground);
   padding: 1.25rem 1.5rem;
   border-radius: 0.5rem;
-  border: 1px solid var(--border);
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
   margin-bottom: 1.5rem;
   line-height: var(--leading-normal);
+  max-width: 100%;
 }
 
 .prose pre code {

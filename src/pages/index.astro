@@ -35,8 +35,7 @@ const formatDate = (date: Date) =>
 <BaseLayout>
   <!-- Hero -->
   <section
-    style="height: 100vh; max-height: 100vh;"
-    class="relative flex flex-col px-6 pt-32 pb-24"
+    class="hero-section relative flex flex-col px-6 pt-32 pb-24"
     data-scroll="depth"
   >
     <HeroMesh />
@@ -295,6 +294,18 @@ const formatDate = (date: Date) =>
 </BaseLayout>
 
 <style>
+  .hero-section {
+    height: 100vh;
+    max-height: 100vh;
+  }
+
+  @media (max-width: 767px) {
+    .hero-section {
+      height: auto;
+      min-height: 60dvh;
+      max-height: none;
+    }
+  }
 
   .scroll-indicator {
     animation: scroll-line 2s ease-in-out infinite;
