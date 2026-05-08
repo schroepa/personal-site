@@ -3,6 +3,7 @@ import BaseLayout from '@/layouts/BaseLayout.astro';
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { getCollection } from 'astro:content';
+import { readingTime } from '@/lib/reading-time';
 
 const posts = await getCollection('blog', ({ data }) => !data.draft);
 const sorted = posts.sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
@@ -47,12 +48,15 @@ const formatDate = (date: Date) =>
 
                 <!-- Text: eigenes Padding, unabhängig vom Thumbnail -->
                 <div class="card-text">
-                  <time
-                    class="t-label text-muted-foreground"
-                    datetime={post.data.date.toISOString()}
-                  >
-                    {formatDate(post.data.date)}
-                  </time>
+                  <div class="flex items-center gap-2">
+                    <time
+                      class="t-label text-muted-foreground"
+                      datetime={post.data.date.toISOString()}
+                    >
+                      {formatDate(post.data.date)}
+                    </time>
+                    <span class="t-label text-muted-foreground">· {readingTime(post.body ?? '')} min</span>
+                  </div>
                   <div class="flex flex-col gap-2 mt-2">
                     <CardTitle className="t-h3">
                       {post.data.title}
