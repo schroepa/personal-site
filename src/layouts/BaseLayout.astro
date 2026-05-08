@@ -99,11 +99,11 @@ const navLinks = [
     ))}
 
     <!-- Twitter / X Card -->
-    <meta name="twitter:card"        content="summary_large_image" />
-    <meta name="twitter:title"       content={title} />
-    <meta name="twitter:description" content={description} />
-    <meta name="twitter:image"       content={ogImageURL} />
-    <meta name="twitter:image:alt"   content={title} />
+    <meta property="twitter:card"        content="summary_large_image" />
+    <meta property="twitter:title"       content={title} />
+    <meta property="twitter:description" content={description} />
+    <meta property="twitter:image"       content={ogImageURL} />
+    <meta property="twitter:image:alt"   content={title} />
 
     <!-- JSON-LD -->
     <script type="application/ld+json" set:html={JSON.stringify(personSchema)} />
