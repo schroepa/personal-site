@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button"
 import { UserAvatar } from "@/components/UserAvatar"
 import { Separator } from "@/components/ui/separator"
 import { getCollection } from "astro:content"
+import { readingTime } from "@/lib/reading-time"
 import HeroMesh from "@/components/astro/HeroMesh.astro"
 
 const allPosts = await getCollection("blog", ({ data }) => !data.draft)
@@ -205,9 +206,12 @@ const formatDate = (date: Date) =>
                 >
                   <CardHeader>
                     <div class="flex flex-col gap-3">
-                      <time class="t-label text-muted-foreground">
-                        {formatDate(post.data.date)}
-                      </time>
+                      <div class="flex items-center gap-2">
+                        <time class="t-label text-muted-foreground shrink-0 mt-1">
+                          {formatDate(post.data.date)}
+                        </time>
+                        <span class="t-label text-muted-foreground mt-1">· {readingTime(post.body ?? '')} min</span>
+                      </div>
                       <div class="flex flex-col gap-2">
                         <CardTitle className="t-h3">
                           {post.data.title}
