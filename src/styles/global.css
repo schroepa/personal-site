@@ -52,7 +52,7 @@
 :root {
     --background: oklch(1 0 0);
     --foreground: oklch(0.153 0.006 107.1);
-    --card: oklch(0.974 0.003 80);
+    --card: oklch(1 0 0);
     --card-foreground: oklch(0.153 0.006 107.1);
     --popover: oklch(1 0 0);
     --popover-foreground: oklch(0.153 0.006 107.1);
@@ -133,16 +133,11 @@
     }
 }
 
-/* ─── No-Outline System: Ring entfernen, Card durch Hintergrundfarbe definiert ── */
+/* ─── No-Outline System: Cards vollständig unsichtbar ───────────────────────── */
 
 [data-slot="card"] {
-  box-shadow: 0 1px 6px 0 oklch(0 0 0 / 0.05) !important;
-}
-
-@media (prefers-color-scheme: dark) {
-  [data-slot="card"] {
-    box-shadow: 0 1px 6px 0 oklch(0 0 0 / 0.2) !important;
-  }
+  box-shadow: none !important;
+  background: transparent !important;
 }
 
 /* ─── Additive: Font Variables ───────────────────────────────────────────── */
