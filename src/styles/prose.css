@@ -175,14 +175,10 @@
   margin-right: 0;
 }
 
-/* Alle Bilder: volle Breite, zoom-Cursor */
+/* Alle Bilder: volle Breite, natürliche Proportionen */
 .article-prose img {
   width: 100%;
-  height: 55vh;
-  min-height: 280px;
-  max-height: 560px;
-  object-fit: cover;
-  object-position: center;
+  height: auto;
   display: block;
   cursor: zoom-in;
 }
