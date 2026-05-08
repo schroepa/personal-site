@@ -1,6 +1,7 @@
 ---
 title: "Forma Design System"
 description: "Ein komponentenbasiertes Design System für eine Enterprise-SaaS-Plattform — von der Token-Architektur bis zur Dokumentation."
+coverImage: "/images/gallery/bg-design-system-sander.png"
 date: 2024-10-01
 tags: ["Design Systems", "Figma", "React", "TypeScript"]
 featured: true
