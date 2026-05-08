@@ -82,6 +82,7 @@ const navLinks = [
     <meta property="og:image:height" content={String(ogImageHeight)} />
     <meta property="og:image:alt"    content={title} />
     <meta property="og:locale"       content="de_DE" />
+    <meta property="og:logo"         content={`${siteUrl}/favicon.svg`} />
 
     <!-- Article-spezifische OG-Tags (nur bei og:type="article") -->
     {ogType === 'article' && articleDate && (
