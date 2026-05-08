@@ -137,3 +137,57 @@
   font-style: italic;
   color: var(--muted-foreground);
 }
+
+/* ─── Artikel-Layout: Text max-w-2xl, Bilder brechen auf volle Breite aus ──── */
+
+/* Container: kein eigenes max-width — wird durch max-w-5xl Parent begrenzt */
+.article-prose {
+  max-width: none;
+}
+
+/* Text-Elemente: auf ~max-w-2xl beschränken */
+.article-prose > p,
+.article-prose > h1,
+.article-prose > h2,
+.article-prose > h3,
+.article-prose > h4,
+.article-prose > ul,
+.article-prose > ol,
+.article-prose > blockquote,
+.article-prose > pre,
+.article-prose > hr,
+.article-prose > table {
+  max-width: 42rem;
+}
+
+/* Absatz der NUR ein Bild enthält → volle Container-Breite */
+.article-prose > p:has(> img:only-child) {
+  max-width: none;
+  margin-left: 0;
+  margin-right: 0;
+  padding: 0;
+}
+
+/* figure → volle Container-Breite */
+.article-prose > figure {
+  max-width: none;
+  margin-left: 0;
+  margin-right: 0;
+}
+
+/* Alle Bilder: volle Breite, zoom-Cursor */
+.article-prose img {
+  width: 100%;
+  height: auto;
+  display: block;
+  cursor: zoom-in;
+}
+
+/* figcaption */
+.article-prose figcaption {
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+  margin-top: 0.5rem;
+}
