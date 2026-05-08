@@ -1,8 +1,6 @@
 ---
 import BaseLayout from '@/layouts/BaseLayout.astro';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { getCollection } from 'astro:content';
 import { readingTime } from '@/lib/reading-time';
 
@@ -20,6 +18,7 @@ const formatDate = (date: Date) =>
 <BaseLayout title="Projekte — Patrick Schröder" description="Ausgewählte Arbeiten aus Design und Entwicklung.">
   <div class="px-6 pt-32 pb-24">
     <div class="max-w-5xl mx-auto">
+
       <header class="mb-16">
         <h1 class="t-h1 mb-4" data-reveal="lines">Projekte</h1>
         <p class="t-lead text-muted-foreground">
@@ -28,55 +27,175 @@ const formatDate = (date: Date) =>
         </p>
       </header>
 
-      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <!-- 2-Spalten-Raster auf Desktop, Einzel auf Mobile -->
+      <div class="project-grid">
         {sorted.map((project) => (
-          <a href={`/projects/${project.id.replace(/\.md$/, '')}`} class="group block no-underline" data-cursor="link">
-            <Card
-              data-scroll="fade-up"
-              client:visible
-              className="h-full overflow-hidden transition-all duration-300 group-hover:border-foreground/20 group-hover:bg-muted/50"
-            >
-              {project.data.coverImage && (
-                <div class="-mx-6 -mt-6 border-b border-border overflow-hidden rounded-t-xl">
-                  <AspectRatio ratio={4/3}>
-                    <img 
-                      src={project.data.coverImage} 
-                      alt={project.data.title}
-                      class="object-cover w-full h-full transition-transform duration-500 group-hover:scale-105"
-                    />
-                  </AspectRatio>
-                </div>
-              )}
-              <CardHeader>
-                <div class="flex items-center gap-2 mb-2">
-                  <time class="t-label text-muted-foreground" datetime={project.data.date.toISOString()}>
+          <article class="project-entry" data-scroll="fade-up">
+            <a href={`/projects/${project.id.replace(/\.md$/, '')}`} class="project-link" data-cursor="link">
+
+              <!-- Bild als Anker -->
+              <div class="project-image">
+                {project.data.coverImage ? (
+                  <img
+                    src={project.data.coverImage}
+                    alt=""
+                    loading="lazy"
+                    decoding="async"
+                    class="project-img"
+                  />
+                ) : (
+                  <div class="project-img-fallback" aria-hidden="true"></div>
+                )}
+              </div>
+
+              <!-- Typografischer Block -->
+              <div class="project-body">
+                <div class="project-meta">
+                  <time datetime={project.data.date.toISOString()}>
                     {formatDate(project.data.date)}
                   </time>
-                  <span class="t-label text-muted-foreground">· {readingTime(project.body ?? '')} min</span>
-                </div>
-                <div class="flex items-start justify-between gap-2">
-                  <CardTitle className="t-h4 mb-2">
-                    {project.data.title}
-                  </CardTitle>
+                  <span>·</span>
+                  <span>{readingTime(project.body ?? '')} min</span>
                   {project.data.featured && (
                     <Badge variant="default" client:visible>Featured</Badge>
                   )}
                 </div>
-                <CardDescription className="t-small text-muted-foreground line-clamp-2">
-                  {project.data.description}
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div class="flex flex-wrap gap-2">
+
+                <h2 class="project-title">{project.data.title}</h2>
+                <p class="project-desc">{project.data.description}</p>
+
+                <div class="project-tags">
                   {project.data.tags.map((tag) => (
-                    <Badge variant="outline" client:visible>{tag}</Badge>
+                    <Badge variant="secondary" client:visible>{tag}</Badge>
                   ))}
                 </div>
-              </CardContent>
-            </Card>
-          </a>
+              </div>
+
+            </a>
+          </article>
         ))}
       </div>
+
     </div>
   </div>
 </BaseLayout>
+
+<style>
+  /* ── Raster ─────────────────────────────────────────────────────────────── */
+  .project-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  @media (min-width: 768px) {
+    .project-grid {
+      grid-template-columns: 1fr 1fr;
+      column-gap: 4rem;
+    }
+  }
+
+  .project-entry {
+    padding-bottom: 3.5rem;
+    margin-bottom: 3.5rem;
+    border-bottom: 1px solid color-mix(in oklch, var(--foreground) 8%, transparent);
+  }
+
+  .project-entry:last-child,
+  .project-entry:nth-last-child(2):nth-child(odd) {
+    border-bottom: none;
+    margin-bottom: 0;
+  }
+
+  .project-link {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+  }
+
+  /* ── Bild als Anker ─────────────────────────────────────────────────────── */
+  .project-image {
+    width: 100%;
+    aspect-ratio: 3 / 2;
+    overflow: hidden;
+    margin-bottom: 1.25rem;
+  }
+
+  .project-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 600ms cubic-bezier(0.25, 1, 0.5, 1);
+  }
+
+  .project-link:hover .project-img {
+    transform: scale(1.03);
+  }
+
+  .project-img-fallback {
+    width: 100%;
+    height: 100%;
+    background:
+      radial-gradient(ellipse 70% 70% at 25% 35%,
+        color-mix(in oklch, var(--mesh-warm) 55%, transparent) 0%, transparent 70%),
+      radial-gradient(ellipse 55% 55% at 75% 65%,
+        color-mix(in oklch, var(--mesh-cool) 45%, transparent) 0%, transparent 65%),
+      var(--muted);
+  }
+
+  /* ── Typografischer Block ───────────────────────────────────────────────── */
+  .project-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .project-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-wide);
+    text-transform: uppercase;
+    font-weight: 500;
+    color: var(--muted-foreground);
+    flex-wrap: wrap;
+  }
+
+  .project-title {
+    font-size: var(--text-lg);
+    font-weight: 500;
+    line-height: var(--leading-snug);
+    letter-spacing: var(--tracking-snug);
+    color: var(--foreground);
+    margin: 0.25rem 0 0;
+    transition: opacity 200ms ease;
+  }
+
+  .project-link:hover .project-title {
+    opacity: 0.6;
+  }
+
+  .project-desc {
+    font-size: var(--text-sm);
+    line-height: var(--leading-normal);
+    color: var(--muted-foreground);
+    margin: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .project-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.25rem;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .project-img { transition: none; }
+  }
+</style>

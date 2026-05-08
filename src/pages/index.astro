@@ -177,120 +177,84 @@ const formatDate = (date: Date) =>
   </section>
 
   <!-- Latest Blog Posts -->
-  {
-    latestPosts.length > 0 && (
-      <section class="px-6 py-24">
-        <div class="mx-auto max-w-5xl">
-          <div class="mb-12 flex items-baseline justify-between">
-            <h2 class="t-h2">Zuletzt geschrieben</h2>
-            <a
-              href="/blog"
-              class="t-small text-muted-foreground underline underline-offset-4 transition-colors duration-200 hover:text-foreground"
-              data-cursor="link"
-            >
-              Alle Posts
-            </a>
-          </div>
-          <div class="grid gap-4">
-            {latestPosts.map((post) => (
-              <a
-                href={`/blog/${post.id.replace(/\.md$/, "")}`}
-                class="group block no-underline"
-                data-cursor="link"
-              >
-                <Card
-                  data-scroll="fade-up"
-                  client:visible
-                  className="transition-all duration-300 group-hover:border-foreground/20 group-hover:bg-muted/50"
-                >
-                  <CardHeader>
-                    <div class="flex flex-col gap-3">
-                      <div class="flex items-center gap-2">
-                        <time class="t-label text-muted-foreground shrink-0 mt-1">
-                          {formatDate(post.data.date)}
-                        </time>
-                        <span class="t-label text-muted-foreground mt-1">· {readingTime(post.body ?? '')} min</span>
-                      </div>
-                      <div class="flex flex-col gap-2">
-                        <CardTitle className="t-h3">
-                          {post.data.title}
-                        </CardTitle>
-                        <CardDescription className="t-body text-muted-foreground">
-                          {post.data.description}
-                        </CardDescription>
-                      </div>
-                    </div>
-                    {post.data.tags && post.data.tags.length > 0 && (
-                      <div class="mt-4 flex flex-wrap gap-2">
-                        {post.data.tags.map((tag) => (
-                          <Badge variant="secondary" client:visible>
-                            {tag}
-                          </Badge>
-                        ))}
-                      </div>
-                    )}
-                  </CardHeader>
-                </Card>
-              </a>
-            ))}
-          </div>
+  <!-- Zuletzt geschrieben -->
+  {latestPosts.length > 0 && (
+    <section class="px-6 py-24">
+      <div class="mx-auto max-w-5xl">
+        <div class="hp-section-header">
+          <h2 class="t-h2">Zuletzt geschrieben</h2>
+          <a href="/blog" class="t-small text-muted-foreground underline underline-offset-4 transition-colors duration-200 hover:text-foreground" data-cursor="link">
+            Alle Posts
+          </a>
         </div>
-      </section>
-    )
-  }
 
-  <!-- Featured Projects -->
-  {
-    featuredProjects.length > 0 && (
-      <section class="border-t border-border px-6 py-24">
-        <div class="mx-auto max-w-5xl">
-          <div class="mb-12 flex items-baseline justify-between">
-            <h2 class="t-h2">Ausgewählte Projekte</h2>
-            <a
-              href="/projects"
-              class="t-small text-muted-foreground underline underline-offset-4 transition-colors duration-200 hover:text-foreground"
-              data-cursor="link"
-            >
-              Alle Projekte
-            </a>
-          </div>
-          <div class="grid gap-6 md:grid-cols-2">
-            {featuredProjects.map((project) => (
-              <a
-                href={`/projects/${project.id.replace(/\.md$/, "")}`}
-                class="group block no-underline"
-                data-cursor="link"
-              >
-                <Card
-                  data-scroll="fade-up"
-                  client:visible
-                  className="h-full transition-all duration-300 group-hover:border-foreground/20 group-hover:bg-muted/50"
-                >
-                  <CardHeader>
-                    <CardTitle className="t-h3 mb-2">
-                      {project.data.title}
-                    </CardTitle>
-                    <CardDescription className="t-body text-muted-foreground">
-                      {project.data.description}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div class="flex flex-wrap gap-2">
-                      {project.data.tags.map((tag) => (
-                        <Badge variant="outline" client:visible>
-                          {tag}
-                        </Badge>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
+        <div class="hp-post-grid">
+          {latestPosts.map((post) => (
+            <article class="hp-post-entry" data-scroll="fade-up">
+              <a href={`/blog/${post.id.replace(/\.md$/, "")}`} class="hp-entry-link" data-cursor="link">
+                <div class="hp-entry-image">
+                  {post.data.coverImage
+                    ? <img src={post.data.coverImage} alt="" loading="lazy" class="hp-entry-img" />
+                    : <div class="hp-entry-fallback" aria-hidden="true"></div>
+                  }
+                </div>
+                <div class="hp-entry-body">
+                  <div class="hp-entry-meta">
+                    <time datetime={post.data.date.toISOString()}>{formatDate(post.data.date)}</time>
+                    <span>·</span>
+                    <span>{readingTime(post.body ?? '')} min</span>
+                  </div>
+                  <h3 class="hp-entry-title">{post.data.title}</h3>
+                  <p class="hp-entry-desc">{post.data.description}</p>
+                </div>
               </a>
-            ))}
-          </div>
+            </article>
+          ))}
         </div>
-      </section>
-    )
-  }
+      </div>
+    </section>
+  )}
+
+  <!-- Ausgewählte Projekte -->
+  {featuredProjects.length > 0 && (
+    <section class="px-6 py-24">
+      <div class="mx-auto max-w-5xl">
+        <div class="hp-section-header">
+          <h2 class="t-h2">Ausgewählte Projekte</h2>
+          <a href="/projects" class="t-small text-muted-foreground underline underline-offset-4 transition-colors duration-200 hover:text-foreground" data-cursor="link">
+            Alle Projekte
+          </a>
+        </div>
+
+        <div class="hp-project-grid">
+          {featuredProjects.map((project) => (
+            <article class="hp-project-entry" data-scroll="fade-up">
+              <a href={`/projects/${project.id.replace(/\.md$/, "")}`} class="hp-entry-link" data-cursor="link">
+                <div class="hp-entry-image">
+                  {project.data.coverImage
+                    ? <img src={project.data.coverImage} alt="" loading="lazy" class="hp-entry-img" />
+                    : <div class="hp-entry-fallback" aria-hidden="true"></div>
+                  }
+                </div>
+                <div class="hp-entry-body">
+                  <div class="hp-entry-meta">
+                    <time datetime={project.data.date.toISOString()}>{formatDate(project.data.date)}</time>
+                  </div>
+                  <h3 class="hp-entry-title">{project.data.title}</h3>
+                  <p class="hp-entry-desc">{project.data.description}</p>
+                  <div class="hp-entry-tags">
+                    {project.data.tags.slice(0, 3).map(tag => (
+                      <Badge variant="secondary" client:visible>{tag}</Badge>
+                    ))}
+                  </div>
+                </div>
+              </a>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
 </BaseLayout>
 
 <style>
@@ -324,8 +288,154 @@ const formatDate = (date: Date) =>
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .scroll-indicator {
-      animation: none;
+    .scroll-indicator { animation: none; }
+    .hp-entry-img { transition: none; }
+  }
+
+  /* ── Homepage Sektionen ─────────────────────────────────────────────────── */
+  .hp-section-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 3rem;
+  }
+
+  /* Letzten Posts: 3-spaltig auf Desktop */
+  .hp-post-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  @media (min-width: 768px) {
+    .hp-post-grid {
+      grid-template-columns: repeat(3, 1fr);
+      column-gap: 3rem;
     }
+  }
+
+  .hp-post-entry {
+    padding-bottom: 2.5rem;
+    margin-bottom: 2.5rem;
+    border-bottom: 1px solid color-mix(in oklch, var(--foreground) 8%, transparent);
+  }
+
+  @media (min-width: 768px) {
+    .hp-post-entry {
+      border-bottom: none;
+      padding-bottom: 0;
+      margin-bottom: 0;
+    }
+  }
+
+  /* Projekte: 2-spaltig auf Desktop */
+  .hp-project-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  @media (min-width: 768px) {
+    .hp-project-grid {
+      grid-template-columns: 1fr 1fr;
+      column-gap: 4rem;
+    }
+  }
+
+  .hp-project-entry {
+    padding-bottom: 3rem;
+    margin-bottom: 3rem;
+    border-bottom: 1px solid color-mix(in oklch, var(--foreground) 8%, transparent);
+  }
+
+  .hp-project-entry:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+  }
+
+  /* Gemeinsame Entry-Styles */
+  .hp-entry-link {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .hp-entry-image {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    margin-bottom: 1rem;
+  }
+
+  .hp-entry-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 600ms cubic-bezier(0.25, 1, 0.5, 1);
+  }
+
+  .hp-entry-link:hover .hp-entry-img {
+    transform: scale(1.03);
+  }
+
+  .hp-entry-fallback {
+    width: 100%;
+    height: 100%;
+    background:
+      radial-gradient(ellipse 80% 80% at 20% 30%,
+        color-mix(in oklch, var(--mesh-warm) 50%, transparent) 0%, transparent 70%),
+      radial-gradient(ellipse 60% 60% at 80% 70%,
+        color-mix(in oklch, var(--mesh-cool) 40%, transparent) 0%, transparent 65%),
+      var(--muted);
+  }
+
+  .hp-entry-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+  }
+
+  .hp-entry-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-wide);
+    text-transform: uppercase;
+    font-weight: 500;
+    color: var(--muted-foreground);
+  }
+
+  .hp-entry-title {
+    font-size: var(--text-base);
+    font-weight: 500;
+    line-height: var(--leading-snug);
+    letter-spacing: var(--tracking-snug);
+    color: var(--foreground);
+    margin: 0.125rem 0 0;
+    transition: opacity 200ms ease;
+  }
+
+  .hp-entry-link:hover .hp-entry-title {
+    opacity: 0.6;
+  }
+
+  .hp-entry-desc {
+    font-size: var(--text-sm);
+    line-height: var(--leading-normal);
+    color: var(--muted-foreground);
+    margin: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .hp-entry-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.375rem;
+    margin-top: 0.25rem;
   }
 </style>
