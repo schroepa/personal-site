@@ -1,23 +1,49 @@
 ---
-import BaseLayout from './BaseLayout.astro';
-import ReadingProgress from '@/components/astro/ReadingProgress.astro';
-import { Badge } from '@/components/ui/badge';
+import BaseLayout from './BaseLayout.astro'
+import ReadingProgress from '@/components/astro/ReadingProgress.astro'
+import ArticleFooter from '@/components/astro/ArticleFooter.astro'
+import { Badge } from '@/components/ui/badge'
+import { readingTime } from '@/lib/reading-time'
 
-interface Props {
-  title: string;
-  description?: string;
-  date: Date;
-  tags?: string[];
-  coverImage?: string;
+interface PrevNextPost {
+  slug: string
+  title: string
+  description: string
+  tags: string[]
+  coverImage?: string
 }
 
-const { title, description, date, tags = [], coverImage } = Astro.props;
+interface Props {
+  title: string
+  description?: string
+  date: Date
+  tags?: string[]
+  coverImage?: string
+  body?: string
+  pageUrl?: string
+  prev?: PrevNextPost
+  next?: PrevNextPost
+}
+
+const {
+  title,
+  description,
+  date,
+  tags = [],
+  coverImage,
+  body = '',
+  pageUrl = Astro.url.href,
+  prev,
+  next,
+} = Astro.props
+
+const minutes = readingTime(body)
 
 const formattedDate = new Intl.DateTimeFormat('de-DE', {
   year: 'numeric',
   month: 'long',
   day: 'numeric',
-}).format(date);
+}).format(date)
 ---
 
 <BaseLayout title={title} description={description}>
@@ -25,16 +51,10 @@ const formattedDate = new Intl.DateTimeFormat('de-DE', {
 
   <article class="pb-24">
 
-    <!-- Cover: startet bei 0px von oben, Nav liegt drüber -->
+    <!-- Cover -->
     <div class="cover-wrap">
       {coverImage ? (
-        <img
-          src={coverImage}
-          alt=""
-          class="cover-img"
-          loading="eager"
-          decoding="async"
-        />
+        <img src={coverImage} alt="" class="cover-img" loading="eager" decoding="async" />
       ) : (
         <div class="cover-placeholder" aria-hidden="true">
           <div class="cp-orb cp-orb-1"></div>
@@ -44,14 +64,17 @@ const formattedDate = new Intl.DateTimeFormat('de-DE', {
       )}
     </div>
 
-    <!-- Content überlappt das Bild nach oben -->
+    <!-- Content -->
     <div class="content-wrap">
       <header class="mb-12 max-w-2xl pt-10">
         <h1 class="t-h1 mb-6" data-reveal="lines">{title}</h1>
-        <div class="flex flex-wrap items-center gap-4">
+        <div class="flex flex-wrap items-center gap-3">
           <time class="t-small text-muted-foreground" datetime={date.toISOString()}>
             {formattedDate}
           </time>
+          <span class="t-small text-muted-foreground" aria-label={`${minutes} Minuten Lesezeit`}>
+            · {minutes} min
+          </span>
           {tags.length > 0 && (
             <div class="flex flex-wrap gap-2">
               {tags.map((tag) => (
@@ -65,12 +88,18 @@ const formattedDate = new Intl.DateTimeFormat('de-DE', {
       <div class="prose t-prose">
         <slot />
       </div>
+
+      <ArticleFooter
+        title={title}
+        pageUrl={pageUrl}
+        prev={prev}
+        next={next}
+      />
     </div>
   </article>
 </BaseLayout>
 
 <style>
-  /* ── Cover: startet direkt bei 0, Nav overlays ─────────────────────────── */
   .cover-wrap {
     position: relative;
     width: 100%;
@@ -79,15 +108,12 @@ const formattedDate = new Intl.DateTimeFormat('de-DE', {
     min-height: 280px;
     overflow: hidden;
   }
-
   .cover-img {
     width: 100%;
     height: 100%;
     object-fit: cover;
     display: block;
   }
-
-  /* ── Content überlappt das Cover, breite am Prosa-Content orientiert ───── */
   .content-wrap {
     position: relative;
     z-index: 10;
@@ -96,81 +122,54 @@ const formattedDate = new Intl.DateTimeFormat('de-DE', {
     margin-top: -72px;
     margin-left: auto;
     margin-right: auto;
-    /* 65ch Prosa + 5rem Padding links/rechts */
     max-width: calc(65ch + 5rem);
     width: 100%;
     padding: 0 2.5rem;
   }
-
-  /* ── Padding-top: kein separates padding mehr auf article ──────────────── */
-  article {
-    padding-top: 0;
-  }
-
-  /* ── Mesh-Gradient-Fallback ────────────────────────────────────────────── */
+  article { padding-top: 0; }
   .cover-placeholder {
     position: absolute;
     inset: 0;
     background: var(--background);
     overflow: hidden;
   }
-
   .cp-orb {
     position: absolute;
     border-radius: 50%;
     filter: blur(60px);
   }
-
   .cp-orb-1 {
-    width: 60%;
-    height: 120%;
-    top: -10%;
-    left: -5%;
-    background: var(--mesh-warm);
-    opacity: 0.55;
+    width: 60%; height: 120%; top: -10%; left: -5%;
+    background: var(--mesh-warm); opacity: 0.55;
     animation: cp-drift-1 14s ease-in-out infinite alternate;
   }
-
   .cp-orb-2 {
-    width: 50%;
-    height: 120%;
-    top: -15%;
-    right: -5%;
-    background: var(--mesh-cool);
-    opacity: 0.45;
+    width: 50%; height: 120%; top: -15%; right: -5%;
+    background: var(--mesh-cool); opacity: 0.45;
     animation: cp-drift-2 18s ease-in-out infinite alternate;
     animation-delay: -6s;
   }
-
   .cp-orb-3 {
-    width: 40%;
-    height: 80%;
-    bottom: -10%;
-    left: 35%;
-    background: var(--mesh-warm);
-    opacity: 0.35;
+    width: 40%; height: 80%; bottom: -10%; left: 35%;
+    background: var(--mesh-warm); opacity: 0.35;
     animation: cp-drift-3 12s ease-in-out infinite alternate;
     animation-delay: -3s;
   }
-
   @keyframes cp-drift-1 {
-    0%   { transform: translate(0%, 0%)   scale(1); }
-    100% { transform: translate(6%, 8%)   scale(1.08); }
+    0%   { transform: translate(0%,  0%)  scale(1); }
+    100% { transform: translate(6%,  8%)  scale(1.08); }
   }
   @keyframes cp-drift-2 {
-    0%   { transform: translate(0%, 0%)   scale(1); }
+    0%   { transform: translate(0%,  0%)  scale(1); }
     100% { transform: translate(-5%, 6%)  scale(1.06); }
   }
   @keyframes cp-drift-3 {
-    0%   { transform: translate(0%, 0%)   scale(1); }
+    0%   { transform: translate(0%,  0%)  scale(1); }
     100% { transform: translate(4%, -5%)  scale(1.04); }
   }
-
   @media (prefers-reduced-motion: reduce) {
     .cp-orb { animation: none; }
   }
-
-  /* ── Grain overlay auf dem Cover ───────────────────────────────────────── */
   .cover-wrap::after {
     content: '';
     position: absolute;
@@ -180,5 +179,4 @@ const formattedDate = new Intl.DateTimeFormat('de-DE', {
     mix-blend-mode: overlay;
     pointer-events: none;
   }
-
 </style>
