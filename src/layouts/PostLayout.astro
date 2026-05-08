@@ -46,7 +46,16 @@ const formattedDate = new Intl.DateTimeFormat('de-DE', {
 }).format(date)
 ---
 
-<BaseLayout title={title} description={description}>
+<BaseLayout
+  title={title}
+  description={description}
+  ogImage={coverImage}
+  ogType="article"
+  canonicalURL={pageUrl}
+  articleDate={date}
+  articleAuthor="Patrick Schröder"
+  articleTags={tags}
+>
   <ReadingProgress />
 
   <article class="pb-24">
