@@ -1,0 +1,416 @@
+---
+interface PrevNextPost {
+  slug: string
+  title: string
+  description: string
+  tags: string[]
+  coverImage?: string
+}
+
+interface Props {
+  title: string
+  pageUrl: string
+  prev?: PrevNextPost
+  next?: PrevNextPost
+}
+
+const { title, pageUrl, prev, next } = Astro.props
+
+const encodedTitle = encodeURIComponent(title)
+const encodedUrl   = encodeURIComponent(pageUrl)
+const prompt       = encodeURIComponent(`Erkläre mir mehr zu diesem Artikel: "${title}" — ${pageUrl}`)
+
+const aiLinks = [
+  {
+    name: 'Claude',
+    href: `https://claude.ai/new?q=${prompt}`,
+    icon: `<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M13.827 3.52c-.728-1.694-3.061-1.694-3.79 0L5.032 14.846c-.273.637.197 1.341.895 1.341h12.146c.698 0 1.168-.704.895-1.341z"/><path d="M9.5 18.5h5M12 16v5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>`,
+  },
+  {
+    name: 'ChatGPT',
+    href: `https://chatgpt.com/?q=${prompt}`,
+    icon: `<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M22.28 9.28a5.76 5.76 0 0 0-.44-4.72 6 6 0 0 0-6.47-2.88A5.75 5.75 0 0 0 11 .1a6 6 0 0 0-5.71 4.14 5.76 5.76 0 0 0-3.84 2.8 6 6 0 0 0 .74 7.04 5.76 5.76 0 0 0 .44 4.72 6 6 0 0 0 6.47 2.88A5.75 5.75 0 0 0 13 23.9a6 6 0 0 0 5.72-4.15 5.76 5.76 0 0 0 3.83-2.8 6 6 0 0 0-.27-7.67zM13 22.43a4.5 4.5 0 0 1-2.89-1.05l.14-.08 4.8-2.77a.77.77 0 0 0 .39-.68v-6.77l2.03 1.17a.07.07 0 0 1 .04.06v5.6A4.54 4.54 0 0 1 13 22.43zm-9.7-4.14a4.5 4.5 0 0 1-.54-3.03l.14.09 4.8 2.77a.78.78 0 0 0 .78 0l5.86-3.38v2.34a.08.08 0 0 1-.03.07L9.44 19.9a4.54 4.54 0 0 1-6.14-1.6zm-1.26-9.9A4.5 4.5 0 0 1 4.4 6.14v5.67a.77.77 0 0 0 .39.67l5.85 3.38-2.03 1.17a.08.08 0 0 1-.08 0L3.6 14.15a4.54 4.54 0 0 1-.55-5.77zm16.67 3.9L13.86 8.9l2.03-1.17a.08.08 0 0 1 .08 0l4.94 2.85a4.53 4.53 0 0 1-.7 8.18v-5.67a.77.77 0 0 0-.4-.67zm2.02-3.04-.15-.09-4.8-2.76a.78.78 0 0 0-.78 0L9.14 10.79V8.45a.07.07 0 0 1 .03-.07l4.87-2.81a4.54 4.54 0 0 1 6.73 4.7v-.02zm-12.72 4.18-2.03-1.17a.07.07 0 0 1-.04-.06V6.6a4.54 4.54 0 0 1 7.44-3.48l-.14.08-4.8 2.77a.77.77 0 0 0-.39.68l-.04 6.76zm1.1-2.37 2.61-1.5 2.6 1.5v3L11.9 16 9.1 14.5v-3z"/></svg>`,
+  },
+  {
+    name: 'Perplexity',
+    href: `https://www.perplexity.ai/search?q=${encodedTitle}+${encodeURIComponent('ptrckschrdtr.de')}`,
+    icon: `<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M11 2L2 9h3v6H2l9 7 9-7h-3V9h3L11 2zm0 2.5l5.5 4.5H14v6h2.5L11 19l-5.5-4H8V9H5.5L11 4.5z"/></svg>`,
+  },
+]
+---
+
+<footer class="article-footer">
+
+  <!-- Divider -->
+  <div class="footer-divider"></div>
+
+  <!-- MIT KI ERKUNDEN -->
+  <section class="footer-section" aria-labelledby="ai-heading">
+    <h2 id="ai-heading" class="footer-label">Mit KI erkunden</h2>
+    <p class="footer-sub">Diesen Beitrag mit einer KI weiterdenken —</p>
+    <div class="ai-links">
+      {aiLinks.map((ai) => (
+        <a
+          href={ai.href}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="ai-link"
+          aria-label={`Beitrag mit ${ai.name} erkunden (öffnet externen Link)`}
+        >
+          <span set:html={ai.icon} />
+          <span>{ai.name}</span>
+        </a>
+      ))}
+    </div>
+  </section>
+
+  <div class="footer-divider"></div>
+
+  <!-- TEILEN -->
+  <section class="footer-section share-section" aria-labelledby="share-heading">
+    <h2 id="share-heading" class="sr-only">Teilen</h2>
+    <button
+      id="copy-link-btn"
+      type="button"
+      class="share-btn"
+      aria-live="polite"
+      data-url={pageUrl}
+    >
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+        <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+      </svg>
+      <span id="copy-link-label">Link kopieren</span>
+    </button>
+
+    <a
+      href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`}
+      target="_blank"
+      rel="noopener noreferrer"
+      class="share-btn"
+      aria-label="Auf LinkedIn teilen (öffnet externen Link)"
+    >
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/>
+        <rect x="2" y="9" width="4" height="12"/>
+        <circle cx="4" cy="4" r="2"/>
+      </svg>
+      <span>LinkedIn</span>
+    </a>
+  </section>
+
+  <div class="footer-divider"></div>
+
+  <!-- PREV / NEXT -->
+  {(prev || next) && (
+    <nav class="prevnext" aria-label="Weitere Artikel">
+      {prev ? (
+        <a
+          href={`/${prev.slug.startsWith('projects') ? 'projects' : 'blog'}/${prev.slug}`}
+          class="pn-card pn-prev"
+          aria-label={`Vorheriger Beitrag: ${prev.title}`}
+        >
+          <div class="pn-dir">← Vorheriger</div>
+          <div class="pn-thumb">
+            {prev.coverImage
+              ? <img src={prev.coverImage} alt="" loading="lazy" />
+              : <div class="pn-thumb-fallback" aria-hidden="true"></div>
+            }
+          </div>
+          <div class="pn-body">
+            <h3 class="pn-title">{prev.title}</h3>
+            <p class="pn-desc">{prev.description}</p>
+            {prev.tags.length > 0 && (
+              <div class="pn-tags">
+                {prev.tags.slice(0, 3).map(tag => (
+                  <span class="pn-tag">{tag}</span>
+                ))}
+              </div>
+            )}
+          </div>
+        </a>
+      ) : <div />}
+
+      {next ? (
+        <a
+          href={`/${next.slug.startsWith('projects') ? 'projects' : 'blog'}/${next.slug}`}
+          class="pn-card pn-next"
+          aria-label={`Nächster Beitrag: ${next.title}`}
+        >
+          <div class="pn-dir">Nächster →</div>
+          <div class="pn-thumb">
+            {next.coverImage
+              ? <img src={next.coverImage} alt="" loading="lazy" />
+              : <div class="pn-thumb-fallback" aria-hidden="true"></div>
+            }
+          </div>
+          <div class="pn-body">
+            <h3 class="pn-title">{next.title}</h3>
+            <p class="pn-desc">{next.description}</p>
+            {next.tags.length > 0 && (
+              <div class="pn-tags">
+                {next.tags.slice(0, 3).map(tag => (
+                  <span class="pn-tag">{tag}</span>
+                ))}
+              </div>
+            )}
+          </div>
+        </a>
+      ) : <div />}
+    </nav>
+  )}
+
+</footer>
+
+<style>
+  .article-footer {
+    margin-top: 4rem;
+    padding-bottom: 4rem;
+  }
+
+  .footer-divider {
+    width: 100%;
+    height: 1px;
+    background: var(--border);
+    margin: 2rem 0;
+  }
+
+  .footer-section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .footer-label {
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-wide);
+    text-transform: uppercase;
+    font-weight: 500;
+    color: var(--muted-foreground);
+  }
+
+  .footer-sub {
+    font-size: var(--text-sm);
+    color: var(--muted-foreground);
+    margin: 0;
+  }
+
+  .ai-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.25rem;
+  }
+
+  .ai-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.875rem;
+    font-size: var(--text-sm);
+    color: var(--foreground);
+    text-decoration: none;
+    border: 1px solid var(--border);
+    border-radius: 0.5rem;
+    background: var(--card);
+    transition: border-color 200ms ease, background 200ms ease, transform 200ms ease;
+  }
+
+  .ai-link:hover {
+    border-color: var(--foreground);
+    background: var(--muted);
+    transform: translateY(-1px);
+  }
+
+  .share-section {
+    flex-direction: row;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .share-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.875rem;
+    font-size: var(--text-sm);
+    color: var(--foreground);
+    text-decoration: none;
+    border: 1px solid var(--border);
+    border-radius: 0.5rem;
+    background: var(--card);
+    cursor: pointer;
+    font-family: var(--font-sans);
+    transition: border-color 200ms ease, background 200ms ease;
+  }
+
+  .share-btn:hover {
+    border-color: var(--foreground);
+    background: var(--muted);
+  }
+
+  .share-btn.copied {
+    border-color: var(--foreground);
+    background: var(--foreground);
+    color: var(--background);
+  }
+
+  .prevnext {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+  }
+
+  @media (max-width: 640px) {
+    .prevnext {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .pn-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.875rem;
+    padding: 1.25rem;
+    border: 1px solid var(--border);
+    border-radius: 0.75rem;
+    text-decoration: none;
+    color: var(--foreground);
+    background: var(--card);
+    transition: border-color 200ms ease, transform 200ms ease, background 200ms ease;
+  }
+
+  .pn-card:hover {
+    border-color: color-mix(in oklch, var(--foreground) 30%, transparent);
+    transform: translateY(-2px);
+    background: var(--muted);
+  }
+
+  .pn-next {
+    text-align: right;
+  }
+
+  .pn-dir {
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-wide);
+    text-transform: uppercase;
+    font-weight: 500;
+    color: var(--muted-foreground);
+  }
+
+  .pn-thumb {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    background: var(--muted);
+  }
+
+  .pn-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 400ms cubic-bezier(0.25, 1, 0.5, 1);
+  }
+
+  .pn-card:hover .pn-thumb img {
+    transform: scale(1.04);
+  }
+
+  .pn-thumb-fallback {
+    width: 100%;
+    height: 100%;
+    background:
+      radial-gradient(ellipse 70% 70% at 20% 30%,
+        color-mix(in oklch, var(--mesh-warm) 60%, transparent) 0%, transparent 70%),
+      radial-gradient(ellipse 60% 60% at 80% 70%,
+        color-mix(in oklch, var(--mesh-cool) 50%, transparent) 0%, transparent 65%),
+      var(--muted);
+  }
+
+  .pn-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+  }
+
+  .pn-title {
+    font-size: var(--text-base);
+    font-weight: 500;
+    line-height: var(--leading-snug);
+    letter-spacing: var(--tracking-snug);
+    margin: 0;
+  }
+
+  .pn-desc {
+    font-size: var(--text-sm);
+    color: var(--muted-foreground);
+    line-height: var(--leading-normal);
+    margin: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .pn-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.375rem;
+    margin-top: 0.25rem;
+  }
+
+  .pn-next .pn-tags {
+    justify-content: flex-end;
+  }
+
+  .pn-tag {
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-wide);
+    text-transform: uppercase;
+    color: var(--muted-foreground);
+    background: var(--muted);
+    border: 1px solid var(--border);
+    border-radius: 0.25rem;
+    padding: 0.125rem 0.5rem;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ai-link, .pn-card, .share-btn { transition: none; }
+    .pn-card:hover { transform: none; }
+    .ai-link:hover { transform: none; }
+  }
+</style>
+
+<script>
+  const btn = document.getElementById('copy-link-btn')
+  const label = document.getElementById('copy-link-label')
+  if (btn && label) {
+    btn.addEventListener('click', async () => {
+      const url = btn.dataset.url ?? window.location.href
+      try {
+        await navigator.clipboard.writeText(url)
+        label.textContent = 'Kopiert ✓'
+        btn.classList.add('copied')
+        setTimeout(() => {
+          label.textContent = 'Link kopieren'
+          btn.classList.remove('copied')
+        }, 2000)
+      } catch {
+        const input = document.createElement('input')
+        input.value = url
+        document.body.appendChild(input)
+        input.select()
+        document.execCommand('copy')
+        document.body.removeChild(input)
+        label.textContent = 'Kopiert ✓'
+        btn.classList.add('copied')
+        setTimeout(() => {
+          label.textContent = 'Link kopieren'
+          btn.classList.remove('copied')
+        }, 2000)
+      }
+    })
+  }
+</script>
