@@ -62,6 +62,17 @@ const navLinks = [
 <html lang="de" class="overflow-x-hidden scroll-smooth">
   <head>
 
+    <!-- Dark-Mode: FOUC-Prevention — synchron vor dem ersten Paint ──────── -->
+    <script is:inline>
+      (function() {
+        const stored = localStorage.getItem('theme')
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (stored === 'dark' || (!stored && prefersDark)) {
+          document.documentElement.classList.add('dark')
+        }
+      })()
+    </script>
+
     <!-- Google tag (gtag.js) -->
     <script is:inline async src="https://www.googletagmanager.com/gtag/js?id=G-3SFN6YV6W9"></script>
     <script is:inline>
@@ -164,6 +175,16 @@ const navLinks = [
       ))}
     </nav>
 
+    <!-- ── Theme Toggle: unten links, fixiert ──────────────────────────── -->
+    <button
+      id="theme-toggle"
+      class="theme-toggle"
+      type="button"
+      aria-label="Zu Dunkel-Modus wechseln"
+    >
+      <span id="theme-toggle-label">DUNKEL</span>
+    </button>
+
     <!-- ── Hamburger (Mobile only) ───────────────────────────────────── -->
     <button
       id="nav-toggle"
@@ -194,6 +215,9 @@ const navLinks = [
       <div class="nav-overlay-footer">
         <a href="/impressum" class="nav-overlay-small">Impressum</a>
         <a href="/datenschutz" class="nav-overlay-small">Datenschutz</a>
+        <button id="theme-toggle-mobile" type="button" class="nav-overlay-small" style="background:none;border:none;padding:0;cursor:pointer;">
+          <span id="theme-toggle-mobile-label">DUNKEL</span>
+        </button>
       </div>
     </div>
 
@@ -237,7 +261,40 @@ const navLinks = [
         initTextReveal()
         initScrollAnimations()
         initHamburger()
+        initThemeToggle()
       })
+
+      function initThemeToggle() {
+        const label   = document.getElementById('theme-toggle-label')
+        const toggle  = document.getElementById('theme-toggle')
+        const labelM  = document.getElementById('theme-toggle-mobile-label')
+        const toggleM = document.getElementById('theme-toggle-mobile')
+
+        function isDark() {
+          return document.documentElement.classList.contains('dark')
+        }
+
+        function updateLabels() {
+          const dark = isDark()
+          const text = dark ? 'HELL' : 'DUNKEL'
+          const aria = dark ? 'Zu Hell-Modus wechseln' : 'Zu Dunkel-Modus wechseln'
+          if (label)  label.textContent  = text
+          if (labelM) labelM.textContent = text
+          if (toggle)  toggle.setAttribute('aria-label',  aria)
+          if (toggleM) toggleM.setAttribute('aria-label', aria)
+        }
+
+        function applyTheme(dark: boolean) {
+          document.documentElement.classList.toggle('dark', dark)
+          localStorage.setItem('theme', dark ? 'dark' : 'light')
+          updateLabels()
+        }
+
+        updateLabels()
+
+        toggle?.addEventListener('click',  () => applyTheme(!isDark()))
+        toggleM?.addEventListener('click', () => applyTheme(!isDark()))
+      }
 
       function initHamburger() {
         const toggle  = document.getElementById('nav-toggle')  as HTMLButtonElement | null
@@ -483,13 +540,47 @@ const navLinks = [
         border-radius: 2px;
       }
 
+      /* ── Theme Toggle ────────────────────────────────────────────────── */
+      .theme-toggle {
+        position: fixed;
+        bottom: 2rem;
+        left: 2.5rem;
+        z-index: 60;
+        background: none;
+        border: none;
+        padding: 0;
+        cursor: pointer;
+        font-size: var(--text-xs);
+        letter-spacing: var(--tracking-wide);
+        text-transform: uppercase;
+        font-family: var(--font-sans);
+        color: var(--muted-foreground);
+        transition: color 200ms ease;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      .theme-toggle:hover { color: var(--foreground); }
+
+      .theme-toggle:focus-visible {
+        outline: 2px solid var(--foreground);
+        outline-offset: 4px;
+        border-radius: 2px;
+      }
+
+      @media (max-width: 640px) {
+        .theme-toggle {
+          display: none; /* auf Mobile: Toggle nur im Hamburger-Overlay */
+        }
+      }
+
       @media (prefers-reduced-motion: reduce) {
         .corner-logo-link,
         .corner-nav-link,
         .bar,
         .nav-overlay,
         .nav-overlay-link,
-        .nav-overlay-footer {
+        .nav-overlay-footer,
+        .theme-toggle {
           transition: none !important;
         }
       }
