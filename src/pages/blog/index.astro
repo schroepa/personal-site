@@ -12,10 +12,9 @@ const formatDate = (date: Date) =>
 ---
 
 <BaseLayout title="Blog — Patrick Schröder" description="Gedanken zu Design, Frontend und Tooling.">
-  <div class="px-6 pt-24 pb-24">
-    <div class="max-w-2xl mx-auto">
+  <div class="page-grid pt-24 pb-24">
 
-      <header class="mb-16">
+      <header class="mb-16 prose-col">
         <h1 class="t-h1 mb-4" data-reveal="lines">Blog</h1>
         <p class="t-lead text-muted-foreground">
           Gedanken zu Design, Frontend-Entwicklung und den Tools dazwischen.
@@ -69,7 +68,6 @@ const formatDate = (date: Date) =>
         ))}
       </div>
 
-    </div>
   </div>
 </BaseLayout>
 

@@ -6,12 +6,11 @@ import BaseLayout from '@/layouts/BaseLayout.astro'
   title="Datenschutzerklärung — Patrick Schröder"
   description="Informationen zur Verarbeitung personenbezogener Daten gemäß DSGVO."
 >
-  <div class="px-6 pt-24 pb-24">
-    <div class="max-w-5xl mx-auto">
-      <h1 class="t-h1 mb-4">Datenschutzerklärung</h1>
-      <p class="t-small text-muted-foreground mb-12">Stand: [PLACEHOLDER: Monat Jahr]</p>
+  <div class="page-grid pt-24 pb-24">
+      <h1 class="t-h1 mb-4 prose-col">Datenschutzerklärung</h1>
+      <p class="t-small text-muted-foreground mb-12 prose-col">Stand: [PLACEHOLDER: Monat Jahr]</p>
 
-      <div class="prose max-w-2xl">
+      <div class="prose prose-col">
 
         <h2>1. Verantwortlicher</h2>
         <p>
@@ -110,6 +109,5 @@ import BaseLayout from '@/layouts/BaseLayout.astro'
         </p>
 
       </div>
-    </div>
   </div>
 </BaseLayout>
