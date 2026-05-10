@@ -18,6 +18,48 @@
 
 ---
 
+## Design-Prinzip: „Be bold but never be regular"
+
+> Sei mutig — aber nie gewöhnlich. Habe Haltung — aber nie Aufsehen.
+
+Dieses Prinzip arbeitet auf zwei Ebenen gleichzeitig:
+
+**Typografisch:** `font-weight: bold` und `font-weight: regular` sind CSS-Werte — aber „regular" bedeutet hier auch: erwartbar, generisch, ohne Charakter. Mut zeigt sich nicht durch laut sein, sondern durch eine klare, unverwechselbare Stimme.
+
+**Als Haltung:** Jede Designentscheidung soll bewusst und konsequent sein — nie der bequeme Mittelweg, aber auch nie Effekt um des Effekts willen.
+
+### Typografische Umsetzung: Akzentschrift
+
+Ein einzelnes Schlüsselwort pro Kontext erhält die **Cartograph CF Italic** — im Kontrast zur Geist Variable (sachlich, Swiss). Dieser Bruch ist kein Fehler, sondern eine Haltung.
+
+**CSS-Klasse:**
+```css
+.accent-word {
+  font-family: 'Cartograph CF', serif;
+  font-style: italic;
+  font-weight: inherit; /* übernimmt den Kontext: bold bleibt bold */
+}
+```
+
+**Anwendungsregeln:**
+- Maximal **ein Wort** pro Kontext — nie zwei, nie einen Satz
+- Nur in **Display-Größen** (`t-h2` aufwärts) — nie im Fließtext
+- Immer **italic** — Cartograph CF upright nie verwenden
+- Nur für semantisch bedeutsame Wörter — nie für Füllwörter
+
+**Angewendet auf:**
+
+| Kontext | Wort | Begründung |
+|---|---|---|
+| Hero-Headline | *Systeme* | Das Kernkonzept — der Überraschungsmoment |
+| Kontakt-Section | *reden* | Das Verb ist die Einladung |
+| Über-Section | *Engineer* | Das differenzierende Wort |
+| About-Seite | nach Redaktion | Sparsam, kontextsensitiv |
+
+**Nie anwenden auf:** Fließtext, Navigation, Labels, Tags, Footer, Buttons.
+
+---
+
 ## Implementierungsstatus
 
 Das Projekt befindet sich in einem kontrollierten Übergang. Nicht alle Prinzipien sind bereits vollständig umgesetzt. Diese Tabelle zeigt den aktuellen Stand:

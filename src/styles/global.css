@@ -163,6 +163,28 @@
   --font-mono: 'Geist Mono', monospace;
 }
 
+/* ─── Akzentschrift: Cartograph CF ──────────────────────────────────────────
+   Datei ablegen: public/fonts/CartographCF-RegularItalic.woff2
+   (oder .otf/.ttf — Pfad unten entsprechend anpassen)
+   Prinzip: "Be bold but never be regular" — ein Wort pro Kontext, nur Display-Größen
+   ─────────────────────────────────────────────────────────────────────────── */
+@font-face {
+  font-family: 'Cartograph CF';
+  src: url('/fonts/CartographCF-RegularItalic.woff2') format('woff2'),
+       url('/fonts/CartographCF-RegularItalic.otf')   format('opentype'),
+       url('/fonts/CartographCF-RegularItalic.ttf')   format('truetype');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
+/* Akzent-Klasse: ein Schlüsselwort, maximal, nur in Display-Größen */
+.accent-word {
+  font-family: 'Cartograph CF', Georgia, serif;
+  font-style: italic;
+  font-weight: inherit;
+}
+
 /* ─── Additive: Typografie-Skala (Major Third, 1.250) ────────────────────── */
 
 :root {
