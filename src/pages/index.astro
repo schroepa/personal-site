@@ -177,7 +177,7 @@ const homeSections = [
       </div>
     </section>
 
-    <!-- ── Section 04: KONTAKT ────────────────────────────────────────── -->
+    <!-- ── Section 05: KONTAKT ────────────────────────────────────────── -->
     <section id="section-kontakt" class="snap-section">
       <div class="page-grid snap-content kontakt-content">
         <div class="kontakt-body">
@@ -185,14 +185,18 @@ const homeSections = [
           <h2 class="t-hero kontakt-heading" data-reveal="words">
             Lass uns reden.
           </h2>
-          <a
-            href="mailto:kontakt@ptrckschrdtr.de"
+          <!-- E-Mail: Bot-Schutz via data-Attribute, kein mailto im HTML -->
+          <button
             class="kontakt-email"
+            data-user="kontakt"
+            data-domain="ptrckschrdtr.de"
             data-cursor="link"
             data-magnetic
+            type="button"
+            aria-label="E-Mail: kontakt@ptrckschrdtr.de"
           >
             kontakt@ptrckschrdtr.de
-          </a>
+          </button>
           <div class="kontakt-secondary">
             <a
               href="/cv.pdf"
@@ -209,6 +213,23 @@ const homeSections = [
             </a>
           </div>
         </div>
+
+        <!-- DSGVO-Pflichtlinks: sichtbar in der letzten Section (kein Footer auf Homepage) -->
+        <div class="kontakt-footer-links">
+          <span class="t-small text-muted-foreground">
+            © {new Date().getFullYear()} Patrick Schröder
+          </span>
+          <div class="kontakt-footer-legal">
+            <a href="/impressum" class="t-small text-muted-foreground kontakt-footer-link" data-cursor="link">
+              Impressum
+            </a>
+            <span class="t-small text-muted-foreground" aria-hidden="true">·</span>
+            <a href="/datenschutz" class="t-small text-muted-foreground kontakt-footer-link" data-cursor="link">
+              Datenschutz
+            </a>
+          </div>
+        </div>
+
       </div>
     </section>
 
@@ -483,6 +504,30 @@ const homeSections = [
     transition: color 200ms ease;
   }
   .kontakt-secondary a:hover { color: var(--foreground); }
+
+  /* DSGVO-Links unten in der Kontakt-Section */
+  .kontakt-footer-links {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 3rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid color-mix(in oklch, var(--foreground) 8%, transparent);
+  }
+
+  .kontakt-footer-legal {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .kontakt-footer-link {
+    text-decoration: none;
+    transition: color 200ms ease;
+  }
+  .kontakt-footer-link:hover { color: var(--foreground); }
 
   /* ── prefers-reduced-motion ──────────────────────────────────────────── */
   @media (prefers-reduced-motion: reduce) {
