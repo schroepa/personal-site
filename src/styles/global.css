@@ -184,6 +184,10 @@
   --tracking-snug:   -0.01em;
   --tracking-normal:  0em;
   --tracking-wide:    0.06em;
+
+  /* ── Grid-System ─────────────────────────────────────────────────── */
+  --grid-pad: clamp(20px, 5vw, 96px);  /* horizontales Padding, viewport-relativ */
+  --text-max: 800px;                    /* max. Zeilenlänge für Fließtext */
 }
 
 @theme {
@@ -206,4 +210,23 @@
 .dark {
   --mesh-warm: oklch(0.22 0.005 75);
   --mesh-cool: oklch(0.20 0.004 90);
+}
+
+/* ─── Layout-Utilities ──────────────────────────────────────────────────── */
+
+/* Vollbreiten-Container: 100vw mit konsistentem Padding */
+.page-grid {
+  width: 100%;
+  padding-left: var(--grid-pad);
+  padding-right: var(--grid-pad);
+}
+
+/* Fließtext-Spalte: max 800px, linksbündig (KEIN margin: auto) */
+.prose-col {
+  max-width: var(--text-max);
+}
+
+/* Weite Spalte: für Bilder, Tabellen, Listen */
+.wide-col {
+  max-width: min(100%, 1200px);
 }
