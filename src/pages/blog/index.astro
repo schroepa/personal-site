@@ -1,6 +1,5 @@
 ---
 import BaseLayout from '@/layouts/BaseLayout.astro';
-import { Badge } from '@/components/ui/badge';
 import { getCollection } from 'astro:content';
 import { readingTime } from '@/lib/reading-time';
 
@@ -8,47 +7,55 @@ const posts = await getCollection('blog', ({ data }) => !data.draft);
 const sorted = posts.sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
 
 const formatDate = (date: Date) =>
-  new Intl.DateTimeFormat('de-DE', { year: 'numeric', month: 'long', day: 'numeric' }).format(date);
+  new Intl.DateTimeFormat('de-DE', { year: 'numeric', month: 'short' }).format(date);
 ---
 
 <BaseLayout title="Blog — Patrick Schröder" description="Gedanken zu Design, Frontend und Tooling.">
   <div class="page-grid pt-24 pb-24">
 
-      <header class="mb-16 prose-col">
-        <h1 class="t-h1 mb-4" data-reveal="lines">Blog</h1>
-        <p class="t-lead text-muted-foreground">
-          Gedanken zu Design, Frontend-Entwicklung und den Tools dazwischen.
-        </p>
-      </header>
+    <header class="blog-header">
+      <h1 class="t-h1 mb-4" data-reveal="lines">Blog</h1>
+      <p class="t-lead text-muted-foreground prose-col">
+        Gedanken zu Design, Frontend-Entwicklung und den Tools dazwischen.
+      </p>
+    </header>
 
-      <div class="post-list">
-        {sorted.map((post) => (
-          <article class="post-entry" data-scroll="fade-up">
-            <a href={`/blog/${post.id.replace(/\.md$/, '')}`} class="post-link" data-cursor="link">
+    <!-- ── Kompakte Liste mit Thumbnail ──────────────────────────────── -->
+    <ol class="post-list" aria-label="Alle Artikel">
+      {sorted.map((post) => {
+        const slug = post.id.replace(/\.md$/, '')
+        const mins = readingTime(post.body ?? '')
 
-              <!-- Bild als Anker — volle Breite, vor dem Text -->
-              <div class="post-image">
+        return (
+          <li class="post-item">
+            <a
+              href={`/blog/${slug}`}
+              class="post-link"
+              data-cursor="link"
+            >
+              <!-- Thumbnail: immer sichtbar, kompakt -->
+              <div class="post-thumb" aria-hidden="true">
                 {post.data.coverImage ? (
                   <img
                     src={post.data.coverImage}
                     alt=""
                     loading="lazy"
                     decoding="async"
-                    class="post-img"
+                    class="post-thumb-img"
                   />
                 ) : (
-                  <div class="post-img-fallback" aria-hidden="true"></div>
+                  <div class="post-thumb-fallback"></div>
                 )}
               </div>
 
-              <!-- Typografischer Block -->
+              <!-- Textblock: Meta, Titel, Beschreibung, Tags -->
               <div class="post-body">
                 <div class="post-meta">
                   <time datetime={post.data.date.toISOString()}>
                     {formatDate(post.data.date)}
                   </time>
-                  <span>·</span>
-                  <span>{readingTime(post.body ?? '')} min</span>
+                  <span aria-hidden="true">·</span>
+                  <span>{mins} min</span>
                 </div>
 
                 <h2 class="post-title">{post.data.title}</h2>
@@ -57,80 +64,100 @@ const formatDate = (date: Date) =>
                 {post.data.tags && post.data.tags.length > 0 && (
                   <div class="post-tags">
                     {post.data.tags.map((tag) => (
-                      <Badge variant="secondary" client:visible>{tag}</Badge>
+                      <span class="post-tag">{tag}</span>
                     ))}
                   </div>
                 )}
               </div>
-
             </a>
-          </article>
-        ))}
-      </div>
+          </li>
+        )
+      })}
+    </ol>
 
   </div>
 </BaseLayout>
 
 <style>
-  /* ── Listengitter ────────────────────────────────────────────────────────── */
+  /* ── Header ──────────────────────────────────────────────────────────── */
+  .blog-header {
+    margin-bottom: 3rem;
+  }
+
+  /* ── Liste ───────────────────────────────────────────────────────────── */
   .post-list {
-    display: flex;
-    flex-direction: column;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    border-top: 1px solid color-mix(in oklch, var(--foreground) 12%, transparent);
   }
 
-  .post-entry {
-    padding-bottom: 3.5rem;
-    margin-bottom: 3.5rem;
-    border-bottom: 1px solid color-mix(in oklch, var(--foreground) 12%, transparent);
+  .post-item {
+    /* Link übernimmt die gesamte Fläche */
   }
 
-  .post-entry:last-child {
-    border-bottom: none;
-    margin-bottom: 0;
-  }
-
+  /* ── Zeile: Thumbnail | Text ─────────────────────────────────────────── */
   .post-link {
-    display: block;
+    display: grid;
+    grid-template-columns: clamp(80px, 12vw, 160px) 1fr;
+    gap: 1.5rem;
+    align-items: start;
+    padding: 1.25rem 0;
+    border-bottom: 1px solid color-mix(in oklch, var(--foreground) 12%, transparent);
     text-decoration: none;
-    color: inherit;
+    color: var(--foreground);
+    transition: opacity 250ms ease;
   }
 
-  /* ── Bild als Anker ─────────────────────────────────────────────────────── */
-  .post-image {
+  .post-link:hover { opacity: 0.4; }
+  .post-link:focus-visible {
+    outline: 2px solid var(--foreground);
+    outline-offset: 4px;
+  }
+
+  /* Kontext-Dimming: nicht-gehoverte Einträge zurücktreten */
+  .post-list:has(.post-link:hover) .post-link:not(:hover) {
+    opacity: 0.25;
+  }
+
+  /* ── Thumbnail ───────────────────────────────────────────────────────── */
+  .post-thumb {
     width: 100%;
-    aspect-ratio: 16 / 9;
+    aspect-ratio: 3 / 2;
     overflow: hidden;
-    margin-bottom: 1.5rem;
+    background: var(--muted);
+    flex-shrink: 0;
   }
 
-  .post-img {
+  .post-thumb-img {
     width: 100%;
     height: 100%;
     object-fit: cover;
     display: block;
-    transition: transform 600ms cubic-bezier(0.25, 1, 0.5, 1);
+    transition: transform 500ms cubic-bezier(0.25, 1, 0.5, 1);
   }
 
-  .post-link:hover .post-img {
-    transform: scale(1.03);
+  .post-link:hover .post-thumb-img {
+    transform: scale(1.04);
   }
 
-  .post-img-fallback {
+  .post-thumb-fallback {
     width: 100%;
     height: 100%;
     background:
       radial-gradient(ellipse 80% 80% at 20% 30%,
-        color-mix(in oklch, var(--mesh-warm) 55%, transparent) 0%, transparent 70%),
+        color-mix(in oklch, var(--mesh-warm) 50%, transparent) 0%, transparent 70%),
       radial-gradient(ellipse 60% 60% at 80% 70%,
-        color-mix(in oklch, var(--mesh-cool) 45%, transparent) 0%, transparent 65%),
+        color-mix(in oklch, var(--mesh-cool) 40%, transparent) 0%, transparent 65%),
       var(--muted);
   }
 
-  /* ── Typografischer Block ───────────────────────────────────────────────── */
+  /* ── Textblock ───────────────────────────────────────────────────────── */
   .post-body {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 0.25rem;
+    padding-top: 0.125rem; /* optische Ausrichtung mit Thumbnail-Oberkante */
   }
 
   .post-meta {
@@ -140,39 +167,56 @@ const formatDate = (date: Date) =>
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-wide);
     text-transform: uppercase;
-    font-weight: 500;
     color: var(--muted-foreground);
+    margin-bottom: 0.25rem;
   }
 
   .post-title {
-    font-size: var(--text-xl);
+    font-size: var(--text-base);
     font-weight: 500;
     line-height: var(--leading-snug);
     letter-spacing: var(--tracking-snug);
-    color: var(--foreground);
-    margin: 0.25rem 0 0;
-    transition: opacity 200ms ease;
-  }
-
-  .post-link:hover .post-title {
-    opacity: 0.6;
-  }
-
-  .post-desc {
-    font-size: var(--text-base);
-    line-height: var(--leading-normal);
-    color: var(--muted-foreground);
     margin: 0;
   }
 
+  .post-desc {
+    font-size: var(--text-sm);
+    line-height: var(--leading-normal);
+    color: var(--muted-foreground);
+    margin: 0.125rem 0 0;
+    /* Maximal 2 Zeilen anzeigen */
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  /* ── Tags: plain text, kein Pill ────────────────────────────────────── */
   .post-tags {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.5rem;
-    margin-top: 0.5rem;
+    gap: 0.625rem;
+    margin-top: 0.375rem;
+  }
+
+  .post-tag {
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-wide);
+    text-transform: uppercase;
+    color: var(--muted-foreground);
+  }
+
+  /* ── Mobile ──────────────────────────────────────────────────────────── */
+  @media (max-width: 480px) {
+    .post-link {
+      grid-template-columns: 80px 1fr;
+      gap: 1rem;
+    }
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .post-img { transition: none; }
+    .post-link,
+    .post-thumb-img { transition: none; }
+    .post-link:hover .post-thumb-img { transform: none; }
   }
 </style>
