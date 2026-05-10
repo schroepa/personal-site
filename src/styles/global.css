@@ -187,13 +187,14 @@
 }
 
 /* ─── Mesh Color Tokens ──────────────────────────────────────────────────── */
+/* Monochrom-Prinzip: UI bleibt neutral. Chroma < 0.008 = praktisch achromatisch. */
 
 :root {
-  --mesh-warm: oklch(0.88 0.04 75);
-  --mesh-cool: oklch(0.88 0.03 145);
+  --mesh-warm: oklch(0.90 0.006 80);   /* subtil warm-neutral, kaum wahrnehmbar */
+  --mesh-cool: oklch(0.88 0.005 200);  /* subtil cool-neutral, kaum wahrnehmbar */
 }
 
 .dark {
-  --mesh-warm: oklch(0.28 0.04 75);
-  --mesh-cool: oklch(0.28 0.03 145);
+  --mesh-warm: oklch(0.22 0.006 80);
+  --mesh-cool: oklch(0.20 0.005 200);
 }
