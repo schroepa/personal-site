@@ -170,10 +170,11 @@
    ─────────────────────────────────────────────────────────────────────────── */
 
 /* Akzent-Klasse: ein Schlüsselwort, maximal, nur in Display-Größen (t-h2+) */
+/* Zwei Achsen Kontrast: italic (Neigung) + weight 300 (leichter als Kontext 500) */
 .accent-word {
-  font-family: var(--font-sans); /* bleibt Geist Variable */
-  font-style: oblique 10deg;
-  font-weight: inherit;
+  font-family: var(--font-sans);
+  font-style: italic;
+  font-weight: 300;
 }
 
 /* ─── Additive: Typografie-Skala (Major Third, 1.250) ────────────────────── */
