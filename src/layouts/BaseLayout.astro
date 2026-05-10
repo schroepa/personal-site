@@ -256,6 +256,15 @@ const navLinks = [
       import { initTextReveal } from "@/scripts/textReveal"
       import { initScrollAnimations } from "@/scripts/scrollAnimations"
 
+      // Dark Mode über View Transitions hinweg erhalten:
+      // Bevor Astro das neue Dokument einsetzt, .dark auf das eingehende übertragen.
+      document.addEventListener('astro:before-swap', (e) => {
+        const event = e as { newDocument: Document }
+        if (document.documentElement.classList.contains('dark')) {
+          event.newDocument.documentElement.classList.add('dark')
+        }
+      })
+
       document.addEventListener("astro:page-load", () => {
         initMagneticButtons()
         initTextReveal()
