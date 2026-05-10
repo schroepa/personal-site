@@ -140,72 +140,31 @@ const navLinks = [
     <GrainOverlay />
     <BaselineGrid />
 
-    <!-- Header -->
-    <header
-      class="fixed top-0 right-0 left-0 z-[60] bg-background/50 px-6 py-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)] backdrop-blur-2xl backdrop-saturate-200 supports-[backdrop-filter]:bg-background/40"
-    >
-      <nav class="mx-auto flex max-w-5xl items-center justify-between">
+    <!-- ── Corner: Logo oben links ──────────────────────────────────── -->
+    <div class="corner-logo">
+      <a
+        href="/"
+        class="corner-logo-link"
+        data-magnetic
+        data-cursor="link"
+        aria-label="Startseite"
+      >
+        PTRCKSCHRDTR
+      </a>
+    </div>
+
+    <!-- ── Corner: Navigation oben rechts ──────────────────────────── -->
+    <nav class="corner-nav" aria-label="Hauptnavigation">
+      {navLinks.map((link) => (
         <a
-          href="/"
-          class="font-medium text-foreground no-underline transition-opacity duration-200 hover:opacity-60 nav-logo"
-          data-magnetic
+          href={link.href}
+          class="corner-nav-link"
           data-cursor="link"
         >
-          PTRCKSCHRDTR
+          {link.label}
         </a>
-
-        <!-- Desktop nav -->
-        <ul class="nav-desktop m-0 flex list-none items-center gap-8 p-0">
-          {
-            navLinks.map((link) => (
-              <li>
-                <a
-                  href={link.href}
-                  class="text-muted-foreground no-underline transition-colors duration-200 hover:text-foreground"
-                  data-magnetic
-                  data-cursor="link"
-                >
-                  {link.label}
-                </a>
-              </li>
-            ))
-          }
-        </ul>
-
-        <!-- Hamburger (mobile only) -->
-        <button
-          id="nav-toggle"
-          class="nav-toggle"
-          aria-label="Menü öffnen"
-          aria-expanded="false"
-          aria-controls="nav-overlay"
-        >
-          <span class="bar bar-1"></span>
-          <span class="bar bar-2"></span>
-          <span class="bar bar-3"></span>
-        </button>
-      </nav>
-    </header>
-
-    <!-- Full-Screen Overlay -->
-    <div id="nav-overlay" class="nav-overlay" aria-hidden="true" role="dialog" aria-label="Navigation">
-      <nav class="nav-overlay-links">
-        {navLinks.map((link, i) => (
-          <a
-            href={link.href}
-            class="nav-overlay-link"
-            style={`--i: ${i}`}
-            data-cursor="link"
-          >
-            {link.label}
-          </a>
-        ))}
-      </nav>
-      <div class="nav-overlay-footer">
-        <a href="/impressum" class="nav-overlay-small">Impressum</a>
-        <a href="/datenschutz" class="nav-overlay-small">Datenschutz</a>
-      </div>
-    </div>
+      ))}
+    </nav>
 
     <!-- Main content -->
     <main>
@@ -246,160 +205,78 @@ const navLinks = [
         initMagneticButtons()
         initTextReveal()
         initScrollAnimations()
-        initHamburger()
       })
-
-      function initHamburger() {
-        const toggle  = document.getElementById('nav-toggle')  as HTMLButtonElement | null
-        const overlay = document.getElementById('nav-overlay') as HTMLElement | null
-        if (!toggle || !overlay) return
-
-        function open() {
-          toggle!.classList.add('is-open')
-          overlay!.classList.add('is-open')
-          toggle!.setAttribute('aria-expanded', 'true')
-          overlay!.setAttribute('aria-hidden', 'false')
-          document.body.style.overflow = 'hidden'
-        }
-
-        function close() {
-          toggle!.classList.remove('is-open')
-          overlay!.classList.remove('is-open')
-          toggle!.setAttribute('aria-expanded', 'false')
-          overlay!.setAttribute('aria-hidden', 'true')
-          document.body.style.overflow = ''
-        }
-
-        toggle.addEventListener('click', () => {
-          toggle.classList.contains('is-open') ? close() : open()
-        })
-
-        overlay.querySelectorAll('a').forEach(link => {
-          link.addEventListener('click', close)
-        })
-
-        document.addEventListener('keydown', (e) => {
-          if (e.key === 'Escape') close()
-        })
-      }
     </script>
 
     <style>
-      /* ── Hamburger Icon ─────────────────────────────────────────────────── */
-      .nav-toggle {
-        display: none;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        gap: 5px;
-        width: 36px;
-        height: 36px;
-        background: none;
-        border: none;
-        cursor: pointer;
-        z-index: 70;
-        position: relative;
-        padding: 0;
-      }
-
-      .bar {
-        display: block;
-        width: 22px;
-        height: 1.5px;
-        background: var(--foreground);
-        transform-origin: center;
-        transition:
-          transform 280ms cubic-bezier(0.16, 1, 0.3, 1),
-          opacity   220ms cubic-bezier(0.16, 1, 0.3, 1),
-          background 200ms ease;
-      }
-
-      .nav-toggle.is-open .bar { background: var(--background); }
-      .nav-toggle.is-open .bar-1 { transform: translateY(6.5px) rotate(45deg); }
-      .nav-toggle.is-open .bar-2 { opacity: 0; transform: scaleX(0); }
-      .nav-toggle.is-open .bar-3 { transform: translateY(-6.5px) rotate(-45deg); }
-
-      /* ── Full-Screen Overlay ────────────────────────────────────────────── */
-      .nav-overlay {
+      /* ── Corner-Logo: oben links ─────────────────────────────────────────── */
+      .corner-logo {
         position: fixed;
-        inset: 0;
-        z-index: 55;
-        background: var(--foreground);
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        padding: 6rem 2.5rem 3rem;
-        opacity: 0;
-        pointer-events: none;
-        transition: opacity 300ms cubic-bezier(0.16, 1, 0.3, 1);
-      }
-
-      .nav-overlay.is-open {
-        opacity: 1;
-        pointer-events: auto;
-      }
-
-      .nav-overlay-links {
-        display: flex;
-        flex-direction: column;
-        gap: 0.25rem;
-      }
-
-      .nav-overlay-link {
-        font-size: var(--text-3xl);
-        font-weight: 500;
-        line-height: var(--leading-tight);
-        letter-spacing: var(--tracking-tight);
-        color: var(--background);
-        text-decoration: none;
-        opacity: 0;
-        transform: translateY(18px);
-        transition:
-          opacity  500ms cubic-bezier(0.16, 1, 0.3, 1),
-          transform 500ms cubic-bezier(0.16, 1, 0.3, 1),
-          color 150ms ease;
-        transition-delay: calc(var(--i) * 70ms + 80ms);
-      }
-
-      .nav-overlay-link:hover { color: color-mix(in oklch, var(--background) 60%, transparent); }
-
-      .nav-overlay.is-open .nav-overlay-link {
-        opacity: 1;
-        transform: translateY(0);
-      }
-
-      .nav-overlay-footer {
-        position: absolute;
-        bottom: 2.5rem;
+        top: 2rem;
         left: 2.5rem;
-        display: flex;
-        gap: 1.5rem;
-        opacity: 0;
-        transition: opacity 400ms ease;
-        transition-delay: 300ms;
+        z-index: 60;
       }
 
-      .nav-overlay.is-open .nav-overlay-footer { opacity: 1; }
-
-      .nav-overlay-small {
-        font-size: var(--text-xs);
+      .corner-logo-link {
+        font-size: var(--text-sm);
+        font-weight: 500;
         letter-spacing: var(--tracking-wide);
-        text-transform: uppercase;
-        color: color-mix(in oklch, var(--background) 40%, transparent);
+        color: var(--foreground);
         text-decoration: none;
-        transition: color 150ms ease;
+        transition: opacity 200ms ease;
       }
-      .nav-overlay-small:hover { color: var(--background); }
 
-      /* ── Responsive: Hamburger nur auf Mobile ───────────────────────────── */
-      @media (max-width: 767px) {
-        .nav-toggle  { display: flex; }
-        .nav-desktop { display: none; }
+      .corner-logo-link:hover {
+        opacity: 0.5;
+      }
+
+      /* ── Corner-Nav: oben rechts ─────────────────────────────────────────── */
+      .corner-nav {
+        position: fixed;
+        top: 2rem;
+        right: 2.5rem;
+        z-index: 60;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 2rem;
+      }
+
+      .corner-nav-link {
+        font-size: var(--text-sm);
+        color: var(--muted-foreground);
+        text-decoration: none;
+        transition: color 200ms ease;
+      }
+
+      .corner-nav-link:hover {
+        color: var(--foreground);
+      }
+
+      /* ── Mobile: kompakter, gestapelt ───────────────────────────────────── */
+      @media (max-width: 640px) {
+        .corner-logo {
+          top: 1.5rem;
+          left: 1.5rem;
+        }
+
+        .corner-nav {
+          top: 1.5rem;
+          right: 1.5rem;
+          flex-direction: column;
+          align-items: flex-end;
+          gap: 0.375rem;
+        }
+
+        .corner-nav-link {
+          font-size: var(--text-xs);
+        }
       }
 
       @media (prefers-reduced-motion: reduce) {
-        .bar, .nav-overlay, .nav-overlay-link, .nav-overlay-footer {
-          transition: none !important;
+        .corner-logo-link,
+        .corner-nav-link {
+          transition: none;
         }
       }
     </style>
