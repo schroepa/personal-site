@@ -1,42 +1,50 @@
 /* ─── Semantic Typography Classes ─────────────────────────────────────────── */
 
+/* ── Display: clamp() — skaliert proportional mit dem Viewport ─────────────── */
+
 .t-hero {
-  font-size: var(--text-3xl);
+  /* Mobile ~49px → Desktop 1280px ~90px → Wide 1920px 144px */
+  font-size: clamp(3.052rem, 7vw, 9rem);
   line-height: var(--leading-tight);
   letter-spacing: var(--tracking-tight);
   font-weight: 500;
 }
 
 .t-h1 {
-  font-size: var(--text-2xl);
+  /* Mobile ~39px → Desktop 1280px ~58px → Wide 1920px 80px */
+  font-size: clamp(2.441rem, 4.5vw, 5rem);
   line-height: var(--leading-tight);
   letter-spacing: var(--tracking-tight);
   font-weight: 500;
 }
 
 .t-h2 {
-  font-size: var(--text-xl);
+  /* Mobile ~31px → Desktop 1280px ~40px → Wide 1920px 48px */
+  font-size: clamp(1.953rem, 3vw, 3rem);
   line-height: var(--leading-snug);
   letter-spacing: var(--tracking-snug);
   font-weight: 500;
 }
 
 .t-h3 {
-  font-size: var(--text-lg);
+  /* Mobile ~25px → Desktop 1280px ~29px → Wide 1920px 36px */
+  font-size: clamp(1.563rem, 2.2vw, 2.25rem);
   line-height: var(--leading-snug);
   letter-spacing: var(--tracking-normal);
   font-weight: 500;
 }
 
+/* ── Text: fix — Lesbarkeit hat Vorrang vor Skalierung ─────────────────────── */
+
 .t-lead {
-  font-size: var(--text-md);
+  font-size: clamp(1.125rem, 1.2vw, 1.25rem);
   line-height: var(--leading-normal);
   letter-spacing: var(--tracking-normal);
   font-weight: 400;
 }
 
 .t-body {
-  font-size: var(--text-base);
+  font-size: 1rem;
   line-height: var(--leading-normal);
   font-weight: 400;
 }
@@ -63,6 +71,6 @@
 
 .t-prose {
   max-width: 65ch;
-  font-size: var(--text-base);
+  font-size: 1rem;
   line-height: var(--leading-loose);
 }
