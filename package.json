@@ -16,6 +16,7 @@
     "@astrojs/react": "^4.4.2",
     "@astrojs/sitemap": "^3.7.2",
     "@fontsource-variable/geist": "^5.2.8",
+    "@fontsource/cormorant-garamond": "^5.2.11",
     "@fontsource/geist-mono": "^5.2.7",
     "@tailwindcss/vite": "^4.2.1",
     "@types/react": "^19.2.14",

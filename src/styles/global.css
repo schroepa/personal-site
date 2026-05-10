@@ -163,26 +163,19 @@
   --font-mono: 'Geist Mono', monospace;
 }
 
-/* ─── Akzentschrift: Cartograph CF ──────────────────────────────────────────
-   Datei ablegen: public/fonts/CartographCF-RegularItalic.woff2
-   (oder .otf/.ttf — Pfad unten entsprechend anpassen)
-   Prinzip: "Be bold but never be regular" — ein Wort pro Kontext, nur Display-Größen
+/* ─── Akzentschrift: Cormorant Garamond Italic ───────────────────────────────
+   Open Source (SIL OFL), via @fontsource/cormorant-garamond
+   Prinzip: "Be bold but never be regular"
+   Hochkontrast-Antiqua als Gegenpol zur geometrischen Geist-Grotesque.
+   Swiss-Klassiker: Grotesque + Garamond = Helvetica + Garamond-Pairing.
    ─────────────────────────────────────────────────────────────────────────── */
-@font-face {
-  font-family: 'Cartograph CF';
-  src: url('/fonts/CartographCF-RegularItalic.woff2') format('woff2'),
-       url('/fonts/CartographCF-RegularItalic.otf')   format('opentype'),
-       url('/fonts/CartographCF-RegularItalic.ttf')   format('truetype');
-  font-weight: 400;
-  font-style: italic;
-  font-display: swap;
-}
+@import "@fontsource/cormorant-garamond/500-italic.css";
 
-/* Akzent-Klasse: ein Schlüsselwort, maximal, nur in Display-Größen */
+/* Akzent-Klasse: ein Schlüsselwort, maximal, nur in Display-Größen (t-h2+) */
 .accent-word {
-  font-family: 'Cartograph CF', Georgia, serif;
+  font-family: 'Cormorant Garamond', Georgia, serif;
   font-style: italic;
-  font-weight: inherit;
+  font-weight: 500;
 }
 
 /* ─── Additive: Typografie-Skala (Major Third, 1.250) ────────────────────── */

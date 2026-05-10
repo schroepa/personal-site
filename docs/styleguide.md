@@ -30,14 +30,21 @@ Dieses Prinzip arbeitet auf zwei Ebenen gleichzeitig:
 
 ### Typografische Umsetzung: Akzentschrift
 
-Ein einzelnes Schlüsselwort pro Kontext erhält die **Cartograph CF Italic** — im Kontrast zur Geist Variable (sachlich, Swiss). Dieser Bruch ist kein Fehler, sondern eine Haltung.
+Ein einzelnes Schlüsselwort pro Kontext erhält die **Cormorant Garamond 500 Italic** — im Kontrast zur Geist Variable (sachlich, Swiss). Dieser Bruch ist kein Fehler, sondern eine Haltung.
+
+**Pairing-Logik:**  
+Geist = geometrische Grotesque (uniform, technisch, kein Strichkontrast)  
+Cormorant Garamond Italic = Hochkontrast-Antiqua (kalligrafisch, variabel, Renaissance)  
+→ Das klassische Swiss-Druckpairing: Helvetica + Garamond, digital.
+
+**Installation:** `@fontsource/cormorant-garamond` (Open Source, SIL OFL)
 
 **CSS-Klasse:**
 ```css
 .accent-word {
-  font-family: 'Cartograph CF', serif;
+  font-family: 'Cormorant Garamond', Georgia, serif;
   font-style: italic;
-  font-weight: inherit; /* übernimmt den Kontext: bold bleibt bold */
+  font-weight: 500;
 }
 ```
 
