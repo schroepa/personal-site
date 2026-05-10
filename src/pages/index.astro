@@ -289,10 +289,29 @@ const homeSections = [
 
   .intro-heading {
     line-height: 0.92;
+    animation: weight-reveal 900ms cubic-bezier(0.16, 1, 0.3, 1) both;
+    animation-delay: 80ms;
+  }
+
+  @keyframes weight-reveal {
+    from {
+      font-weight: 100;
+      opacity: 0;
+    }
+    to {
+      font-weight: 500;
+      opacity: 1;
+    }
   }
 
   .intro-line {
     display: block;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .intro-heading {
+      animation: none;
+    }
   }
 
   /* ── Scroll-Hint ─────────────────────────────────────────────────────── */

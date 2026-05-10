@@ -311,6 +311,7 @@ const email = { user: 'kontakt', domain: 'ptrckschrdtr.de' }
         initHamburger()
         initThemeToggle()
         initEmailLinks()
+        initScramble()
       })
 
       function initThemeToggle() {
@@ -376,6 +377,60 @@ const email = { user: 'kontakt', domain: 'ptrckschrdtr.de' }
 
         document.addEventListener('keydown', (e) => {
           if (e.key === 'Escape') close()
+        })
+      }
+
+      // Text-Scramble: Nav-Links flimmern kurz durch Zufallszeichen beim Hover
+      // Buchstaben settlen von links nach rechts → technischer Charakter
+      function initScramble() {
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+        if (!window.matchMedia('(hover: hover)').matches) return
+
+        const CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
+        const FPS   = 30
+        const DURATION_MS = 380
+
+        const links = document.querySelectorAll<HTMLAnchorElement>('.corner-nav-link')
+
+        links.forEach((link) => {
+          if (link.dataset.scrambleInit) return
+          link.dataset.scrambleInit = '1'
+
+          const original = link.textContent ?? ''
+          let timer: ReturnType<typeof setInterval> | null = null
+          let frame = 0
+          const totalFrames = Math.round((DURATION_MS / 1000) * FPS)
+
+          link.addEventListener('mouseenter', () => {
+            if (timer) clearInterval(timer)
+            frame = 0
+
+            timer = setInterval(() => {
+              frame++
+              const progress = frame / totalFrames
+
+              link.textContent = original
+                .split('')
+                .map((char, i) => {
+                  if (char === ' ') return char
+                  // Buchstaben settlen von links → rechts
+                  if (i / original.length < progress) return char
+                  return CHARS[Math.floor(Math.random() * CHARS.length)]
+                })
+                .join('')
+
+              if (frame >= totalFrames) {
+                clearInterval(timer!)
+                timer = null
+                link.textContent = original
+              }
+            }, 1000 / FPS)
+          })
+
+          link.addEventListener('mouseleave', () => {
+            if (timer) { clearInterval(timer); timer = null }
+            link.textContent = original
+          })
         })
       }
 
