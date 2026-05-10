@@ -94,11 +94,6 @@ const getYear = (date: Date) =>
     transition: opacity 250ms ease;
   }
 
-  /* Hover: aktive Zeile tritt leicht zurück */
-  .project-line:hover {
-    opacity: 0.4;
-  }
-
   /* Alle anderen Zeilen zurückdrängen wenn eine gehovered wird */
   .project-index:has(.project-line:hover) .project-line:not(:hover) {
     opacity: 0.25;
