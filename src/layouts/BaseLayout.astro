@@ -132,6 +132,7 @@ const navLinks = [
   <body
     class="relative min-h-screen overflow-x-hidden bg-background text-foreground antialiased"
   >
+    <a href="#main-content" class="skip-link">Zum Inhalt springen</a>
   <!-- Google Tag Manager (noscript) -->
   <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-T4HLWZWZ"
   height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
@@ -160,6 +161,7 @@ const navLinks = [
           href={link.href}
           class="corner-nav-link"
           data-cursor="link"
+          aria-current={Astro.url.pathname === link.href ? "page" : undefined}
         >
           {link.label}
         </a>
@@ -167,7 +169,7 @@ const navLinks = [
     </nav>
 
     <!-- Main content -->
-    <main>
+    <main id="main-content">
       <slot />
     </main>
 
@@ -271,6 +273,32 @@ const navLinks = [
         .corner-nav-link {
           font-size: var(--text-xs);
         }
+      }
+
+      /* ── Skip-Link (Tastaturnavigation) ─────────────────────────────────── */
+      .skip-link {
+        position: absolute;
+        top: -100%;
+        left: 1.5rem;
+        z-index: 100;
+        background: var(--foreground);
+        color: var(--background);
+        font-size: var(--text-sm);
+        padding: 0.5rem 1rem;
+        text-decoration: none;
+        transition: top 150ms ease;
+      }
+
+      .skip-link:focus {
+        top: 1rem;
+      }
+
+      /* ── Fokus-Stile für Tastaturnavigation ─────────────────────────────── */
+      .corner-logo-link:focus-visible,
+      .corner-nav-link:focus-visible {
+        outline: 2px solid var(--foreground);
+        outline-offset: 4px;
+        border-radius: 2px;
       }
 
       @media (prefers-reduced-motion: reduce) {
