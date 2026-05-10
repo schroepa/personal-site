@@ -44,7 +44,6 @@ const getYear = (date: Date) =>
                 class="project-line"
                 data-cursor="link"
                 data-preview={coverSrc}
-                aria-label={project.data.title}
               >
                 <span class="project-num" aria-hidden="true">{num}</span>
                 <span class="project-name">{project.data.title}</span>
@@ -184,6 +183,13 @@ const getYear = (date: Date) =>
       transition: none;
     }
   }
+
+  /* ── Fokus-Stil ──────────────────────────────────────────────────── */
+  .project-line:focus-visible {
+    outline: 2px solid var(--foreground);
+    outline-offset: 2px;
+    border-radius: 1px;
+  }
 </style>
 
 <script>
@@ -192,24 +198,27 @@ const getYear = (date: Date) =>
     const previewImg = document.getElementById('project-preview-img') as HTMLImageElement | null
 
     if (!preview || !previewImg) return
-
-    // Nur auf Geräten mit Hover-Unterstützung
     if (!window.matchMedia('(hover: hover)').matches) return
     if (!window.matchMedia('(min-width: 901px)').matches) return
 
     const lines = document.querySelectorAll<HTMLAnchorElement>('[data-preview]')
+    let switchTimer: ReturnType<typeof setTimeout> | null = null
 
     lines.forEach((line) => {
+      if (line.dataset.previewInit) return   // bereits initialisiert
+      line.dataset.previewInit = '1'
+
       line.addEventListener('mouseenter', () => {
         const src = line.dataset.preview
         if (!src) return
 
-        // Bild nur wechseln wenn src sich ändert (verhindert Flackern)
         if (previewImg.getAttribute('src') !== src) {
+          clearTimeout(switchTimer ?? undefined)
           preview.classList.remove('is-visible')
-          setTimeout(() => {
+          switchTimer = setTimeout(() => {
             previewImg.src = src
             preview.classList.add('is-visible')
+            switchTimer = null
           }, 80)
         } else {
           preview.classList.add('is-visible')
@@ -217,6 +226,8 @@ const getYear = (date: Date) =>
       })
 
       line.addEventListener('mouseleave', () => {
+        clearTimeout(switchTimer ?? undefined)
+        switchTimer = null
         preview.classList.remove('is-visible')
       })
     })
