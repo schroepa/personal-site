@@ -24,6 +24,7 @@ const formatDate = (date: Date) =>
 
 const homeSections = [
   { id: 'section-intro',    label: 'Intro' },
+  { id: 'section-ueber',    label: 'Über' },
   { id: 'section-arbeit',   label: 'Arbeit' },
   { id: 'section-gedanken', label: 'Gedanken' },
   { id: 'section-kontakt',  label: 'Kontakt' },
@@ -59,7 +60,45 @@ const homeSections = [
       </div>
     </section>
 
-    <!-- ── Section 02: ARBEIT ─────────────────────────────────────────── -->
+    <!-- ── Section 02: ÜBER ──────────────────────────────────────────── -->
+    <section id="section-ueber" class="snap-section">
+      <div class="page-grid snap-content ueber-content">
+
+        <span class="t-label text-muted-foreground ueber-eyebrow">Über mich</span>
+
+        <div class="ueber-grid">
+
+          <!-- Linke Spalte: Stichworte / Statement -->
+          <div class="ueber-left">
+            <h2 class="t-h2 ueber-statement">
+              Design Engineer.<br>Berlin.<br>15+ Jahre.
+            </h2>
+            <p class="t-small text-muted-foreground ueber-keywords">
+              Systeme. Prozesse.<br>Menschen. Pixel.
+            </p>
+          </div>
+
+          <!-- Rechte Spalte: Bio-Text -->
+          <div class="ueber-right">
+            <p class="t-body ueber-para">
+              Seit über 15 Jahren gestalte ich digitale Produkte an der Schnittstelle von Design und Code. Mein Weg führte mich von High-Growth E-Commerce (DefShop) und Corporate Innovation (Oetker Digital) bis hin zum Aufbau komplexer B2B-Plattformen und Super-Apps.
+            </p>
+            <p class="t-body ueber-para">
+              Ich bezeichne mich selbst gerne als Design Engineer — weil ich die Sprache der Entwickler spreche. Ob ich skalierbare Design-Systeme auf Basis von shadcn/ui und Tailwind CSS entwerfe oder repetitive Design-Ops durch n8n und KI-Workflows automatisiere — mein Ziel ist immer ein nahtloser Übergang vom Pixel zum produktiven Code.
+            </p>
+            <p class="t-body ueber-para">
+              Ich glaube fest an die Kraft der physischen Zusammenarbeit. Deshalb findet man mich meistens direkt im Berliner Office, wo ich am liebsten in cross-funktionalen Teams komplexe Workflows in intuitive Erlebnisse verwandele.
+            </p>
+            <a href="/about" class="ueber-link t-small" data-cursor="link">
+              Mehr über mich →
+            </a>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Section 03: ARBEIT ─────────────────────────────────────────── -->
     <section id="section-arbeit" class="snap-section">
       <div class="page-grid snap-content arbeit-content">
 
@@ -253,12 +292,67 @@ const homeSections = [
     50%       { transform: translateY(5px); }
   }
 
-  /* ── Sections 02–04 ──────────────────────────────────────────────────── */
+  /* ── Sections 02–05 ──────────────────────────────────────────────────── */
+  .ueber-content,
   .arbeit-content,
   .gedanken-content,
   .kontakt-content {
     justify-content: flex-end;
     padding-bottom: 5rem;
+  }
+
+  /* ── Section 02: Über ────────────────────────────────────────────────── */
+  .ueber-eyebrow {
+    position: absolute;
+    top: 7rem;
+    left: var(--grid-pad);
+  }
+
+  .ueber-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: clamp(2rem, 5vw, 5rem);
+    align-items: end;
+    max-width: var(--text-max);
+  }
+
+  @media (max-width: 767px) {
+    .ueber-grid {
+      grid-template-columns: 1fr;
+      gap: 2rem;
+    }
+  }
+
+  .ueber-statement {
+    line-height: var(--leading-snug);
+    margin-bottom: 1.5rem;
+  }
+
+  .ueber-keywords {
+    line-height: var(--leading-loose);
+    opacity: 0.6;
+  }
+
+  .ueber-para {
+    color: var(--muted-foreground);
+    line-height: var(--leading-loose);
+    margin-bottom: 1rem;
+  }
+
+  .ueber-para:last-of-type {
+    margin-bottom: 1.5rem;
+  }
+
+  .ueber-link {
+    color: var(--foreground);
+    text-decoration: none;
+    border-bottom: 1px solid color-mix(in oklch, var(--foreground) 25%, transparent);
+    padding-bottom: 0.125rem;
+    transition: border-color 200ms ease;
+  }
+
+  .ueber-link:hover {
+    border-color: var(--foreground);
   }
 
   .section-label-row {
