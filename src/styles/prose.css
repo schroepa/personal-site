@@ -157,7 +157,7 @@
 .article-prose > pre,
 .article-prose > hr,
 .article-prose > table {
-  max-width: 42rem;
+  max-width: var(--text-max);
 }
 
 /* Absatz der NUR ein Bild enthält → volle Container-Breite */

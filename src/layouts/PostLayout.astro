@@ -75,7 +75,7 @@ const formattedDate = new Intl.DateTimeFormat('de-DE', {
     )}
 
     <!-- Content: max-w-5xl, Text auf max-w-2xl, Bilder auf volle Containerbreite -->
-    <div class="mx-auto max-w-5xl px-6">
+    <div class="page-grid">
 
       <header class="article-header">
         <h1 class="t-h1 mb-5" data-reveal="lines">{title}</h1>
@@ -188,7 +188,7 @@ const formattedDate = new Intl.DateTimeFormat('de-DE', {
 
   /* ── Header ─────────────────────────────────────────────────────────────── */
   .article-header {
-    max-width: 42rem;
+    max-width: var(--text-max);
     margin-bottom: 3rem;
     padding-top: 0.5rem;
   }
