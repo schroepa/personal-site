@@ -30,21 +30,20 @@ Dieses Prinzip arbeitet auf zwei Ebenen gleichzeitig:
 
 ### Typografische Umsetzung: Akzentschrift
 
-Ein einzelnes Schlüsselwort pro Kontext erhält die **Cormorant Garamond 500 Italic** — im Kontrast zur Geist Variable (sachlich, Swiss). Dieser Bruch ist kein Fehler, sondern eine Haltung.
+Ein einzelnes Schlüsselwort pro Kontext erhält **Geist Variable Oblique 10°** — kein Schriftmix, nur ein Formkontrast innerhalb derselben Sippe. Dieses Oblique ist synthetisiert: eine mathematisch präzise 10°-Neigung, kein kalligrafischer Kursivschnitt. Genau das ist Swiss-konform — Geometrie statt Handschrift.
 
-**Pairing-Logik:**  
-Geist = geometrische Grotesque (uniform, technisch, kein Strichkontrast)  
-Cormorant Garamond Italic = Hochkontrast-Antiqua (kalligrafisch, variabel, Renaissance)  
-→ Das klassische Swiss-Druckpairing: Helvetica + Garamond, digital.
+**Logik:**  
+Geist upright = sachlich, vertikal, technisch  
+Geist oblique 10° = dieselbe Sachlichkeit — mit Richtung, mit Haltung
 
-**Installation:** `@fontsource/cormorant-garamond` (Open Source, SIL OFL)
+**Kein externer Font nötig.** Geist Variable ist bereits geladen.
 
 **CSS-Klasse:**
 ```css
 .accent-word {
-  font-family: 'Cormorant Garamond', Georgia, serif;
-  font-style: italic;
-  font-weight: 500;
+  font-family: var(--font-sans); /* bleibt Geist Variable */
+  font-style: oblique 10deg;
+  font-weight: inherit;
 }
 ```
 

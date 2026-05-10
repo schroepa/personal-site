@@ -163,19 +163,17 @@
   --font-mono: 'Geist Mono', monospace;
 }
 
-/* ─── Akzentschrift: Cormorant Garamond Italic ───────────────────────────────
-   Open Source (SIL OFL), via @fontsource/cormorant-garamond
-   Prinzip: "Be bold but never be regular"
-   Hochkontrast-Antiqua als Gegenpol zur geometrischen Geist-Grotesque.
-   Swiss-Klassiker: Grotesque + Garamond = Helvetica + Garamond-Pairing.
+/* ─── Akzentschrift: Geist Variable Oblique ──────────────────────────────────
+   Keine externe Schrift — synthetisierter Schrägschnitt aus Geist Variable.
+   Prinzip: "Be bold but never be regular" — eine Sippe, ein Kontrast.
+   10° Oblique: mathematisch präzise, Swiss-konform, keine Kalligrafie.
    ─────────────────────────────────────────────────────────────────────────── */
-@import "@fontsource/cormorant-garamond/500-italic.css";
 
 /* Akzent-Klasse: ein Schlüsselwort, maximal, nur in Display-Größen (t-h2+) */
 .accent-word {
-  font-family: 'Cormorant Garamond', Georgia, serif;
-  font-style: italic;
-  font-weight: 500;
+  font-family: var(--font-sans); /* bleibt Geist Variable */
+  font-style: oblique 10deg;
+  font-weight: inherit;
 }
 
 /* ─── Additive: Typografie-Skala (Major Third, 1.250) ────────────────────── */
