@@ -2,7 +2,7 @@
 title: "Digital Art – Lettering, Graffiti, Tags & Styles"
 description: "Lesbarkeit ist dann doch nicht immer Respekt"
 coverImage: "/images/gallery/digital-graffiti/IMG_0132.webp"
-date: 2024-07-15
+date: 2026-11-05
 tags: ["UI Design", "Data Visualization", "React", "Recharts"]
 featured: true
 ---
