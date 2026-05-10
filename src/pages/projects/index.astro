@@ -17,17 +17,19 @@ const getYear = (date: Date) =>
   title="Projekte — Patrick Schröder"
   description="Ausgewählte Arbeiten aus Design und Entwicklung."
 >
-  <div class="page-grid pt-24 pb-32">
+  <!-- Hero: Header linksbündig am unteren Viewport-Rand -->
+  <div class="page-grid page-hero">
+    <header class="projects-header">
+      <h1 class="t-h1 mb-4" data-reveal="lines">Projekte</h1>
+      <p class="t-lead text-muted-foreground max-w-2xl">
+        Ausgewählte Arbeiten aus den Bereichen Interface Design,
+        Frontend-Entwicklung und Design-Systems.
+      </p>
+    </header>
+  </div>
 
-      <header class="projects-header">
-        <h1 class="t-h1 mb-4" data-reveal="lines">Projekte</h1>
-        <p class="t-lead text-muted-foreground max-w-2xl">
-          Ausgewählte Arbeiten aus den Bereichen Interface Design,
-          Frontend-Entwicklung und Design-Systems.
-        </p>
-      </header>
-
-      <!-- ── Textverzeichnis ─────────────────────────────────────── -->
+  <!-- Textverzeichnis scrollt darunter weiter -->
+  <div class="page-grid pb-32">
       <ol class="project-index" aria-label="Projektliste">
         {sorted.map((project, i) => {
           const slug = project.id.replace(/\.md$/, '')
@@ -65,8 +67,17 @@ const getYear = (date: Date) =>
 
 <style>
   /* ── Header ──────────────────────────────────────────────────────── */
+  /* ── Hero: volle Viewporthöhe, Header unten links ───────────────────── */
+  .page-hero {
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding-bottom: 5rem;
+  }
+
   .projects-header {
-    margin-bottom: 4rem;
+    margin-bottom: 0;
   }
 
   /* ── Index-Liste ─────────────────────────────────────────────────── */

@@ -11,16 +11,18 @@ const formatDate = (date: Date) =>
 ---
 
 <BaseLayout title="Blog — Patrick Schröder" description="Gedanken zu Design, Frontend und Tooling.">
-  <div class="page-grid pt-24 pb-24">
-
+  <!-- Hero: Header linksbündig am unteren Viewport-Rand -->
+  <div class="page-grid page-hero">
     <header class="blog-header">
       <h1 class="t-h1 mb-4" data-reveal="lines">Blog</h1>
       <p class="t-lead text-muted-foreground prose-col">
         Gedanken zu Design, Frontend-Entwicklung und den Tools dazwischen.
       </p>
     </header>
+  </div>
 
-    <!-- ── Kompakte Liste mit Thumbnail ──────────────────────────────── -->
+  <!-- Liste scrollt darunter weiter -->
+  <div class="page-grid pb-24">
     <ol class="post-list" aria-label="Alle Artikel">
       {sorted.map((post) => {
         const slug = post.id.replace(/\.md$/, '')
@@ -79,9 +81,18 @@ const formatDate = (date: Date) =>
 </BaseLayout>
 
 <style>
+  /* ── Hero: volle Viewporthöhe, Header unten links ───────────────────── */
+  .page-hero {
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding-bottom: 5rem;
+  }
+
   /* ── Header ──────────────────────────────────────────────────────────── */
   .blog-header {
-    margin-bottom: 3rem;
+    margin-bottom: 0;
   }
 
   /* ── Liste ───────────────────────────────────────────────────────────── */
