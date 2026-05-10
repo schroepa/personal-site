@@ -1,0 +1,466 @@
+# About-Seite — Implementation Plan
+
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+
+**Goal:** About-Seite unter `/about` erstellen — halbseitiges Portrait, Narrativ-Absätze, typografische Timeline, Tools-Liste, CTA-Block.
+
+**Architecture:** Einzelne Astro-Seite mit `BaseLayout`. Kein PostLayout (kein Cover-Wrap). Swiss-Typography-Prinzip: keine Cards, keine Borders, Hierarchie durch Abstand und Schrift. Portrait als 2-Spalten-Grid auf Desktop, gestapelt auf Mobile.
+
+**Tech Stack:** Astro, Tailwind v4, CSS Custom Properties, shadcn Button
+
+---
+
+## Dateistruktur
+
+| Aktion | Datei | Zweck |
+|---|---|---|
+| Create | `src/pages/about.astro` | Vollständige About-Seite |
+| Modify | `src/layouts/BaseLayout.astro` | „Über"-Link in navLinks |
+
+---
+
+### Task 1: About-Seite erstellen
+
+**Files:**
+- Create: `src/pages/about.astro`
+
+- [ ] **Schritt 1: Datei erstellen**
+
+  `src/pages/about.astro` mit folgendem vollständigen Inhalt anlegen:
+
+  ```astro
+  ---
+  import BaseLayout from '@/layouts/BaseLayout.astro'
+  import { Button } from '@/components/ui/button'
+  import { Badge } from '@/components/ui/badge'
+  ---
+
+  <BaseLayout
+    title="Über — Patrick Schröder"
+    description="Design Engineer aus Berlin. Aufgewachsen mit Spraydosen, groß geworden mit Code."
+  >
+    <div class="about-page">
+
+      <!-- ── 1. Hero: Portrait + Opening ──────────────────────────────── -->
+      <section class="about-hero">
+        <div class="mx-auto max-w-5xl px-6 pt-32 pb-20">
+          <div class="about-hero-grid">
+
+            <!-- Portrait halbseitig -->
+            <div class="about-portrait-col">
+              <div class="about-portrait-wrap">
+                <img
+                  src="/images/portrait.jpg"
+                  alt="Patrick Schröder"
+                  class="about-portrait-img"
+                  loading="eager"
+                  decoding="async"
+                />
+              </div>
+            </div>
+
+            <!-- Opening Text -->
+            <div class="about-opening-col">
+              <span class="t-label text-muted-foreground block mb-4">
+                Design Engineer — Berlin
+              </span>
+              <h1 class="t-hero mb-8" data-reveal="words">
+                Patrick Schröder
+              </h1>
+              <p class="t-lead text-muted-foreground">
+                Aufgewachsen mit Spraydosen,<br>
+                groß geworden mit Code.
+              </p>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      <!-- ── 2. Narrativ ───────────────────────────────────────────────── -->
+      <section class="mx-auto max-w-5xl px-6 pb-20">
+        <div class="max-w-2xl">
+
+          <!-- Graffiti-Bild als visueller Anker -->
+          <div class="about-graffiti mb-16">
+            <img
+              src="/images/gallery/digital-graffiti/IMG_0413.webp"
+              alt="Graffiti-Lettering von Patrick Schröder"
+              class="about-graffiti-img"
+              loading="lazy"
+              decoding="async"
+            />
+          </div>
+
+          <div class="about-narrative">
+            <p class="t-body mb-8">
+              Ich habe Buchstaben nicht mit dem Stift gelernt, sondern mit der Dose.
+              Graffiti hat mir beigebracht, wie Formen im Raum wirken, wie Farbe
+              Emotion trägt und warum Proportionen über Leben und Tod einer
+              Komposition entscheiden. Kein Kurs vermittelt das — man lernt es
+              an Wänden, bei Dunkelheit, unter Zeitdruck.
+            </p>
+
+            <p class="t-body mb-8">
+              Heute nenne ich mich Design Engineer — nicht weil es gut klingt,
+              sondern weil es beschreibt, was ich tue. Ich entwerfe nicht nur,
+              ich baue. Ich spreche die Sprache der Entwickler, denke in
+              Komponenten, Token und States. Design Systems sind mein
+              Hauptwerkzeug: lebendige Strukturen die im Code leben, nicht in
+              Statics vergilben.
+            </p>
+
+            <p class="t-body">
+              Privat betreibe ich ein Proxmox-Homelab, experimentiere mit
+              n8n-Workflows und finde heraus, wie Claude und Gemini die Art
+              verändern, wie ich über Design-Ops denke. Das ist kein Hobby —
+              es ist Methode. Wer versteht wie Systeme gebaut sind, baut
+              bessere Interfaces für sie.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── 3. Werdegang ──────────────────────────────────────────────── -->
+      <section class="mx-auto max-w-5xl px-6 pb-20">
+        <div class="max-w-2xl">
+          <h2 class="t-label text-muted-foreground mb-10 uppercase tracking-widest">
+            Werdegang
+          </h2>
+
+          <div class="about-timeline">
+
+            <div class="timeline-entry">
+              <div class="timeline-meta">
+                <span class="timeline-company">A Eins</span>
+                <span class="timeline-role">Lead Design &amp; Digital Transformation</span>
+              </div>
+              <p class="timeline-desc t-small text-muted-foreground">
+                Führung von Design- und Transformationsprozessen auf
+                Unternehmensebene. Aufbau skalierbarer Design-Systeme und
+                KI-gestützter Workflows.
+              </p>
+            </div>
+
+            <div class="timeline-entry">
+              <div class="timeline-meta">
+                <span class="timeline-company">Oetker Digital</span>
+                <span class="timeline-role">Corporate Innovation</span>
+              </div>
+              <p class="timeline-desc t-small text-muted-foreground">
+                Gestaltung komplexer B2B-Plattformen und Super-Apps im
+                Corporate-Kontext. Von der ersten Skizze bis zum
+                produktiven Code.
+              </p>
+            </div>
+
+            <div class="timeline-entry">
+              <div class="timeline-meta">
+                <span class="timeline-company">DefShop</span>
+                <span class="timeline-role">High-Growth E-Commerce</span>
+              </div>
+              <p class="timeline-desc t-small text-muted-foreground">
+                Interface Design und Produktentwicklung in einem der
+                schnellst-wachsenden Street-Culture-Shops Europas.
+              </p>
+            </div>
+
+            <div class="timeline-entry timeline-entry--last">
+              <div class="timeline-meta">
+                <span class="timeline-company">Graffiti / Straße</span>
+                <span class="timeline-role">Visuelles Fundament</span>
+              </div>
+              <p class="timeline-desc t-small text-muted-foreground">
+                Wo alles begann. Letterformen, Komposition, Farbe —
+                gelernt an Wänden, nicht in Klassenzimmern.
+              </p>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      <!-- ── 4. Womit ich arbeite ──────────────────────────────────────── -->
+      <section class="mx-auto max-w-5xl px-6 pb-20">
+        <div class="max-w-2xl">
+          <h2 class="t-label text-muted-foreground mb-10 uppercase tracking-widest">
+            Womit ich arbeite
+          </h2>
+
+          <div class="about-tools-grid">
+            <div class="tools-col">
+              <h3 class="t-label text-foreground mb-4 uppercase tracking-widest">
+                Design &amp; Product
+              </h3>
+              <ul class="tools-list">
+                <li>Figma</li>
+                <li>Design Systems</li>
+                <li>shadcn/ui</li>
+                <li>Tailwind CSS v4</li>
+                <li>Astro, React</li>
+                <li>TypeScript</li>
+              </ul>
+            </div>
+            <div class="tools-col">
+              <h3 class="t-label text-foreground mb-4 uppercase tracking-widest">
+                Engineering &amp; Automation
+              </h3>
+              <ul class="tools-list">
+                <li>n8n</li>
+                <li>Claude / Gemini CLI</li>
+                <li>Proxmox Homelab</li>
+                <li>Vercel</li>
+                <li>Git</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── 5. CTA ─────────────────────────────────────────────────────── -->
+      <section class="mx-auto max-w-5xl px-6 pb-32">
+        <div class="max-w-2xl">
+          <div class="about-cta">
+            <h2 class="t-h2 mb-8">
+              Lass uns zusammenarbeiten.
+            </h2>
+            <div class="about-cta-actions">
+              <Button
+                data-magnetic
+                data-cursor="button"
+                client:visible
+              >
+                <a href="mailto:kontakt@ptrckschrdtr.de" class="no-underline">
+                  Projekt anfragen
+                </a>
+              </Button>
+              <div class="about-cta-secondary">
+                <a
+                  href="/cv.pdf"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="t-small text-muted-foreground underline underline-offset-4 hover:text-foreground transition-colors duration-200"
+                  data-cursor="link"
+                >
+                  Lebenslauf ↓
+                </a>
+                <span class="t-small text-muted-foreground">·</span>
+                <a
+                  href="/projects"
+                  class="t-small text-muted-foreground underline underline-offset-4 hover:text-foreground transition-colors duration-200"
+                  data-cursor="link"
+                >
+                  Projekte ansehen
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </BaseLayout>
+
+  <style>
+    /* ── Hero Grid: Portrait halbseitig ──────────────────────────────────── */
+    .about-hero-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 3rem;
+    }
+
+    @media (min-width: 768px) {
+      .about-hero-grid {
+        grid-template-columns: 1fr 1fr;
+        align-items: start;
+        gap: 5rem;
+      }
+    }
+
+    /* ── Portrait ─────────────────────────────────────────────────────────── */
+    .about-portrait-wrap {
+      width: 100%;
+      aspect-ratio: 3 / 4;
+      overflow: hidden;
+    }
+
+    .about-portrait-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center top;
+      display: block;
+    }
+
+    /* ── Opening ──────────────────────────────────────────────────────────── */
+    .about-opening-col {
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding-bottom: 0.5rem;
+    }
+
+    @media (min-width: 768px) {
+      .about-opening-col {
+        padding-top: 4rem;
+      }
+    }
+
+    /* ── Graffiti-Anker ───────────────────────────────────────────────────── */
+    .about-graffiti {
+      width: 100%;
+      overflow: hidden;
+    }
+
+    .about-graffiti-img {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    /* ── Narrative ────────────────────────────────────────────────────────── */
+    .about-narrative p {
+      line-height: var(--leading-loose);
+    }
+
+    /* ── Timeline ─────────────────────────────────────────────────────────── */
+    .about-timeline {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .timeline-entry {
+      padding-bottom: 2.5rem;
+      margin-bottom: 2.5rem;
+      border-bottom: 1px solid color-mix(in oklch, var(--foreground) 8%, transparent);
+    }
+
+    .timeline-entry--last {
+      border-bottom: none;
+      margin-bottom: 0;
+    }
+
+    .timeline-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .timeline-company {
+      font-size: var(--text-base);
+      font-weight: 500;
+      letter-spacing: var(--tracking-snug);
+      color: var(--foreground);
+    }
+
+    .timeline-role {
+      font-size: var(--text-xs);
+      letter-spacing: var(--tracking-wide);
+      text-transform: uppercase;
+      color: var(--muted-foreground);
+    }
+
+    /* ── Tools ────────────────────────────────────────────────────────────── */
+    .about-tools-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3rem;
+    }
+
+    @media (max-width: 480px) {
+      .about-tools-grid {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+      }
+    }
+
+    .tools-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0.625rem;
+    }
+
+    .tools-list li {
+      font-size: var(--text-sm);
+      color: var(--muted-foreground);
+      line-height: var(--leading-normal);
+    }
+
+    /* ── CTA ──────────────────────────────────────────────────────────────── */
+    .about-cta-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+      align-items: flex-start;
+    }
+
+    .about-cta-secondary {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+  </style>
+  ```
+
+- [ ] **Schritt 2: Build-Check**
+
+  ```bash
+  cd /Users/ptrck/Documents/personal-site-ptrckschrdtr/personal-site-ptrckschrdtr && npm run build
+  ```
+
+  Erwartetes Ergebnis: `[build] Complete!` ohne Fehler. Die Seitenzahl steigt um 1.
+
+- [ ] **Schritt 3: Commit**
+
+  ```bash
+  git add src/pages/about.astro
+  git commit -m "feat: About-Seite mit Portrait, Narrativ, Timeline, Tools und CTA"
+  ```
+
+---
+
+### Task 2: Navigation-Link hinzufügen
+
+**Files:**
+- Modify: `src/layouts/BaseLayout.astro`
+
+- [ ] **Schritt 1: navLinks erweitern**
+
+  In `src/layouts/BaseLayout.astro` die `navLinks`-Array ergänzen:
+
+  ```ts
+  // Vorher:
+  const navLinks = [
+    { href: "/", label: "Start" },
+    { href: "/blog", label: "Blog" },
+    { href: "/projects", label: "Projekte" },
+  ]
+
+  // Nachher:
+  const navLinks = [
+    { href: "/", label: "Start" },
+    { href: "/about", label: "Über" },
+    { href: "/blog", label: "Blog" },
+    { href: "/projects", label: "Projekte" },
+  ]
+  ```
+
+- [ ] **Schritt 2: Build-Check**
+
+  ```bash
+  npm run build
+  ```
+
+  Erwartetes Ergebnis: `[build] Complete!`
+
+- [ ] **Schritt 3: Finaler Build + Push**
+
+  ```bash
+  git add src/layouts/BaseLayout.astro
+  git commit -m "feat: Über-Link in Navigation"
+  git push origin main
+  ```
