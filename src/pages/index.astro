@@ -48,8 +48,9 @@ const homeSections = [
         </span>
 
         <div class="intro-statement">
-          <h1 class="t-hero intro-heading" data-reveal="lines">
-            Ich entwerfe <span class="accent-word">Systeme.</span><br>Ich baue sie auch.
+          <h1 class="t-hero intro-heading">
+            <span class="intro-line">Ich entwerfe <span class="accent-word">Systeme.</span></span>
+            <span class="intro-line">Ich baue sie auch.</span>
           </h1>
         </div>
 
@@ -288,6 +289,10 @@ const homeSections = [
 
   .intro-heading {
     line-height: 0.92;
+  }
+
+  .intro-line {
+    display: block;
   }
 
   /* ── Scroll-Hint ─────────────────────────────────────────────────────── */
