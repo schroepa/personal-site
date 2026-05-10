@@ -163,19 +163,6 @@
   --font-mono: 'Geist Mono', monospace;
 }
 
-/* ─── Akzentschrift: Geist Variable Oblique ──────────────────────────────────
-   Keine externe Schrift — synthetisierter Schrägschnitt aus Geist Variable.
-   Prinzip: "Be bold but never be regular" — eine Sippe, ein Kontrast.
-   10° Oblique: mathematisch präzise, Swiss-konform, keine Kalligrafie.
-   ─────────────────────────────────────────────────────────────────────────── */
-
-/* Akzent-Klasse: ein Schlüsselwort, maximal, nur in Display-Größen (t-h2+) */
-/* Zwei Achsen Kontrast: italic (Neigung) + weight 300 (leichter als Kontext 500) */
-.accent-word {
-  font-family: var(--font-sans);
-  font-style: italic;
-  font-weight: 300;
-}
 
 /* ─── Additive: Typografie-Skala (Major Third, 1.250) ────────────────────── */
 
