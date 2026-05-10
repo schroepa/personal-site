@@ -1,0 +1,171 @@
+---
+interface Section {
+  id: string    // entspricht der id des <section>-Elements
+  label: string // Anzeige-Label, z.B. "Intro"
+}
+
+interface Props {
+  sections: Section[]
+}
+
+const { sections } = Astro.props
+---
+
+<nav
+  class="section-indicator"
+  id="section-indicator"
+  aria-label="Seitennavigation"
+>
+  {sections.map((section, i) => (
+    <button
+      class="si-item"
+      data-target={section.id}
+      aria-label={`Springe zu: ${section.label}`}
+      aria-current={i === 0 ? "true" : undefined}
+      type="button"
+    >
+      <span class="si-label">{section.label}</span>
+      <span class="si-line" aria-hidden="true"></span>
+      <span class="si-num" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+    </button>
+  ))}
+</nav>
+
+<style>
+  /* ── Container: fixed, rechte Kante, vertikal zentriert ───────────────── */
+  .section-indicator {
+    position: fixed;
+    right: 2rem;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 55;
+    display: flex;
+    flex-direction: column;
+    gap: 1.75rem;
+  }
+
+  @media (max-width: 1023px) {
+    .section-indicator {
+      display: none;
+    }
+  }
+
+  /* ── Item: Button mit Label + Linie + Nummer ───────────────────────────── */
+  .si-item {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    background: none;
+    border: none;
+    padding: 0.25rem 0;
+    cursor: pointer;
+  }
+
+  .si-item:focus-visible {
+    outline: 2px solid var(--foreground);
+    outline-offset: 4px;
+    border-radius: 2px;
+  }
+
+  /* ── Nummer ────────────────────────────────────────────────────────────── */
+  .si-num {
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-wide);
+    font-variant-numeric: tabular-nums;
+    color: var(--foreground);
+    opacity: 0.25;
+    transition: opacity 200ms ease;
+    min-width: 1.5rem;
+    text-align: right;
+  }
+
+  /* ── Linie ─────────────────────────────────────────────────────────────── */
+  .si-line {
+    display: block;
+    height: 1px;
+    width: 16px;
+    background: var(--foreground);
+    opacity: 0.2;
+    transition: width 250ms ease, opacity 250ms ease;
+  }
+
+  /* ── Label ─────────────────────────────────────────────────────────────── */
+  .si-label {
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-wide);
+    text-transform: uppercase;
+    color: var(--foreground);
+    opacity: 0;
+    transform: translateX(6px);
+    transition:
+      opacity 200ms ease,
+      transform 200ms ease;
+    white-space: nowrap;
+  }
+
+  /* ── Aktiv-Zustand ─────────────────────────────────────────────────────── */
+  .si-item[aria-current="true"] .si-num   { opacity: 1; }
+  .si-item[aria-current="true"] .si-line  { width: 28px; opacity: 0.9; }
+  .si-item[aria-current="true"] .si-label { opacity: 0.9; transform: translateX(0); }
+
+  /* ── Hover-Zustand ─────────────────────────────────────────────────────── */
+  .si-item:hover .si-num   { opacity: 0.7; }
+  .si-item:hover .si-line  { width: 22px; opacity: 0.5; }
+  .si-item:hover .si-label { opacity: 0.5; transform: translateX(0); }
+
+  @media (prefers-reduced-motion: reduce) {
+    .si-num, .si-line, .si-label { transition: none; }
+  }
+</style>
+
+<script>
+  function initSectionIndicator() {
+    const indicator = document.getElementById('section-indicator')
+    if (!indicator) return
+
+    const scrollContainer = document.querySelector<HTMLElement>('.scroll-container')
+    if (!scrollContainer) return
+
+    const buttons = indicator.querySelectorAll<HTMLButtonElement>('.si-item')
+
+    function setActive(sectionId: string) {
+      buttons.forEach((btn) => {
+        const isActive = btn.dataset.target === sectionId
+        btn.setAttribute('aria-current', isActive ? 'true' : 'false')
+      })
+    }
+
+    const sections = Array.from(
+      scrollContainer.querySelectorAll<HTMLElement>('.snap-section')
+    )
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setActive(entry.target.id)
+          }
+        })
+      },
+      {
+        root: scrollContainer,
+        threshold: 0.5,
+      }
+    )
+
+    sections.forEach((section) => observer.observe(section))
+
+    buttons.forEach((btn) => {
+      if (btn.dataset.indicatorInit) return
+      btn.dataset.indicatorInit = '1'
+      btn.addEventListener('click', () => {
+        const targetId = btn.dataset.target
+        if (!targetId) return
+        const target = document.getElementById(targetId)
+        target?.scrollIntoView({ behavior: 'smooth' })
+      })
+    })
+  }
+
+  document.addEventListener('astro:page-load', initSectionIndicator)
+</script>
