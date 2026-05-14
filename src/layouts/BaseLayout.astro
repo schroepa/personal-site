@@ -71,6 +71,25 @@ const email = { user: "kontakt", domain: "ptrckschrdtr.de" }
 <!doctype html>
 <html lang="de" class="overflow-x-hidden scroll-smooth">
   <head>
+    <!-- Google Consent Mode v2: Defaults ZUERST, vor allem anderen -->
+    <script is:inline>
+      window.dataLayer = window.dataLayer || []
+      function gtag() { dataLayer.push(arguments) }
+
+      gtag('consent', 'default', {
+        ad_storage:             'denied',
+        ad_user_data:           'denied',
+        ad_personalization:     'denied',
+        analytics_storage:      'denied',
+        functionality_storage:  'denied',
+        personalization_storage:'denied',
+        security_storage:       'granted',
+        wait_for_update:        500
+      })
+
+      gtag('set', 'ads_data_redaction', true)
+      gtag('set', 'url_passthrough', false)
+    </script>
     <!-- Cookiebot ZUERST — blockiert alle anderen Scripts bis Consent -->
     <script
       id="Cookiebot"
