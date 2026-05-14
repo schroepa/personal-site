@@ -1,7 +1,6 @@
 ---
 // PostHog analytics snippet with View Transitions support
-// Uses is:inline to prevent Astro from processing the script
-// Includes initialization guard to prevent stack overflow with ClientRouter
+// Cookiebot-gated: loads only after statistics consent
 ---
 
 <script
@@ -11,11 +10,10 @@
     apiHost: import.meta.env.PUBLIC_POSTHOG_HOST,
   }}
 >
-  // IMPORTANT: Guard against multiple initializations during view transitions
-  // Without this guard, ClientRouter's soft navigation can re-execute the inline script
-  // during page transitions, causing a stack overflow error.
-  if (!window.__posthog_initialized) {
+  function initPostHog() {
+    if (window.__posthog_initialized) return
     window.__posthog_initialized = true
+
     !(function (t, e) {
       var o, n, p, r
       e.__SV ||
@@ -65,11 +63,30 @@
         }),
         (e.__SV = 1))
     })(document, window.posthog || [])
+
     posthog.init(apiKey || "", {
       api_host: apiHost,
       defaults: "2026-01-30",
-      // IMPORTANT: Use 'history_change' to automatically track pageviews during soft navigation
       capture_pageview: "history_change",
     })
   }
+
+  // Bereits zugestimmt (z. B. Folgebesuch): sofort laden
+  if (window.Cookiebot?.consent?.statistics) {
+    initPostHog()
+  }
+
+  // Erstzustimmung im Banner
+  window.addEventListener("CookiebotOnAccept", function () {
+    if (Cookiebot.consent.statistics) {
+      initPostHog()
+    }
+  })
+
+  // Consent widerrufen: PostHog opt-out
+  window.addEventListener("CookiebotOnDecline", function () {
+    if (!Cookiebot.consent.statistics) {
+      window.posthog?.opt_out_capturing()
+    }
+  })
 </script>
