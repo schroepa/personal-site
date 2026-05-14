@@ -1,6 +1,7 @@
 ---
 import { ViewTransitions } from "astro:transitions"
 import CustomCursor from "@/components/astro/CustomCursor.astro"
+import PostHog from "@/components/posthog.astro"
 import "@/styles/global.css"
 import "@/styles/typography.css"
 import "@/styles/animations.css"
@@ -10,7 +11,7 @@ interface Props {
   title?: string
   description?: string
   ogImage?: string
-  ogType?: 'website' | 'article'
+  ogType?: "website" | "article"
   canonicalURL?: string
   articleDate?: Date
   articleAuthor?: string
@@ -21,7 +22,7 @@ const {
   title = "Patrick Schröder — UI Designer & Developer",
   description = "Personal site of Patrick Schröder, UI Designer and Frontend Developer.",
   ogImage,
-  ogType = 'website',
+  ogType = "website",
   canonicalURL = Astro.url.href,
   articleDate,
   articleAuthor,
@@ -29,14 +30,14 @@ const {
 } = Astro.props
 
 const siteName = "ptrckschrdtr.de"
-const siteUrl  = "https://ptrckschrdtr.de"
+const siteUrl = "https://ptrckschrdtr.de"
 const ogImageURL = ogImage
   ? new URL(ogImage, siteUrl).toString()
   : `${siteUrl}/og-default.png`
 
 // OG-Bildgröße: Cover-Images sind 2100×900, Default ist 1920×1080
-const ogImageWidth  = ogImage ? 2100 : 1920
-const ogImageHeight = ogImage ? 900  : 1080
+const ogImageWidth = ogImage ? 2100 : 1920
+const ogImageHeight = ogImage ? 900 : 1080
 
 const personSchema = {
   "@context": "https://schema.org",
@@ -59,47 +60,72 @@ const navLinks = [
 
 // ── Social Links — hier updaten ───────────────────────────────────────────
 const social = {
-  linkedin:  'https://linkedin.com/in/ptrckschrdtr',   // ← URL eintragen
-  instagram: 'https://instagram.com/ptrckschrdtr',      // ← URL eintragen
-  github:    'https://github.com/ptrckschrdtr',         // ← URL eintragen
+  linkedin: "https://linkedin.com/in/ptrckschrdtr", // ← URL eintragen
+  instagram: "https://instagram.com/ptrckschrdtr", // ← URL eintragen
+  github: "https://github.com/ptrckschrdtr", // ← URL eintragen
 }
 // ── E-Mail (Bot-Schutz: kein mailto im HTML) ─────────────────────────────
-const email = { user: 'kontakt', domain: 'ptrckschrdtr.de' }
+const email = { user: "kontakt", domain: "ptrckschrdtr.de" }
 ---
 
 <!doctype html>
 <html lang="de" class="overflow-x-hidden scroll-smooth">
   <head>
-
     <!-- Dark-Mode: FOUC-Prevention — synchron vor dem ersten Paint ──────── -->
     <script is:inline>
-      (function() {
-        const stored = localStorage.getItem('theme')
-        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
-        if (stored === 'dark' || (!stored && prefersDark)) {
-          document.documentElement.classList.add('dark')
+      ;(function () {
+        const stored = localStorage.getItem("theme")
+        const prefersDark = window.matchMedia(
+          "(prefers-color-scheme: dark)"
+        ).matches
+        if (stored === "dark" || (!stored && prefersDark)) {
+          document.documentElement.classList.add("dark")
         }
       })()
     </script>
 
     <!-- Google tag (gtag.js) -->
-    <script is:inline async src="https://www.googletagmanager.com/gtag/js?id=G-3SFN6YV6W9"></script>
+    <script
+      is:inline
+      async
+      src="https://www.googletagmanager.com/gtag/js?id=G-3SFN6YV6W9"></script>
     <script is:inline>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', 'G-3SFN6YV6W9');
+      window.dataLayer = window.dataLayer || []
+      function gtag() {
+        dataLayer.push(arguments)
+      }
+      gtag("js", new Date())
+      gtag("config", "G-3SFN6YV6W9")
     </script>
 
     <!-- Google Tag Manager -->
-    <script is:inline>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-    })(window,document,'script','dataLayer','GTM-T4HLWZWZ');</script>
+    <script is:inline>
+      ;(function (w, d, s, l, i) {
+        w[l] = w[l] || []
+        w[l].push({ "gtm.start": new Date().getTime(), event: "gtm.js" })
+        var f = d.getElementsByTagName(s)[0],
+          j = d.createElement(s),
+          dl = l != "dataLayer" ? "&l=" + l : ""
+        j.async = true
+        j.src = "https://www.googletagmanager.com/gtm.js?id=" + i + dl
+        f.parentNode.insertBefore(j, f)
+      })(window, document, "script", "dataLayer", "GTM-T4HLWZWZ")
+    </script>
     <!-- End Google Tag Manager -->
 
     <meta charset="UTF-8" />
+    <!-- Fonts: Fontsource-CSS aus dem Bundle nehmen — Vite löst url(./files/…) dort nicht zuverlässig auf (Build-Warnungen / Risiko abgebrochener Builds). Gleiche npm-Versionen wie zuvor, ausgeliefert über jsDelivr. -->
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/@fontsource-variable/geist@5.2.8/index.css"
+      crossorigin="anonymous"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/@fontsource/geist-mono@5.2.7/index.css"
+      crossorigin="anonymous"
+    />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="generator" content={Astro.generator} />
 
@@ -112,49 +138,66 @@ const email = { user: 'kontakt', domain: 'ptrckschrdtr.de' }
     <link rel="canonical" href={canonicalURL} />
 
     <!-- Open Graph -->
-    <meta property="og:type"         content={ogType} />
-    <meta property="og:url"          content={canonicalURL} />
-    <meta property="og:site_name"    content={siteName} />
-    <meta property="og:title"        content={title} />
-    <meta property="og:description"  content={description} />
-    <meta property="og:image"        content={ogImageURL} />
-    <meta property="og:image:width"  content={String(ogImageWidth)} />
+    <meta property="og:type" content={ogType} />
+    <meta property="og:url" content={canonicalURL} />
+    <meta property="og:site_name" content={siteName} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={ogImageURL} />
+    <meta property="og:image:width" content={String(ogImageWidth)} />
     <meta property="og:image:height" content={String(ogImageHeight)} />
-    <meta property="og:image:alt"    content={title} />
-    <meta property="og:locale"       content="de_DE" />
-    <meta property="og:logo"         content={`${siteUrl}/logo.svg`} />
+    <meta property="og:image:alt" content={title} />
+    <meta property="og:locale" content="de_DE" />
+    <meta property="og:logo" content={`${siteUrl}/logo.svg`} />
 
     <!-- Article-spezifische OG-Tags (nur bei og:type="article") -->
-    {ogType === 'article' && articleDate && (
-      <meta property="article:published_time" content={articleDate.toISOString()} />
-    )}
-    {ogType === 'article' && articleAuthor && (
-      <meta property="article:author" content={articleAuthor} />
-    )}
-    {ogType === 'article' && articleTags.map(tag => (
-      <meta property="article:tag" content={tag} />
-    ))}
+    {
+      ogType === "article" && articleDate && (
+        <meta
+          property="article:published_time"
+          content={articleDate.toISOString()}
+        />
+      )
+    }
+    {
+      ogType === "article" && articleAuthor && (
+        <meta property="article:author" content={articleAuthor} />
+      )
+    }
+    {
+      ogType === "article" &&
+        articleTags.map((tag) => <meta property="article:tag" content={tag} />)
+    }
 
     <!-- Twitter / X Card -->
-    <meta property="twitter:card"        content="summary_large_image" />
-    <meta property="twitter:title"       content={title} />
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:title" content={title} />
     <meta property="twitter:description" content={description} />
-    <meta property="twitter:image"       content={ogImageURL} />
-    <meta property="twitter:image:alt"   content={title} />
+    <meta property="twitter:image" content={ogImageURL} />
+    <meta property="twitter:image:alt" content={title} />
 
     <!-- JSON-LD -->
-    <script type="application/ld+json" set:html={JSON.stringify(personSchema)} />
+    <script
+      type="application/ld+json"
+      set:html={JSON.stringify(personSchema)}
+    />
 
     <ViewTransitions />
+    <PostHog />
   </head>
   <body
     class="relative min-h-screen overflow-x-hidden bg-background text-foreground antialiased"
   >
     <a href="#main-content" class="skip-link">Zum Inhalt springen</a>
-  <!-- Google Tag Manager (noscript) -->
-  <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-T4HLWZWZ"
-  height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
-  <!-- End Google Tag Manager (noscript) -->
+    <!-- Google Tag Manager (noscript) -->
+    <noscript
+      ><iframe
+        src="https://www.googletagmanager.com/ns.html?id=GTM-T4HLWZWZ"
+        height="0"
+        width="0"
+        style="display:none;visibility:hidden"></iframe></noscript
+    >
+    <!-- End Google Tag Manager (noscript) -->
     <CustomCursor />
 
     <!-- ── Corner: Logo oben links ──────────────────────────────────── -->
@@ -172,16 +215,18 @@ const email = { user: 'kontakt', domain: 'ptrckschrdtr.de' }
 
     <!-- ── Corner: Navigation oben rechts (Desktop) ────────────────── -->
     <nav class="corner-nav" aria-label="Hauptnavigation">
-      {navLinks.map((link) => (
-        <a
-          href={link.href}
-          class="corner-nav-link"
-          data-cursor="link"
-          aria-current={Astro.url.pathname === link.href ? "page" : undefined}
-        >
-          {link.label}
-        </a>
-      ))}
+      {
+        navLinks.map((link) => (
+          <a
+            href={link.href}
+            class="corner-nav-link"
+            data-cursor="link"
+            aria-current={Astro.url.pathname === link.href ? "page" : undefined}
+          >
+            {link.label}
+          </a>
+        ))
+      }
     </nav>
 
     <!-- ── Theme Toggle: unten links, fixiert ──────────────────────────── -->
@@ -207,24 +252,39 @@ const email = { user: 'kontakt', domain: 'ptrckschrdtr.de' }
     </button>
 
     <!-- ── Mobile Overlay ───────────────────────────────────────────── -->
-    <div id="nav-overlay" class="nav-overlay" aria-hidden="true" role="dialog" aria-label="Navigation">
+    <div
+      id="nav-overlay"
+      class="nav-overlay"
+      aria-hidden="true"
+      role="dialog"
+      aria-label="Navigation"
+    >
       <nav class="nav-overlay-links" aria-label="Mobile Navigation">
-        {navLinks.map((link, i) => (
-          <a
-            href={link.href}
-            class="nav-overlay-link"
-            style={`--i: ${i}`}
-            data-cursor="link"
-            aria-current={Astro.url.pathname === link.href ? "page" : undefined}
-          >
-            {link.label}
-          </a>
-        ))}
+        {
+          navLinks.map((link, i) => (
+            <a
+              href={link.href}
+              class="nav-overlay-link"
+              style={`--i: ${i}`}
+              data-cursor="link"
+              aria-current={
+                Astro.url.pathname === link.href ? "page" : undefined
+              }
+            >
+              {link.label}
+            </a>
+          ))
+        }
       </nav>
       <div class="nav-overlay-footer">
         <a href="/impressum" class="nav-overlay-small">Impressum</a>
         <a href="/datenschutz" class="nav-overlay-small">Datenschutz</a>
-        <button id="theme-toggle-mobile" type="button" class="nav-overlay-small" style="background:none;border:none;padding:0;cursor:pointer;">
+        <button
+          id="theme-toggle-mobile"
+          type="button"
+          class="nav-overlay-small"
+          style="background:none;border:none;padding:0;cursor:pointer;"
+        >
           <span id="theme-toggle-mobile-label">DUNKEL</span>
         </button>
       </div>
@@ -237,9 +297,7 @@ const email = { user: 'kontakt', domain: 'ptrckschrdtr.de' }
 
     <!-- ── Footer ───────────────────────────────────────────────────────── -->
     <footer class="site-footer page-grid" aria-label="Seiten-Footer">
-
       <div class="footer-inner">
-
         <!-- Obere Zeile: Identität links / Social + E-Mail rechts -->
         <div class="footer-top">
           <div class="footer-identity">
@@ -250,16 +308,34 @@ const email = { user: 'kontakt', domain: 'ptrckschrdtr.de' }
           </div>
 
           <nav class="footer-social" aria-label="Social Media">
-            <a href={social.linkedin} target="_blank" rel="noopener noreferrer"
-               class="footer-link" data-cursor="link" aria-label="LinkedIn Profil">
+            <a
+              href={social.linkedin}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="footer-link"
+              data-cursor="link"
+              aria-label="LinkedIn Profil"
+            >
               LinkedIn ↗
             </a>
-            <a href={social.instagram} target="_blank" rel="noopener noreferrer"
-               class="footer-link" data-cursor="link" aria-label="Instagram Profil">
+            <a
+              href={social.instagram}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="footer-link"
+              data-cursor="link"
+              aria-label="Instagram Profil"
+            >
               Instagram ↗
             </a>
-            <a href={social.github} target="_blank" rel="noopener noreferrer"
-               class="footer-link" data-cursor="link" aria-label="GitHub Profil">
+            <a
+              href={social.github}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="footer-link"
+              data-cursor="link"
+              aria-label="GitHub Profil"
+            >
               GitHub ↗
             </a>
             <!-- E-Mail: Bot-Schutz via JS — kein mailto im HTML-Quelltext -->
@@ -281,12 +357,15 @@ const email = { user: 'kontakt', domain: 'ptrckschrdtr.de' }
             © {new Date().getFullYear()} Patrick Schröder
           </span>
           <nav class="footer-legal" aria-label="Rechtliches">
-            <a href="/impressum" class="footer-link" data-cursor="link">Impressum</a>
+            <a href="/impressum" class="footer-link" data-cursor="link"
+              >Impressum</a
+            >
             <span class="footer-sep" aria-hidden="true">·</span>
-            <a href="/datenschutz" class="footer-link" data-cursor="link">Datenschutz</a>
+            <a href="/datenschutz" class="footer-link" data-cursor="link"
+              >Datenschutz</a
+            >
           </nav>
         </div>
-
       </div>
     </footer>
 
@@ -297,10 +376,10 @@ const email = { user: 'kontakt', domain: 'ptrckschrdtr.de' }
 
       // Dark Mode über View Transitions hinweg erhalten:
       // Bevor Astro das neue Dokument einsetzt, .dark auf das eingehende übertragen.
-      document.addEventListener('astro:before-swap', (e) => {
+      document.addEventListener("astro:before-swap", (e) => {
         const event = e as { newDocument: Document }
-        if (document.documentElement.classList.contains('dark')) {
-          event.newDocument.documentElement.classList.add('dark')
+        if (document.documentElement.classList.contains("dark")) {
+          event.newDocument.documentElement.classList.add("dark")
         }
       })
 
@@ -311,97 +390,109 @@ const email = { user: 'kontakt', domain: 'ptrckschrdtr.de' }
         initHamburger()
         initThemeToggle()
         initEmailLinks()
+        initSocialLinks()
         initScramble()
       })
 
       function initThemeToggle() {
-        const label   = document.getElementById('theme-toggle-label')
-        const toggle  = document.getElementById('theme-toggle')
-        const labelM  = document.getElementById('theme-toggle-mobile-label')
-        const toggleM = document.getElementById('theme-toggle-mobile')
+        const label = document.getElementById("theme-toggle-label")
+        const toggle = document.getElementById("theme-toggle")
+        const labelM = document.getElementById("theme-toggle-mobile-label")
+        const toggleM = document.getElementById("theme-toggle-mobile")
 
         function isDark() {
-          return document.documentElement.classList.contains('dark')
+          return document.documentElement.classList.contains("dark")
         }
 
         function updateLabels() {
           const dark = isDark()
-          const text = dark ? 'HELL' : 'DUNKEL'
-          const aria = dark ? 'Zu Hell-Modus wechseln' : 'Zu Dunkel-Modus wechseln'
-          if (label)  label.textContent  = text
+          const text = dark ? "HELL" : "DUNKEL"
+          const aria = dark
+            ? "Zu Hell-Modus wechseln"
+            : "Zu Dunkel-Modus wechseln"
+          if (label) label.textContent = text
           if (labelM) labelM.textContent = text
-          if (toggle)  toggle.setAttribute('aria-label',  aria)
-          if (toggleM) toggleM.setAttribute('aria-label', aria)
+          if (toggle) toggle.setAttribute("aria-label", aria)
+          if (toggleM) toggleM.setAttribute("aria-label", aria)
         }
 
         function applyTheme(dark: boolean) {
-          document.documentElement.classList.toggle('dark', dark)
-          localStorage.setItem('theme', dark ? 'dark' : 'light')
+          document.documentElement.classList.toggle("dark", dark)
+          localStorage.setItem("theme", dark ? "dark" : "light")
           updateLabels()
+          window.posthog?.capture("theme_toggled", {
+            theme: dark ? "dark" : "light",
+          })
         }
 
         updateLabels()
 
-        toggle?.addEventListener('click',  () => applyTheme(!isDark()))
-        toggleM?.addEventListener('click', () => applyTheme(!isDark()))
+        toggle?.addEventListener("click", () => applyTheme(!isDark()))
+        toggleM?.addEventListener("click", () => applyTheme(!isDark()))
       }
 
       function initHamburger() {
-        const toggle  = document.getElementById('nav-toggle')  as HTMLButtonElement | null
-        const overlay = document.getElementById('nav-overlay') as HTMLElement | null
+        const toggle = document.getElementById(
+          "nav-toggle"
+        ) as HTMLButtonElement | null
+        const overlay = document.getElementById(
+          "nav-overlay"
+        ) as HTMLElement | null
         if (!toggle || !overlay) return
 
         function open() {
-          toggle!.classList.add('is-open')
-          overlay!.classList.add('is-open')
-          toggle!.setAttribute('aria-expanded', 'true')
-          overlay!.setAttribute('aria-hidden', 'false')
-          document.body.style.overflow = 'hidden'
+          toggle!.classList.add("is-open")
+          overlay!.classList.add("is-open")
+          toggle!.setAttribute("aria-expanded", "true")
+          overlay!.setAttribute("aria-hidden", "false")
+          document.body.style.overflow = "hidden"
         }
 
         function close() {
-          toggle!.classList.remove('is-open')
-          overlay!.classList.remove('is-open')
-          toggle!.setAttribute('aria-expanded', 'false')
-          overlay!.setAttribute('aria-hidden', 'true')
-          document.body.style.overflow = ''
+          toggle!.classList.remove("is-open")
+          overlay!.classList.remove("is-open")
+          toggle!.setAttribute("aria-expanded", "false")
+          overlay!.setAttribute("aria-hidden", "true")
+          document.body.style.overflow = ""
         }
 
-        toggle.addEventListener('click', () => {
-          toggle.classList.contains('is-open') ? close() : open()
+        toggle.addEventListener("click", () => {
+          toggle.classList.contains("is-open") ? close() : open()
         })
 
-        overlay.querySelectorAll('a').forEach(link => {
-          link.addEventListener('click', close)
+        overlay.querySelectorAll("a").forEach((link) => {
+          link.addEventListener("click", close)
         })
 
-        document.addEventListener('keydown', (e) => {
-          if (e.key === 'Escape') close()
+        document.addEventListener("keydown", (e) => {
+          if (e.key === "Escape") close()
         })
       }
 
       // Text-Scramble: Nav-Links flimmern kurz durch Zufallszeichen beim Hover
       // Buchstaben settlen von links nach rechts → technischer Charakter
       function initScramble() {
-        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
-        if (!window.matchMedia('(hover: hover)').matches) return
+        if (window.matchMedia("(prefers-reduced-motion: reduce)").matches)
+          return
+        if (!window.matchMedia("(hover: hover)").matches) return
 
-        const CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
-        const FPS   = 30
+        const CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+        const FPS = 30
         const DURATION_MS = 380
 
-        const links = document.querySelectorAll<HTMLAnchorElement>('.corner-nav-link')
+        const links =
+          document.querySelectorAll<HTMLAnchorElement>(".corner-nav-link")
 
         links.forEach((link) => {
           if (link.dataset.scrambleInit) return
-          link.dataset.scrambleInit = '1'
+          link.dataset.scrambleInit = "1"
 
-          const original = link.textContent ?? ''
+          const original = link.textContent ?? ""
           let timer: ReturnType<typeof setInterval> | null = null
           let frame = 0
           const totalFrames = Math.round((DURATION_MS / 1000) * FPS)
 
-          link.addEventListener('mouseenter', () => {
+          link.addEventListener("mouseenter", () => {
             if (timer) clearInterval(timer)
             frame = 0
 
@@ -410,14 +501,14 @@ const email = { user: 'kontakt', domain: 'ptrckschrdtr.de' }
               const progress = frame / totalFrames
 
               link.textContent = original
-                .split('')
+                .split("")
                 .map((char, i) => {
-                  if (char === ' ') return char
+                  if (char === " ") return char
                   // Buchstaben settlen von links → rechts
                   if (i / original.length < progress) return char
                   return CHARS[Math.floor(Math.random() * CHARS.length)]
                 })
-                .join('')
+                .join("")
 
               if (frame >= totalFrames) {
                 clearInterval(timer!)
@@ -427,25 +518,53 @@ const email = { user: 'kontakt', domain: 'ptrckschrdtr.de' }
             }, 1000 / FPS)
           })
 
-          link.addEventListener('mouseleave', () => {
-            if (timer) { clearInterval(timer); timer = null }
+          link.addEventListener("mouseleave", () => {
+            if (timer) {
+              clearInterval(timer)
+              timer = null
+            }
             link.textContent = original
           })
         })
       }
 
+      function initSocialLinks() {
+        document
+          .querySelectorAll<HTMLAnchorElement>(".footer-social a[href]")
+          .forEach((el) => {
+            if (el.dataset.phSocialInit) return
+            el.dataset.phSocialInit = "1"
+            el.addEventListener("click", () => {
+              const platform = (
+                el.getAttribute("aria-label") ??
+                el.textContent ??
+                ""
+              )
+                .replace(/\s*Profil\s*/i, "")
+                .trim()
+              window.posthog?.capture("social_link_clicked", {
+                platform,
+                url: el.href,
+              })
+            })
+          })
+      }
+
       // E-Mail Bot-Schutz: mailto wird erst bei Klick per JS zusammengesetzt
       // → kein href="mailto:" im HTML-Quelltext, kein Spam-Bot-Treffer
       function initEmailLinks() {
-        document.querySelectorAll<HTMLElement>('[data-user][data-domain]').forEach((el) => {
-          if (el.dataset.emailInit) return
-          el.dataset.emailInit = '1'
-          el.style.cursor = 'pointer'
-          el.addEventListener('click', () => {
-            const addr = `${el.dataset.user}@${el.dataset.domain}`
-            window.location.href = `mailto:${addr}`
+        document
+          .querySelectorAll<HTMLElement>("[data-user][data-domain]")
+          .forEach((el) => {
+            if (el.dataset.emailInit) return
+            el.dataset.emailInit = "1"
+            el.style.cursor = "pointer"
+            el.addEventListener("click", () => {
+              const addr = `${el.dataset.user}@${el.dataset.domain}`
+              window.posthog?.capture("contact_email_clicked", { email: addr })
+              window.location.href = `mailto:${addr}`
+            })
           })
-        })
       }
     </script>
 
@@ -538,12 +657,20 @@ const email = { user: 'kontakt', domain: 'ptrckschrdtr.de' }
       }
 
       /* Zwei Striche → X: jede Linie dreht zur Mitte */
-      .nav-toggle.is-open .bar   { background: var(--background); }
-      .nav-toggle.is-open .bar-1 { transform: translateY(3.75px) rotate(45deg); }
-      .nav-toggle.is-open .bar-2 { transform: translateY(-3.75px) rotate(-45deg); }
+      .nav-toggle.is-open .bar {
+        background: var(--background);
+      }
+      .nav-toggle.is-open .bar-1 {
+        transform: translateY(3.75px) rotate(45deg);
+      }
+      .nav-toggle.is-open .bar-2 {
+        transform: translateY(-3.75px) rotate(-45deg);
+      }
 
       @media (max-width: 640px) {
-        .nav-toggle { display: flex; }
+        .nav-toggle {
+          display: flex;
+        }
       }
 
       /* ── Mobile Overlay ──────────────────────────────────────────────────── */
@@ -583,18 +710,20 @@ const email = { user: 'kontakt', domain: 'ptrckschrdtr.de' }
         color: var(--background);
         text-decoration: none;
         min-height: 72px; /* daumenfreundliches Tap-Target */
-        border-bottom: 1px solid color-mix(in oklch, var(--background) 12%, transparent);
+        border-bottom: 1px solid
+          color-mix(in oklch, var(--background) 12%, transparent);
         opacity: 0;
         transform: translateY(12px);
         transition:
-          opacity  450ms cubic-bezier(0.16, 1, 0.3, 1),
+          opacity 450ms cubic-bezier(0.16, 1, 0.3, 1),
           transform 450ms cubic-bezier(0.16, 1, 0.3, 1),
           color 150ms ease;
         transition-delay: calc(var(--i) * 60ms + 60ms);
       }
 
       .nav-overlay-link:first-child {
-        border-top: 1px solid color-mix(in oklch, var(--background) 12%, transparent);
+        border-top: 1px solid
+          color-mix(in oklch, var(--background) 12%, transparent);
       }
 
       .nav-overlay-link:hover,
@@ -619,7 +748,9 @@ const email = { user: 'kontakt', domain: 'ptrckschrdtr.de' }
         transition-delay: 280ms;
       }
 
-      .nav-overlay.is-open .nav-overlay-footer { opacity: 1; }
+      .nav-overlay.is-open .nav-overlay-footer {
+        opacity: 1;
+      }
 
       .nav-overlay-small {
         font-size: var(--text-xs);
@@ -630,7 +761,9 @@ const email = { user: 'kontakt', domain: 'ptrckschrdtr.de' }
         transition: color 150ms ease;
       }
 
-      .nav-overlay-small:hover { color: var(--background); }
+      .nav-overlay-small:hover {
+        color: var(--background);
+      }
 
       /* ── Skip-Link (Tastaturnavigation) ─────────────────────────────────── */
       .skip-link {
@@ -677,7 +810,9 @@ const email = { user: 'kontakt', domain: 'ptrckschrdtr.de' }
         -webkit-tap-highlight-color: transparent;
       }
 
-      .theme-toggle:hover { color: var(--foreground); }
+      .theme-toggle:hover {
+        color: var(--foreground);
+      }
 
       .theme-toggle:focus-visible {
         outline: 2px solid var(--foreground);
@@ -708,7 +843,8 @@ const email = { user: 'kontakt', domain: 'ptrckschrdtr.de' }
         margin-top: 6rem;
         padding-top: 2.5rem;
         padding-bottom: 3rem;
-        border-top: 1px solid color-mix(in oklch, var(--foreground) 12%, transparent);
+        border-top: 1px solid
+          color-mix(in oklch, var(--foreground) 12%, transparent);
       }
 
       .footer-inner {
@@ -759,7 +895,9 @@ const email = { user: 'kontakt', domain: 'ptrckschrdtr.de' }
         transition: color 200ms ease;
       }
 
-      .footer-link:hover { color: var(--foreground); }
+      .footer-link:hover {
+        color: var(--foreground);
+      }
 
       .footer-link:focus-visible {
         outline: 2px solid var(--foreground);
@@ -775,7 +913,8 @@ const email = { user: 'kontakt', domain: 'ptrckschrdtr.de' }
         gap: 1rem;
         flex-wrap: wrap;
         padding-top: 1.5rem;
-        border-top: 1px solid color-mix(in oklch, var(--foreground) 8%, transparent);
+        border-top: 1px solid
+          color-mix(in oklch, var(--foreground) 8%, transparent);
       }
 
       .footer-legal {

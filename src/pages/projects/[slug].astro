@@ -16,14 +16,16 @@ export const getStaticPaths: GetStaticPaths = async () => {
       props: {
         project,
         prev: prev ? {
-          slug: `projects/${prev.id.replace(/\.md$/, '')}`,
+          slug: prev.id.replace(/\.md$/, ''),
+          kind: 'projects' as const,
           title: prev.data.title,
           description: prev.data.description,
           tags: prev.data.tags ?? [],
           coverImage: prev.data.coverImage,
         } : undefined,
         next: next ? {
-          slug: `projects/${next.id.replace(/\.md$/, '')}`,
+          slug: next.id.replace(/\.md$/, ''),
+          kind: 'projects' as const,
           title: next.data.title,
           description: next.data.description,
           tags: next.data.tags ?? [],

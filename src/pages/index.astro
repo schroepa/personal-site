@@ -1,33 +1,37 @@
 ---
-import BaseLayout from '@/layouts/BaseLayout.astro'
-import SectionIndicator from '@/components/astro/SectionIndicator.astro'
-import { getCollection } from 'astro:content'
+import BaseLayout from "@/layouts/BaseLayout.astro"
+import SectionIndicator from "@/components/astro/SectionIndicator.astro"
+import { getCollection } from "astro:content"
 
 // Projekte: Featured zuerst, dann nach Datum, max 3
-const allProjects = await getCollection('projects')
+const allProjects = await getCollection("projects")
 const featuredProjects = allProjects
   .filter((p) => p.data.featured)
   .sort((a, b) => b.data.date.getTime() - a.data.date.getTime())
   .slice(0, 3)
 
 // Blog: neueste zuerst, max 3, keine Drafts
-const allPosts = await getCollection('blog', ({ data }) => !data.draft)
+const allPosts = await getCollection("blog", ({ data }) => !data.draft)
 const latestPosts = allPosts
   .sort((a, b) => b.data.date.getTime() - a.data.date.getTime())
   .slice(0, 3)
 
 const getYear = (date: Date) =>
-  new Intl.DateTimeFormat('de-DE', { year: 'numeric' }).format(date)
+  new Intl.DateTimeFormat("de-DE", { year: "numeric" }).format(date)
 
 const formatDate = (date: Date) =>
-  new Intl.DateTimeFormat('de-DE', { day: 'numeric', month: 'long', year: 'numeric' }).format(date)
+  new Intl.DateTimeFormat("de-DE", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  }).format(date)
 
 const homeSections = [
-  { id: 'section-intro',    label: 'Intro' },
-  { id: 'section-ueber',    label: 'Über' },
-  { id: 'section-arbeit',   label: 'Arbeit' },
-  { id: 'section-gedanken', label: 'Gedanken' },
-  { id: 'section-kontakt',  label: 'Kontakt' },
+  { id: "section-intro", label: "Intro" },
+  { id: "section-ueber", label: "Über" },
+  { id: "section-arbeit", label: "Arbeit" },
+  { id: "section-gedanken", label: "Gedanken" },
+  { id: "section-kontakt", label: "Kontakt" },
 ]
 ---
 
@@ -35,15 +39,13 @@ const homeSections = [
   title="Patrick Schröder — UI Designer & Developer"
   description="Design Engineer aus Berlin. Aufgewachsen mit Spraydosen, groß geworden mit Code."
 >
-
   <SectionIndicator sections={homeSections} />
 
   <div class="scroll-container" id="scroll-container">
-
     <!-- ── Section 01: INTRO ──────────────────────────────────────────── -->
     <section id="section-intro" class="snap-section">
       <div class="page-grid snap-content intro-content">
-        <span class="t-label text-muted-foreground intro-eyebrow">
+        <span class="t-label intro-eyebrow text-muted-foreground">
           Design Engineer — Berlin
         </span>
 
@@ -64,37 +66,47 @@ const homeSections = [
     <!-- ── Section 02: ÜBER ──────────────────────────────────────────── -->
     <section id="section-ueber" class="snap-section">
       <div class="page-grid snap-content ueber-content">
-
-        <span class="t-label text-muted-foreground ueber-eyebrow">Über mich</span>
+        <span class="t-label ueber-eyebrow text-muted-foreground"
+          >Über mich</span
+        >
 
         <div class="ueber-grid">
-
           <!-- Linke Spalte: Stichworte / Statement -->
           <div class="ueber-left">
             <h2 class="t-h2 ueber-statement">
-              Design Engineer.<br>Berlin.<br>15+ Jahre.
+              Design Engineer.<br />Berlin.<br />15+ Jahre.
             </h2>
-            <p class="t-small text-muted-foreground ueber-keywords">
-              Systeme. Prozesse.<br>Menschen. Pixel.
+            <p class="t-small ueber-keywords text-muted-foreground">
+              Systeme. Prozesse.<br />Menschen. Pixel.
             </p>
           </div>
 
           <!-- Rechte Spalte: Bio-Text -->
           <div class="ueber-right">
             <p class="t-body ueber-para">
-              Seit über 15 Jahren gestalte ich digitale Produkte an der Schnittstelle von Design und Code. Mein Weg führte mich von High-Growth E-Commerce (DefShop) und Corporate Innovation (Oetker Digital) bis hin zum Aufbau komplexer B2B-Plattformen und Super-Apps.
+              Seit über 15 Jahren gestalte ich digitale Produkte an der
+              Schnittstelle von Design und Code. Mein Weg führte mich von
+              High-Growth E-Commerce (DefShop) und Corporate Innovation (Oetker
+              Digital) bis hin zum Aufbau komplexer B2B-Plattformen und
+              Super-Apps.
             </p>
             <p class="t-body ueber-para">
-              Ich bezeichne mich selbst gerne als Design Engineer — weil ich die Sprache der Entwickler spreche. Ob ich skalierbare Design-Systeme auf Basis von shadcn/ui und Tailwind CSS entwerfe oder repetitive Design-Ops durch n8n und KI-Workflows automatisiere — mein Ziel ist immer ein nahtloser Übergang vom Pixel zum produktiven Code.
+              Ich bezeichne mich selbst gerne als Design Engineer — weil ich die
+              Sprache der Entwickler spreche. Ob ich skalierbare Design-Systeme
+              auf Basis von shadcn/ui und Tailwind CSS entwerfe oder repetitive
+              Design-Ops durch n8n und KI-Workflows automatisiere — mein Ziel
+              ist immer ein nahtloser Übergang vom Pixel zum produktiven Code.
             </p>
             <p class="t-body ueber-para">
-              Ich glaube fest an die Kraft der physischen Zusammenarbeit. Deshalb findet man mich meistens direkt im Berliner Office, wo ich am liebsten in cross-funktionalen Teams komplexe Workflows in intuitive Erlebnisse verwandele.
+              Ich glaube fest an die Kraft der physischen Zusammenarbeit.
+              Deshalb findet man mich meistens direkt im Berliner Office, wo ich
+              am liebsten in cross-funktionalen Teams komplexe Workflows in
+              intuitive Erlebnisse verwandele.
             </p>
             <a href="/about" class="ueber-link t-small" data-cursor="link">
               Mehr über mich →
             </a>
           </div>
-
         </div>
       </div>
     </section>
@@ -102,50 +114,64 @@ const homeSections = [
     <!-- ── Section 03: ARBEIT ─────────────────────────────────────────── -->
     <section id="section-arbeit" class="snap-section">
       <div class="page-grid snap-content arbeit-content">
-
         <div class="section-label-row">
           <span class="t-label text-muted-foreground">Ausgewählte Arbeit</span>
-          <a href="/projects" class="section-all-link t-label" data-cursor="link">
+          <a
+            href="/projects"
+            class="section-all-link t-label"
+            data-cursor="link"
+          >
             Alle Projekte →
           </a>
         </div>
 
         <ol class="home-list" aria-label="Ausgewählte Projekte">
-          {featuredProjects.map((project, i) => {
-            const slug = project.id.replace(/\.md$/, '')
-            const coverSrc = project.data.coverImage ?? undefined
-            const num = String(i + 1).padStart(2, '0')
-            const year = getYear(project.data.date)
-            return (
-              <li>
-                <a
-                  href={`/projects/${slug}`}
-                  class="home-list-item"
-                  data-cursor="link"
-                  data-preview={coverSrc}
-                >
-                  <span class="home-list-num" aria-hidden="true">{num}</span>
-                  <span class="home-list-title">{project.data.title}</span>
-                  <time class="home-list-year" datetime={project.data.date.toISOString()}>
-                    {year}
-                  </time>
-                </a>
-              </li>
-            )
-          })}
+          {
+            featuredProjects.map((project, i) => {
+              const slug = project.id.replace(/\.md$/, "")
+              const coverSrc = project.data.coverImage ?? undefined
+              const num = String(i + 1).padStart(2, "0")
+              const year = getYear(project.data.date)
+              return (
+                <li>
+                  <a
+                    href={`/projects/${slug}`}
+                    class="home-list-item"
+                    data-cursor="link"
+                    data-preview={coverSrc}
+                  >
+                    <span class="home-list-num" aria-hidden="true">
+                      {num}
+                    </span>
+                    <span class="home-list-title">{project.data.title}</span>
+                    <time
+                      class="home-list-year"
+                      datetime={project.data.date.toISOString()}
+                    >
+                      {year}
+                    </time>
+                  </a>
+                </li>
+              )
+            })
+          }
         </ol>
 
         <div id="home-project-preview" class="home-preview" aria-hidden="true">
-          <img id="home-preview-img" src="" alt="" loading="lazy" decoding="async" />
+          <img
+            id="home-preview-img"
+            src=""
+            alt=""
+            loading="lazy"
+            decoding="async"
+          />
         </div>
-
       </div>
     </section>
 
     <!-- ── Section 03: GEDANKEN ───────────────────────────────────────── -->
     <section id="section-gedanken" class="snap-section">
       <div class="page-grid snap-content gedanken-content">
-
         <div class="section-label-row">
           <span class="t-label text-muted-foreground">Gedanken</span>
           <a href="/blog" class="section-all-link t-label" data-cursor="link">
@@ -154,27 +180,33 @@ const homeSections = [
         </div>
 
         <ol class="home-list" aria-label="Neueste Artikel">
-          {latestPosts.map((post, i) => {
-            const slug = post.id.replace(/\.md$/, '')
-            const num = String(i + 1).padStart(2, '0')
-            return (
-              <li>
-                <a
-                  href={`/blog/${slug}`}
-                  class="home-list-item"
-                  data-cursor="link"
-                >
-                  <span class="home-list-num" aria-hidden="true">{num}</span>
-                  <span class="home-list-title">{post.data.title}</span>
-                  <time class="home-list-year" datetime={post.data.date.toISOString()}>
-                    {formatDate(post.data.date)}
-                  </time>
-                </a>
-              </li>
-            )
-          })}
+          {
+            latestPosts.map((post, i) => {
+              const slug = post.id.replace(/\.md$/, "")
+              const num = String(i + 1).padStart(2, "0")
+              return (
+                <li>
+                  <a
+                    href={`/blog/${slug}`}
+                    class="home-list-item"
+                    data-cursor="link"
+                  >
+                    <span class="home-list-num" aria-hidden="true">
+                      {num}
+                    </span>
+                    <span class="home-list-title">{post.data.title}</span>
+                    <time
+                      class="home-list-year"
+                      datetime={post.data.date.toISOString()}
+                    >
+                      {formatDate(post.data.date)}
+                    </time>
+                  </a>
+                </li>
+              )
+            })
+          }
         </ol>
-
       </div>
     </section>
 
@@ -182,10 +214,8 @@ const homeSections = [
     <section id="section-kontakt" class="snap-section">
       <div class="page-grid snap-content kontakt-content">
         <div class="kontakt-body">
-          <p class="t-label text-muted-foreground kontakt-label">Kontakt</p>
-          <h2 class="t-hero kontakt-heading">
-            Lass uns reden.
-          </h2>
+          <p class="t-label kontakt-label text-muted-foreground">Kontakt</p>
+          <h2 class="t-hero kontakt-heading">Lass uns reden.</h2>
           <!-- E-Mail: Bot-Schutz via data-Attribute, kein mailto im HTML -->
           <button
             class="kontakt-email"
@@ -208,8 +238,14 @@ const homeSections = [
             >
               Lebenslauf ↓
             </a>
-            <span class="t-small text-muted-foreground" aria-hidden="true">·</span>
-            <a href="/projects" class="t-small text-muted-foreground" data-cursor="link">
+            <span class="t-small text-muted-foreground" aria-hidden="true"
+              >·</span
+            >
+            <a
+              href="/projects"
+              class="t-small text-muted-foreground"
+              data-cursor="link"
+            >
               Projekte ansehen
             </a>
           </div>
@@ -221,21 +257,28 @@ const homeSections = [
             © {new Date().getFullYear()} Patrick Schröder
           </span>
           <div class="kontakt-footer-legal">
-            <a href="/impressum" class="t-small text-muted-foreground kontakt-footer-link" data-cursor="link">
+            <a
+              href="/impressum"
+              class="t-small kontakt-footer-link text-muted-foreground"
+              data-cursor="link"
+            >
               Impressum
             </a>
-            <span class="t-small text-muted-foreground" aria-hidden="true">·</span>
-            <a href="/datenschutz" class="t-small text-muted-foreground kontakt-footer-link" data-cursor="link">
+            <span class="t-small text-muted-foreground" aria-hidden="true"
+              >·</span
+            >
+            <a
+              href="/datenschutz"
+              class="t-small kontakt-footer-link text-muted-foreground"
+              data-cursor="link"
+            >
               Datenschutz
             </a>
           </div>
         </div>
-
       </div>
     </section>
-
   </div>
-
 </BaseLayout>
 
 <style>
@@ -247,7 +290,9 @@ const homeSections = [
     overscroll-behavior: none;
     scrollbar-width: none;
   }
-  .scroll-container::-webkit-scrollbar { display: none; }
+  .scroll-container::-webkit-scrollbar {
+    display: none;
+  }
 
   :global(body:has(.scroll-container)) {
     overflow: hidden;
@@ -333,8 +378,13 @@ const homeSections = [
   }
 
   @keyframes bounce-down {
-    0%, 100% { transform: translateY(0); }
-    50%       { transform: translateY(5px); }
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(5px);
+    }
   }
 
   /* ── Sections 02–05 ──────────────────────────────────────────────────── */
@@ -391,7 +441,8 @@ const homeSections = [
   .ueber-link {
     color: var(--foreground);
     text-decoration: none;
-    border-bottom: 1px solid color-mix(in oklch, var(--foreground) 25%, transparent);
+    border-bottom: 1px solid
+      color-mix(in oklch, var(--foreground) 25%, transparent);
     padding-bottom: 0.125rem;
     transition: border-color 200ms ease;
   }
@@ -405,7 +456,8 @@ const homeSections = [
     align-items: center;
     justify-content: space-between;
     margin-bottom: 2.5rem;
-    border-bottom: 1px solid color-mix(in oklch, var(--foreground) 12%, transparent);
+    border-bottom: 1px solid
+      color-mix(in oklch, var(--foreground) 12%, transparent);
     padding-bottom: 1rem;
   }
 
@@ -414,7 +466,9 @@ const homeSections = [
     text-decoration: none;
     transition: color 200ms ease;
   }
-  .section-all-link:hover { color: var(--foreground); }
+  .section-all-link:hover {
+    color: var(--foreground);
+  }
 
   /* ── Textliste ───────────────────────────────────────────────────────── */
   .home-list {
@@ -430,17 +484,21 @@ const homeSections = [
     align-items: baseline;
     gap: 1.5rem;
     padding: 1.125rem 0;
-    border-bottom: 1px solid color-mix(in oklch, var(--foreground) 12%, transparent);
+    border-bottom: 1px solid
+      color-mix(in oklch, var(--foreground) 12%, transparent);
     text-decoration: none;
     color: var(--foreground);
     transition: opacity 250ms ease;
   }
 
   .home-list li:first-child .home-list-item {
-    border-top: 1px solid color-mix(in oklch, var(--foreground) 12%, transparent);
+    border-top: 1px solid
+      color-mix(in oklch, var(--foreground) 12%, transparent);
   }
 
-  .home-list:has(.home-list-item:hover) .home-list-item:not(:hover) { opacity: 0.25; }
+  .home-list:has(.home-list-item:hover) .home-list-item:not(:hover) {
+    opacity: 0.25;
+  }
 
   .home-list-item:focus-visible {
     outline: 2px solid var(--foreground);
@@ -481,13 +539,24 @@ const homeSections = [
     overflow: hidden;
     transition: opacity 300ms cubic-bezier(0.16, 1, 0.3, 1);
   }
-  .home-preview.is-visible { opacity: 1; }
-  .home-preview img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .home-preview.is-visible {
+    opacity: 1;
+  }
+  .home-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
 
   @media (hover: none), (max-width: 900px) {
-    .home-preview { display: none; }
+    .home-preview {
+      display: none;
+    }
     .home-list-item:hover,
-    .home-list:has(.home-list-item:hover) .home-list-item:not(:hover) { opacity: 1; }
+    .home-list:has(.home-list-item:hover) .home-list-item:not(:hover) {
+      opacity: 1;
+    }
   }
 
   /* ── Section 04: Kontakt ─────────────────────────────────────────────── */
@@ -507,9 +576,12 @@ const homeSections = [
     letter-spacing: var(--tracking-snug);
     color: var(--foreground);
     text-decoration: none;
-    border-bottom: 1px solid color-mix(in oklch, var(--foreground) 25%, transparent);
+    border-bottom: 1px solid
+      color-mix(in oklch, var(--foreground) 25%, transparent);
     padding-bottom: 0.25rem;
-    transition: border-color 200ms ease, opacity 200ms ease;
+    transition:
+      border-color 200ms ease,
+      opacity 200ms ease;
     margin-bottom: 2rem;
   }
   .kontakt-email:hover {
@@ -527,7 +599,9 @@ const homeSections = [
     text-decoration: none;
     transition: color 200ms ease;
   }
-  .kontakt-secondary a:hover { color: var(--foreground); }
+  .kontakt-secondary a:hover {
+    color: var(--foreground);
+  }
 
   /* DSGVO-Links unten in der Kontakt-Section */
   .kontakt-footer-links {
@@ -551,7 +625,9 @@ const homeSections = [
     text-decoration: none;
     transition: color 200ms ease;
   }
-  .kontakt-footer-link:hover { color: var(--foreground); }
+  .kontakt-footer-link:hover {
+    color: var(--foreground);
+  }
 
   /* ── prefers-reduced-motion ──────────────────────────────────────────── */
   @media (prefers-reduced-motion: reduce) {
@@ -560,66 +636,129 @@ const homeSections = [
       height: auto;
       overflow-y: visible;
     }
-    :global(body:has(.scroll-container)) { overflow: visible; }
+    :global(body:has(.scroll-container)) {
+      overflow: visible;
+    }
     .snap-section {
       height: auto;
       min-height: 80vh;
       scroll-snap-align: none;
     }
-    .scroll-hint-arrow { animation: none; }
-    .home-list-item, .home-preview { transition: none; }
+    .scroll-hint-arrow {
+      animation: none;
+    }
+    .home-list-item,
+    .home-preview {
+      transition: none;
+    }
   }
 
   /* ── Mobile ──────────────────────────────────────────────────────────── */
   @media (max-width: 640px) {
-    .intro-eyebrow { top: 5rem; }
-    .intro-content { padding-bottom: 3rem; }
-    .kontakt-email { font-size: 1.25rem; }
+    .intro-eyebrow {
+      top: 5rem;
+    }
+    .intro-content {
+      padding-bottom: 3rem;
+    }
+    .kontakt-email {
+      font-size: 1.25rem;
+    }
   }
 </style>
 
 <script>
   function initHomePage() {
-    const preview = document.getElementById('home-project-preview') as HTMLElement | null
-    const previewImg = document.getElementById('home-preview-img') as HTMLImageElement | null
+    const preview = document.getElementById(
+      "home-project-preview"
+    ) as HTMLElement | null
+    const previewImg = document.getElementById(
+      "home-preview-img"
+    ) as HTMLImageElement | null
 
     if (
       preview &&
       previewImg &&
-      window.matchMedia('(hover: hover)').matches &&
-      window.matchMedia('(min-width: 901px)').matches
+      window.matchMedia("(hover: hover)").matches &&
+      window.matchMedia("(min-width: 901px)").matches
     ) {
       let switchTimer: ReturnType<typeof setTimeout> | null = null
-      const lines = document.querySelectorAll<HTMLAnchorElement>('[data-preview]')
+      const lines =
+        document.querySelectorAll<HTMLAnchorElement>("[data-preview]")
 
       lines.forEach((line) => {
         if (line.dataset.previewInit) return
-        line.dataset.previewInit = '1'
+        line.dataset.previewInit = "1"
 
-        line.addEventListener('mouseenter', () => {
+        line.addEventListener("mouseenter", () => {
           const src = line.dataset.preview
           if (!src) return
           clearTimeout(switchTimer ?? undefined)
-          if (previewImg.getAttribute('src') !== src) {
-            preview.classList.remove('is-visible')
+          if (previewImg.getAttribute("src") !== src) {
+            preview.classList.remove("is-visible")
             switchTimer = setTimeout(() => {
               previewImg.src = src
-              preview.classList.add('is-visible')
+              preview.classList.add("is-visible")
               switchTimer = null
             }, 80)
           } else {
-            preview.classList.add('is-visible')
+            preview.classList.add("is-visible")
           }
         })
 
-        line.addEventListener('mouseleave', () => {
+        line.addEventListener("mouseleave", () => {
           clearTimeout(switchTimer ?? undefined)
           switchTimer = null
-          preview.classList.remove('is-visible')
+          preview.classList.remove("is-visible")
         })
       })
     }
   }
 
-  document.addEventListener('astro:page-load', initHomePage)
+  function initHomeTracking() {
+    document
+      .querySelectorAll<HTMLAnchorElement>("#section-arbeit .home-list-item")
+      .forEach((el) => {
+        if (el.dataset.phProjectInit) return
+        el.dataset.phProjectInit = "1"
+        el.addEventListener("click", () => {
+          const title =
+            el.querySelector(".home-list-title")?.textContent?.trim() ?? ""
+          window.posthog?.capture("project_clicked", {
+            project_title: title,
+            url: el.href,
+          })
+        })
+      })
+
+    document
+      .querySelectorAll<HTMLAnchorElement>("#section-gedanken .home-list-item")
+      .forEach((el) => {
+        if (el.dataset.phBlogInit) return
+        el.dataset.phBlogInit = "1"
+        el.addEventListener("click", () => {
+          const title =
+            el.querySelector(".home-list-title")?.textContent?.trim() ?? ""
+          window.posthog?.capture("blog_post_clicked", {
+            post_title: title,
+            url: el.href,
+          })
+        })
+      })
+
+    document
+      .querySelectorAll<HTMLAnchorElement>('a[href="/cv.pdf"]')
+      .forEach((el) => {
+        if (el.dataset.phCvInit) return
+        el.dataset.phCvInit = "1"
+        el.addEventListener("click", () => {
+          window.posthog?.capture("cv_downloaded")
+        })
+      })
+  }
+
+  document.addEventListener("astro:page-load", () => {
+    initHomePage()
+    initHomeTracking()
+  })
 </script>

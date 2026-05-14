@@ -1,10 +1,16 @@
 ---
 interface PrevNextPost {
   slug: string
+  kind?: "blog" | "projects"
   title: string
   description: string
   tags: string[]
   coverImage?: string
+}
+
+function prevNextHref(entry: PrevNextPost): string {
+  const segment = entry.kind ?? "blog"
+  return `/${segment}/${entry.slug}`
 }
 
 interface Props {
@@ -17,30 +23,31 @@ interface Props {
 const { title, pageUrl, prev, next } = Astro.props
 
 const encodedTitle = encodeURIComponent(title)
-const encodedUrl   = encodeURIComponent(pageUrl)
-const prompt       = encodeURIComponent(`Erkläre mir mehr zu diesem Artikel: "${title}" — ${pageUrl}`)
+const encodedUrl = encodeURIComponent(pageUrl)
+const prompt = encodeURIComponent(
+  `Erkläre mir mehr zu diesem Artikel: "${title}" — ${pageUrl}`
+)
 
 const aiLinks = [
   {
-    name: 'Claude',
+    name: "Claude",
     href: `https://claude.ai/new?q=${prompt}`,
     icon: `<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M13.827 3.52c-.728-1.694-3.061-1.694-3.79 0L5.032 14.846c-.273.637.197 1.341.895 1.341h12.146c.698 0 1.168-.704.895-1.341z"/><path d="M9.5 18.5h5M12 16v5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>`,
   },
   {
-    name: 'ChatGPT',
+    name: "ChatGPT",
     href: `https://chatgpt.com/?q=${prompt}`,
     icon: `<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M22.28 9.28a5.76 5.76 0 0 0-.44-4.72 6 6 0 0 0-6.47-2.88A5.75 5.75 0 0 0 11 .1a6 6 0 0 0-5.71 4.14 5.76 5.76 0 0 0-3.84 2.8 6 6 0 0 0 .74 7.04 5.76 5.76 0 0 0 .44 4.72 6 6 0 0 0 6.47 2.88A5.75 5.75 0 0 0 13 23.9a6 6 0 0 0 5.72-4.15 5.76 5.76 0 0 0 3.83-2.8 6 6 0 0 0-.27-7.67zM13 22.43a4.5 4.5 0 0 1-2.89-1.05l.14-.08 4.8-2.77a.77.77 0 0 0 .39-.68v-6.77l2.03 1.17a.07.07 0 0 1 .04.06v5.6A4.54 4.54 0 0 1 13 22.43zm-9.7-4.14a4.5 4.5 0 0 1-.54-3.03l.14.09 4.8 2.77a.78.78 0 0 0 .78 0l5.86-3.38v2.34a.08.08 0 0 1-.03.07L9.44 19.9a4.54 4.54 0 0 1-6.14-1.6zm-1.26-9.9A4.5 4.5 0 0 1 4.4 6.14v5.67a.77.77 0 0 0 .39.67l5.85 3.38-2.03 1.17a.08.08 0 0 1-.08 0L3.6 14.15a4.54 4.54 0 0 1-.55-5.77zm16.67 3.9L13.86 8.9l2.03-1.17a.08.08 0 0 1 .08 0l4.94 2.85a4.53 4.53 0 0 1-.7 8.18v-5.67a.77.77 0 0 0-.4-.67zm2.02-3.04-.15-.09-4.8-2.76a.78.78 0 0 0-.78 0L9.14 10.79V8.45a.07.07 0 0 1 .03-.07l4.87-2.81a4.54 4.54 0 0 1 6.73 4.7v-.02zm-12.72 4.18-2.03-1.17a.07.07 0 0 1-.04-.06V6.6a4.54 4.54 0 0 1 7.44-3.48l-.14.08-4.8 2.77a.77.77 0 0 0-.39.68l-.04 6.76zm1.1-2.37 2.61-1.5 2.6 1.5v3L11.9 16 9.1 14.5v-3z"/></svg>`,
   },
   {
-    name: 'Perplexity',
-    href: `https://www.perplexity.ai/search?q=${encodedTitle}+${encodeURIComponent('ptrckschrdtr.de')}`,
+    name: "Perplexity",
+    href: `https://www.perplexity.ai/search?q=${encodedTitle}+${encodeURIComponent("ptrckschrdtr.de")}`,
     icon: `<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M11 2L2 9h3v6H2l9 7 9-7h-3V9h3L11 2zm0 2.5l5.5 4.5H14v6h2.5L11 19l-5.5-4H8V9H5.5L11 4.5z"/></svg>`,
   },
 ]
 ---
 
 <footer class="article-footer">
-
   <!-- ── Divider ─────────────────────────────────────────────────────────── -->
   <hr class="footer-rule" aria-hidden="true" />
 
@@ -49,19 +56,22 @@ const aiLinks = [
     <h2 id="ai-heading" class="footer-label">Mit KI erkunden</h2>
     <p class="footer-sub">Diesen Beitrag mit einer KI weiterdenken —</p>
     <div class="ai-links">
-      {aiLinks.map((ai) => (
-        <a
-          href={ai.href}
-          target="_blank"
-          rel="noopener noreferrer"
-          class="ai-link"
-          data-cursor="link"
-          aria-label={`Beitrag mit ${ai.name} erkunden (öffnet externen Link)`}
-        >
-          <span set:html={ai.icon} />
-          <span>{ai.name}</span>
-        </a>
-      ))}
+      {
+        aiLinks.map((ai) => (
+          <a
+            href={ai.href}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="ai-link"
+            data-cursor="link"
+            data-ai-name={ai.name}
+            aria-label={`Beitrag mit ${ai.name} erkunden (öffnet externen Link)`}
+          >
+            <span set:html={ai.icon} />
+            <span>{ai.name}</span>
+          </a>
+        ))
+      }
     </div>
   </section>
 
@@ -78,9 +88,21 @@ const aiLinks = [
       data-url={pageUrl}
       data-cursor="link"
     >
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
-        <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+      <svg
+        width="13"
+        height="13"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
+      >
+        <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"
+        ></path>
+        <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"
+        ></path>
       </svg>
       <span id="copy-link-label">Link kopieren</span>
     </button>
@@ -93,10 +115,18 @@ const aiLinks = [
       data-cursor="link"
       aria-label="Auf LinkedIn teilen (öffnet externen Link)"
     >
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-        <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/>
-        <rect x="2" y="9" width="4" height="12"/>
-        <circle cx="4" cy="4" r="2"/>
+      <svg
+        width="13"
+        height="13"
+        viewBox="0 0 24 24"
+        fill="currentColor"
+        aria-hidden="true"
+      >
+        <path
+          d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"
+        ></path>
+        <rect x="2" y="9" width="4" height="12"></rect>
+        <circle cx="4" cy="4" r="2"></circle>
       </svg>
       <span>LinkedIn</span>
     </a>
@@ -105,62 +135,77 @@ const aiLinks = [
   <hr class="footer-rule" aria-hidden="true" />
 
   <!-- ── PREV / NEXT ───────────────────────────────────────────────────── -->
-  {(prev || next) && (
-    <nav class="prevnext" aria-label="Weitere Artikel">
-
-      {prev ? (
-        <a
-          href={`/${prev.slug.startsWith('projects') ? 'projects' : 'blog'}/${prev.slug}`}
-          class="pn-link pn-prev"
-          data-cursor="link"
-          aria-label={`Vorheriger Beitrag: ${prev.title}`}
-        >
-          <span class="pn-dir">← Vorheriger</span>
-          <div class="pn-thumb">
-            {prev.coverImage
-              ? <img src={prev.coverImage} alt="" loading="lazy" decoding="async" />
-              : <div class="pn-thumb-fallback" aria-hidden="true"></div>
-            }
-          </div>
-          <span class="pn-title">{prev.title}</span>
-          {prev.tags.length > 0 && (
-            <div class="pn-tags">
-              {prev.tags.slice(0, 3).map(tag => (
-                <span class="pn-tag">{tag}</span>
-              ))}
+  {
+    (prev || next) && (
+      <nav class="prevnext" aria-label="Weitere Artikel">
+        {prev ? (
+          <a
+            href={prevNextHref(prev)}
+            class="pn-link pn-prev"
+            data-cursor="link"
+            aria-label={`Vorheriger Beitrag: ${prev.title}`}
+          >
+            <span class="pn-dir">← Vorheriger</span>
+            <div class="pn-thumb">
+              {prev.coverImage ? (
+                <img
+                  src={prev.coverImage}
+                  alt=""
+                  loading="lazy"
+                  decoding="async"
+                />
+              ) : (
+                <div class="pn-thumb-fallback" aria-hidden="true" />
+              )}
             </div>
-          )}
-        </a>
-      ) : <div />}
+            <span class="pn-title">{prev.title}</span>
+            {prev.tags.length > 0 && (
+              <div class="pn-tags">
+                {prev.tags.slice(0, 3).map((tag) => (
+                  <span class="pn-tag">{tag}</span>
+                ))}
+              </div>
+            )}
+          </a>
+        ) : (
+          <div />
+        )}
 
-      {next ? (
-        <a
-          href={`/${next.slug.startsWith('projects') ? 'projects' : 'blog'}/${next.slug}`}
-          class="pn-link pn-next"
-          data-cursor="link"
-          aria-label={`Nächster Beitrag: ${next.title}`}
-        >
-          <span class="pn-dir">Nächster →</span>
-          <div class="pn-thumb">
-            {next.coverImage
-              ? <img src={next.coverImage} alt="" loading="lazy" decoding="async" />
-              : <div class="pn-thumb-fallback" aria-hidden="true"></div>
-            }
-          </div>
-          <span class="pn-title">{next.title}</span>
-          {next.tags.length > 0 && (
-            <div class="pn-tags">
-              {next.tags.slice(0, 3).map(tag => (
-                <span class="pn-tag">{tag}</span>
-              ))}
+        {next ? (
+          <a
+            href={prevNextHref(next)}
+            class="pn-link pn-next"
+            data-cursor="link"
+            aria-label={`Nächster Beitrag: ${next.title}`}
+          >
+            <span class="pn-dir">Nächster →</span>
+            <div class="pn-thumb">
+              {next.coverImage ? (
+                <img
+                  src={next.coverImage}
+                  alt=""
+                  loading="lazy"
+                  decoding="async"
+                />
+              ) : (
+                <div class="pn-thumb-fallback" aria-hidden="true" />
+              )}
             </div>
-          )}
-        </a>
-      ) : <div />}
-
-    </nav>
-  )}
-
+            <span class="pn-title">{next.title}</span>
+            {next.tags.length > 0 && (
+              <div class="pn-tags">
+                {next.tags.slice(0, 3).map((tag) => (
+                  <span class="pn-tag">{tag}</span>
+                ))}
+              </div>
+            )}
+          </a>
+        ) : (
+          <div />
+        )}
+      </nav>
+    )
+  }
 </footer>
 
 <style>
@@ -176,7 +221,8 @@ const aiLinks = [
   /* ── Divider: präzise 1px-Linie (Lexikon-Ästhetik) ─────────────────────── */
   .footer-rule {
     border: none;
-    border-top: 1px solid color-mix(in oklch, var(--foreground) 12%, transparent);
+    border-top: 1px solid
+      color-mix(in oklch, var(--foreground) 12%, transparent);
     margin: 0;
   }
 
@@ -217,7 +263,9 @@ const aiLinks = [
     font-size: var(--text-sm);
     color: var(--muted-foreground);
     text-decoration: none;
-    transition: color 200ms ease, opacity 200ms ease;
+    transition:
+      color 200ms ease,
+      opacity 200ms ease;
   }
 
   .ai-link:hover {
@@ -314,10 +362,16 @@ const aiLinks = [
     width: 100%;
     height: 100%;
     background:
-      radial-gradient(ellipse 70% 70% at 20% 30%,
-        color-mix(in oklch, var(--mesh-warm) 60%, transparent) 0%, transparent 70%),
-      radial-gradient(ellipse 60% 60% at 80% 70%,
-        color-mix(in oklch, var(--mesh-cool) 50%, transparent) 0%, transparent 65%),
+      radial-gradient(
+        ellipse 70% 70% at 20% 30%,
+        color-mix(in oklch, var(--mesh-warm) 60%, transparent) 0%,
+        transparent 70%
+      ),
+      radial-gradient(
+        ellipse 60% 60% at 80% 70%,
+        color-mix(in oklch, var(--mesh-cool) 50%, transparent) 0%,
+        transparent 65%
+      ),
       var(--muted);
   }
 
@@ -344,39 +398,74 @@ const aiLinks = [
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .ai-link, .share-link, .pn-link { transition: none; }
-    .pn-link:hover .pn-thumb img { transform: none; }
+    .ai-link,
+    .share-link,
+    .pn-link {
+      transition: none;
+    }
+    .pn-link:hover .pn-thumb img {
+      transform: none;
+    }
   }
 </style>
 
 <script>
-  const btn = document.getElementById('copy-link-btn')
-  const label = document.getElementById('copy-link-label')
+  const btn = document.getElementById("copy-link-btn")
+  const label = document.getElementById("copy-link-label")
   if (btn && label) {
-    btn.addEventListener('click', async () => {
+    btn.addEventListener("click", async () => {
       const url = btn.dataset.url ?? window.location.href
       try {
         await navigator.clipboard.writeText(url)
-        label.textContent = 'Kopiert ✓'
-        btn.classList.add('copied')
+        window.posthog?.capture("article_shared", { method: "copy_link", url })
+        label.textContent = "Kopiert ✓"
+        btn.classList.add("copied")
         setTimeout(() => {
-          label.textContent = 'Link kopieren'
-          btn.classList.remove('copied')
+          label.textContent = "Link kopieren"
+          btn.classList.remove("copied")
         }, 2000)
       } catch {
-        const input = document.createElement('input')
+        const input = document.createElement("input")
         input.value = url
         document.body.appendChild(input)
         input.select()
-        document.execCommand('copy')
+        document.execCommand("copy")
         document.body.removeChild(input)
-        label.textContent = 'Kopiert ✓'
-        btn.classList.add('copied')
+        window.posthog?.capture("article_shared", { method: "copy_link", url })
+        label.textContent = "Kopiert ✓"
+        btn.classList.add("copied")
         setTimeout(() => {
-          label.textContent = 'Link kopieren'
-          btn.classList.remove('copied')
+          label.textContent = "Link kopieren"
+          btn.classList.remove("copied")
         }, 2000)
       }
     })
   }
+
+  document
+    .querySelectorAll<HTMLAnchorElement>("a[data-ai-name]")
+    .forEach((el) => {
+      if (el.dataset.phAiInit) return
+      el.dataset.phAiInit = "1"
+      el.addEventListener("click", () => {
+        window.posthog?.capture("ai_link_clicked", {
+          ai_tool: el.dataset.aiName,
+        })
+      })
+    })
+
+  document
+    .querySelectorAll<HTMLAnchorElement>(
+      'a[aria-label="Auf LinkedIn teilen (öffnet externen Link)"]'
+    )
+    .forEach((el) => {
+      if (el.dataset.phLinkedinInit) return
+      el.dataset.phLinkedinInit = "1"
+      el.addEventListener("click", () => {
+        window.posthog?.capture("article_shared", {
+          method: "linkedin",
+          url: window.location.href,
+        })
+      })
+    })
 </script>

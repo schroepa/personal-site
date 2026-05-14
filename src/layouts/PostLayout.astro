@@ -8,6 +8,8 @@ import { readingTime } from '@/lib/reading-time'
 
 interface PrevNextPost {
   slug: string
+  /** Default: blog — bei Projekt-Detailseiten `projects` setzen */
+  kind?: 'blog' | 'projects'
   title: string
   description: string
   tags: string[]
