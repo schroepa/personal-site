@@ -385,13 +385,18 @@ const email = { user: "kontakt", domain: "ptrckschrdtr.de" }
             © {new Date().getFullYear()} Patrick Schröder
           </span>
           <nav class="footer-legal" aria-label="Rechtliches">
-            <a href="/impressum" class="footer-link" data-cursor="link"
-              >Impressum</a
-            >
+            <a href="/impressum" class="footer-link" data-cursor="link">Impressum</a>
             <span class="footer-sep" aria-hidden="true">·</span>
-            <a href="/datenschutz" class="footer-link" data-cursor="link"
-              >Datenschutz</a
+            <a href="/datenschutz" class="footer-link" data-cursor="link">Datenschutz</a>
+            <span class="footer-sep" aria-hidden="true">·</span>
+            <button
+              type="button"
+              class="footer-link"
+              onclick="Cookiebot.renew()"
+              data-cursor="link"
             >
+              Cookie-Einstellungen
+            </button>
           </nav>
         </div>
       </div>
