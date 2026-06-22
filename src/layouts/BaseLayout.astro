@@ -416,6 +416,38 @@ const email = { user: "kontakt", domain: "ptrckschrdtr.de" }
         }
       })
 
+      // Navigation-Resilienz: fehlerhafte Browser-Extensions (Passwort-Manager,
+      // Ad-Blocker etc.) können Klicks abfangen und die SPA-Navigation lahmlegen
+      // ("message channel closed" Fehler — kommt aus der Extension, nicht von uns).
+      // Da die Seite per ViewTransitions nie komplett neu lädt, bleibt ein einmal
+      // kaputter Extension-Zustand über mehrere Klicks hinweg bestehen.
+      // Fallback: Wenn sich die URL nach kurzer Zeit nicht ändert, erzwingen wir
+      // eine harte Navigation — die ist robuster gegen hängende Extension-Promises.
+      document.addEventListener("click", (e) => {
+        const link = (e.target as HTMLElement)?.closest("a[href]") as HTMLAnchorElement | null
+        if (!link || link.target === "_blank" || link.hasAttribute("download")) return
+
+        let url: URL
+        try {
+          url = new URL(link.href, window.location.href)
+        } catch {
+          return
+        }
+        if (url.origin !== window.location.origin) return
+        if (url.protocol === "mailto:" || url.protocol === "tel:") return
+
+        const targetHref = url.href
+        const startHref = window.location.href
+        if (targetHref === startHref) return
+
+        setTimeout(() => {
+          if (document.visibilityState === "hidden") return
+          if (window.location.href === startHref) {
+            window.location.assign(targetHref)
+          }
+        }, 1000)
+      })
+
       document.addEventListener("astro:page-load", () => {
         initMagneticButtons()
         initTextReveal()
