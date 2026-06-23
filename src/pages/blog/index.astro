@@ -39,7 +39,9 @@ const formatDate = (date: Date) =>
               <div class="post-thumb" aria-hidden="true">
                 {post.data.coverImage ? (
                   <img
-                    src={post.data.coverImage}
+                    src={post.data.coverImage.startsWith('/images/blog/')
+                      ? post.data.coverImage.replace(/\.webp$/, '-640.webp')
+                      : post.data.coverImage}
                     alt=""
                     loading="lazy"
                     decoding="async"

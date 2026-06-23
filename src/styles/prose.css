@@ -87,12 +87,25 @@
   max-width: 100%;
 }
 
-/* Shiki (github-dark Theme) setzt Token-Farben inline per style-Attribut.
-   #6A737D (Kommentar-Token) ist für dunkle Hintergründe kalibriert und
-   fällt auf unserem hellen --muted Code-Block-Hintergrund unter 4.5:1
-   Kontrast. Override auf unser eigenes, bereits geprüftes --muted-foreground
-   (5.34:1 auf --muted) — !important nötig, da Inline-Styles sonst gewinnen. */
-.prose pre span[style*="#6A737D" i] {
+/* Shiki (github-dark Theme) setzt Hintergrund UND Token-Farben komplett
+   inline per style-Attribut auf <pre> und jedem <span> — das überschreibt
+   unsere .prose pre Regel oben vollständig (Inline-Styles gewinnen immer
+   gegen externe Stylesheets ohne !important). Ergebnis war ein dunkler
+   Shiki-Hintergrund (#24292e) mit Kommentarfarbe #6A737D bei nur 2.45:1
+   Kontrast — krasser Fehlschlag. Fix: Shikis Farben komplett neutralisieren,
+   eigenes Farbsystem erzwingen. Passt zudem besser zum monochromen
+   Swiss-Designsystem als bunte Syntax-Highlighting-Farben. */
+.prose pre.astro-code {
+  background-color: var(--muted) !important;
+}
+
+.prose pre.astro-code code,
+.prose pre.astro-code span {
+  color: var(--foreground) !important;
+}
+
+/* Kommentare bleiben zurückhaltender, aber kontrastsicher (5.34:1 auf --muted) */
+.prose pre.astro-code span[style*="6A737D" i] {
   color: var(--muted-foreground) !important;
 }
 

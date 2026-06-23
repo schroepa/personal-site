@@ -47,6 +47,16 @@ const formattedDate = new Intl.DateTimeFormat('de-DE', {
   month: 'long',
   day: 'numeric',
 }).format(date)
+
+// Responsive srcset für Blog-Cover-Bilder: -640/-1050 Varianten liegen neben
+// dem Original (z.B. blog-image-3.webp + blog-image-3-640.webp + -1050.webp).
+// Andere Bilder (Projekte) bleiben unverändert, da bereits klein genug.
+const coverSrcset = coverImage?.startsWith('/images/blog/')
+  ? (() => {
+      const base = coverImage.replace(/\.webp$/, '')
+      return `${base}-640.webp 640w, ${base}-1050.webp 1050w, ${coverImage} 2100w`
+    })()
+  : undefined
 ---
 
 <BaseLayout
@@ -66,7 +76,15 @@ const formattedDate = new Intl.DateTimeFormat('de-DE', {
     <!-- Cover: volle Breite, normaler Dokumentfluss, kein Overlap -->
     {coverImage ? (
       <div class="cover-wrap">
-        <img src={coverImage} alt="" class="cover-img" loading="eager" decoding="async" />
+        <img
+          src={coverImage}
+          srcset={coverSrcset}
+          sizes="100vw"
+          alt=""
+          class="cover-img"
+          loading="eager"
+          decoding="async"
+        />
       </div>
     ) : (
       <div class="cover-wrap cover-placeholder" aria-hidden="true">
