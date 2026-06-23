@@ -54,7 +54,7 @@ const formattedDate = new Intl.DateTimeFormat('de-DE', {
 const coverSrcset = coverImage?.startsWith('/images/blog/')
   ? (() => {
       const base = coverImage.replace(/\.webp$/, '')
-      return `${base}-640.webp 640w, ${base}-1050.webp 1050w, ${coverImage} 2100w`
+      return `${base}-480.webp 480w, ${base}-1200.webp 1200w, ${coverImage} 2100w`
     })()
   : undefined
 ---

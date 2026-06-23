@@ -40,7 +40,7 @@ const formatDate = (date: Date) =>
                 {post.data.coverImage ? (
                   <img
                     src={post.data.coverImage.startsWith('/images/blog/')
-                      ? post.data.coverImage.replace(/\.webp$/, '-640.webp')
+                      ? post.data.coverImage.replace(/\.webp$/, '-480.webp')
                       : post.data.coverImage}
                     alt=""
                     loading="lazy"
