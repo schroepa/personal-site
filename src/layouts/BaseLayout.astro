@@ -284,6 +284,7 @@ const email = { user: "kontakt", domain: "ptrckschrdtr.de" }
       id="nav-overlay"
       class="nav-overlay"
       aria-hidden="true"
+      inert
       role="dialog"
       aria-label="Navigation"
     >
@@ -510,6 +511,7 @@ const email = { user: "kontakt", domain: "ptrckschrdtr.de" }
           overlay!.classList.add("is-open")
           toggle!.setAttribute("aria-expanded", "true")
           overlay!.setAttribute("aria-hidden", "false")
+          overlay!.removeAttribute("inert")
           document.body.style.overflow = "hidden"
         }
 
@@ -518,6 +520,7 @@ const email = { user: "kontakt", domain: "ptrckschrdtr.de" }
           overlay!.classList.remove("is-open")
           toggle!.setAttribute("aria-expanded", "false")
           overlay!.setAttribute("aria-hidden", "true")
+          overlay!.setAttribute("inert", "")
           document.body.style.overflow = ""
         }
 

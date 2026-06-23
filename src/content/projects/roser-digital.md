@@ -1,7 +1,7 @@
 ---
 title: "A new digital sketch comes to life…"
 description: "On some soccer evening while Union Berlin wins"
-coverImage: "/images/gallery/roser-sketch-01/IMG_0432.PNG"
+coverImage: "/images/gallery/roser-sketch-01/IMG_0432.webp"
 date: 2024-07-15
 tags: ["Pro Create", "Digital Art", "Graffiti", "Lettering"]
 featured: true
@@ -11,7 +11,7 @@ Manchmal gibt es diese Momente, da klickt es einfach. Man sitzt da, das iPad Pro
 
 &nbsp;
 &nbsp;
-![digital-tag gy ptrckschrdtr](/images/gallery/roser-sketch-01/IMG_0432.PNG)
+![digital-tag gy ptrckschrdtr](/images/gallery/roser-sketch-01/IMG_0432.webp)
 &nbsp;
 &nbsp;
 

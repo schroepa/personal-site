@@ -3,7 +3,7 @@ title: "Typografie ist das Interface"
 description: "Warum gute Schriftsetzung nicht Dekoration ist, sondern Infrastruktur — und wie man sie im Web richtig umsetzt."
 date: 2024-11-12
 tags: ["Design", "Typografie", "CSS"]
-coverImage: "/images/blog/blog-image-4.png"
+coverImage: "/images/blog/blog-image-4.webp"
 draft: false
 ---
 
