@@ -101,37 +101,54 @@ import { Badge } from '@/components/ui/badge'
 
           <div class="timeline-entry">
             <div class="timeline-meta">
-              <span class="timeline-company">A Eins</span>
-              <span class="timeline-role">Lead Design &amp; Digital Transformation</span>
+              <span class="timeline-period t-mono">2025 — Heute</span>
+              <span class="timeline-company">Freelance — SWT Stadtwerke Trier &amp; Sander Gruppe</span>
+              <span class="timeline-role">Product Design Lead · UI/UX &amp; Digital Transformation</span>
             </div>
-            <p class="timeline-desc t-small text-muted-foreground">
-              Führung von Design- und Transformationsprozessen auf
-              Unternehmensebene. Aufbau skalierbarer Design-Systeme und
-              KI-gestützter Workflows.
-            </p>
+            <ul class="timeline-achievements t-small text-muted-foreground">
+              <li>Konzeption und Design eines interaktiven Solar-Beratungstools mit Live-Bedarfsermittlung und 10-Jahres-Planungssicherheit für Sales-Teams.</li>
+              <li>Digitalisierung des B2B-Vertriebs: Ablösung von PowerPoint-Präsentationen durch ein dynamisches, Figma-basiertes Slide-System mit granularen Zugriffsrechten.</li>
+              <li>Redesign der Corporate-Website auf modernem Astro-Frontend mit Grav-CMS-Anbindung.</li>
+            </ul>
           </div>
 
           <div class="timeline-entry">
             <div class="timeline-meta">
+              <span class="timeline-period t-mono">2022 — 2025</span>
+              <span class="timeline-company">A Eins Digital Innovation</span>
+              <span class="timeline-role">UX/UI Designer (Lead), Wittlich</span>
+            </div>
+            <ul class="timeline-achievements t-small text-muted-foreground">
+              <li>Konzeption und Design von Portazon — der ersten deutschsprachigen Super-App.</li>
+              <li>Integration diverser Drittanbieter-Services in eine konsistente, holistische User Experience.</li>
+              <li>Verantwortung für die visuelle Skalierbarkeit des gesamten digitalen Ökosystems.</li>
+            </ul>
+          </div>
+
+          <div class="timeline-entry">
+            <div class="timeline-meta">
+              <span class="timeline-period t-mono">2019 — 2022</span>
               <span class="timeline-company">Oetker Digital</span>
-              <span class="timeline-role">Corporate Innovation</span>
+              <span class="timeline-role">UX/UI Designer, Berlin</span>
             </div>
-            <p class="timeline-desc t-small text-muted-foreground">
-              Gestaltung komplexer B2B-Plattformen und Super-Apps im
-              Corporate-Kontext. Von der ersten Skizze bis zum
-              produktiven Code.
-            </p>
+            <ul class="timeline-achievements t-small text-muted-foreground">
+              <li>Direkt im Engineering-Team gestafft, um die Lücke zwischen Design und produktivem Code zu schließen.</li>
+              <li>Validierung komplexer technischer Anforderungen durch funktionale Mockups statt statischer Screens.</li>
+              <li>Optimierung des Handoff-Prozesses durch technische Dokumentation und Komponenten-Logik.</li>
+            </ul>
           </div>
 
           <div class="timeline-entry">
             <div class="timeline-meta">
+              <span class="timeline-period t-mono">2012 — 2019</span>
               <span class="timeline-company">DefShop</span>
-              <span class="timeline-role">High-Growth E-Commerce</span>
+              <span class="timeline-role">Senior UI/UX Designer (Lead), Berlin</span>
             </div>
-            <p class="timeline-desc t-small text-muted-foreground">
-              Interface Design und Produktentwicklung in einem der
-              schnellst-wachsenden Street-Culture-Shops Europas.
-            </p>
+            <ul class="timeline-achievements t-small text-muted-foreground">
+              <li>Gesamtverantwortung für drei umfangreiche Redesigns der E-Commerce-Plattform.</li>
+              <li>Lead-Design für zwei native Apps (iOS &amp; Android).</li>
+              <li>Einführung und Pflege eines systemischen Design-Ansatzes zur Beschleunigung der Development-Zyklen.</li>
+            </ul>
           </div>
 
           <div class="timeline-entry timeline-entry--last">
@@ -328,6 +345,35 @@ import { Badge } from '@/components/ui/badge'
     letter-spacing: var(--tracking-wide);
     text-transform: uppercase;
     color: var(--muted-foreground);
+  }
+
+  .timeline-period {
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-wide);
+    color: var(--muted-foreground);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .timeline-achievements {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .timeline-achievements li {
+    position: relative;
+    padding-left: 1.125rem;
+    line-height: var(--leading-normal);
+  }
+
+  .timeline-achievements li::before {
+    content: '—';
+    position: absolute;
+    left: 0;
+    color: color-mix(in oklch, var(--foreground) 30%, transparent);
   }
 
   /* ── Tools ────────────────────────────────────────────────────────────── */
