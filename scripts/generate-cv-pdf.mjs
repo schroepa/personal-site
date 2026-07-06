@@ -74,6 +74,10 @@ async function main() {
 }
 
 main().catch((err) => {
-  console.error('[cv-pdf] Fehler:', err)
-  process.exit(1)
+  // Bewusst kein process.exit(1): Ein Fehler beim CV-PDF-Export (z.B. fehlendes
+  // Chromium in einer neuen Build-Umgebung) darf niemals den gesamten Astro-Build
+  // scheitern lassen — postbuild-Fehler würden sonst den kompletten Deploy blockieren.
+  // Der Fehler wird klar geloggt, damit er in den Build-Logs sichtbar ist.
+  console.error('[cv-pdf] Fehler — CV-PDF wurde NICHT generiert, der restliche Build läuft trotzdem weiter:')
+  console.error(err)
 })

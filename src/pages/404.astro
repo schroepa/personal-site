@@ -1,0 +1,70 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro'
+---
+
+<BaseLayout
+  title="Seite nicht gefunden — Patrick Schröder"
+  description="Diese Seite existiert nicht oder wurde verschoben."
+>
+  <div class="page-grid not-found">
+    <span class="t-label text-muted-foreground not-found-eyebrow">404</span>
+    <h1 class="t-hero not-found-heading">Seite nicht gefunden.</h1>
+    <p class="t-lead text-muted-foreground not-found-text">
+      Die Seite existiert nicht oder wurde verschoben.
+    </p>
+    <div class="not-found-links">
+      <a href="/" class="not-found-link" data-cursor="link">Zur Startseite →</a>
+      <a href="/projects" class="not-found-link" data-cursor="link">Projekte ansehen →</a>
+      <a href="/blog" class="not-found-link" data-cursor="link">Blog lesen →</a>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .not-found {
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding-bottom: 5rem;
+  }
+
+  .not-found-eyebrow {
+    margin-bottom: 1.5rem;
+  }
+
+  .not-found-heading {
+    line-height: 0.95;
+    margin-bottom: 1rem;
+  }
+
+  .not-found-text {
+    margin-bottom: 2.5rem;
+  }
+
+  .not-found-links {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    align-items: flex-start;
+  }
+
+  .not-found-link {
+    color: var(--foreground);
+    text-decoration: none;
+    border-bottom: 1px solid color-mix(in oklch, var(--foreground) 25%, transparent);
+    padding-bottom: 0.125rem;
+    transition: border-color 200ms ease, opacity 200ms ease;
+  }
+
+  .not-found-link:hover {
+    border-color: var(--foreground);
+    opacity: 0.7;
+  }
+
+  @media (max-width: 640px) {
+    .not-found-links {
+      gap: 1rem;
+    }
+  }
+</style>
