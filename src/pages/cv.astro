@@ -1,0 +1,431 @@
+---
+import PrintLayout from '@/layouts/PrintLayout.astro'
+import { cvData } from '@/data/cv'
+---
+
+<PrintLayout title="CV — Patrick Schröder" description="Lebenslauf von Patrick Schröder, Senior Product Designer & Design Engineer.">
+  <div class="cv-page">
+
+    <!-- ── Seite 1 ──────────────────────────────────────────────────── -->
+    <div class="cv-sheet">
+      <aside class="cv-sidebar">
+        <img
+          src="/images/portrait.webp"
+          alt=""
+          class="cv-portrait"
+          decoding="async"
+        />
+
+        <div class="cv-sidebar-block">
+          <span class="cv-label">Kontakt</span>
+          <p class="cv-sidebar-text">
+            {cvData.contact.city}<br />
+            {cvData.contact.email}<br />
+            {cvData.contact.website}<br />
+            {cvData.contact.linkedinDisplay}
+          </p>
+        </div>
+
+        <div class="cv-sidebar-block">
+          <span class="cv-label">Sprachen</span>
+          <ul class="cv-lang-list">
+            {cvData.languages.map((lang) => (
+              <li>
+                <span>{lang.name}</span>
+                <span class="cv-dots" aria-hidden="true">
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <span class:list={['cv-dot', i < lang.level && 'cv-dot--filled']}></span>
+                  ))}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <div class="cv-sidebar-block">
+          <span class="cv-label">Tech-Stack</span>
+          {cvData.techStack.map((group) => (
+            <p class="cv-sidebar-text">
+              <strong>{group.category}:</strong> {group.items.join(', ')}
+            </p>
+          ))}
+        </div>
+      </aside>
+
+      <main class="cv-main">
+        <span class="cv-meta">{cvData.metaLine}</span>
+        <h1 class="cv-name">{cvData.name}</h1>
+        <p class="cv-title">{cvData.title}</p>
+
+        <section class="cv-section">
+          <span class="cv-label">Profil</span>
+          <p class="cv-body-text">{cvData.profile}</p>
+        </section>
+
+        <section class="cv-section">
+          <span class="cv-label">Kernkompetenzen</span>
+          <div class="cv-competency-grid">
+            {cvData.coreCompetencies.map((c) => (
+              <div class="cv-competency">
+                <strong class="cv-competency-title">{c.title}</strong>
+                <p class="cv-competency-desc">{c.description}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section class="cv-section">
+          <span class="cv-label">Berufliche Stationen</span>
+          {cvData.experience.map((exp) => (
+            <div class="cv-experience">
+              <div class="cv-experience-head">
+                <span class="cv-experience-period">{exp.period}</span>
+                <span class="cv-experience-company">{exp.company}</span>
+              </div>
+              <span class="cv-experience-role">{exp.role} · {exp.location}</span>
+              <ul class="cv-achievements">
+                {exp.achievements.map((a) => <li>{a}</li>)}
+              </ul>
+            </div>
+          ))}
+        </section>
+      </main>
+    </div>
+
+    <!-- ── Seite 2 ──────────────────────────────────────────────────── -->
+    <div class="cv-sheet cv-sheet--page2">
+      <aside class="cv-sidebar">
+        <img
+          src="/images/portrait.webp"
+          alt=""
+          class="cv-portrait"
+          decoding="async"
+        />
+
+        <div class="cv-sidebar-block">
+          <span class="cv-label">Kontakt</span>
+          <p class="cv-sidebar-text">
+            {cvData.contact.city}<br />
+            {cvData.contact.email}<br />
+            {cvData.contact.website}<br />
+            {cvData.contact.linkedinDisplay}
+          </p>
+        </div>
+
+        <div class="cv-sidebar-block">
+          <span class="cv-label">Tech-Stack</span>
+          {cvData.techStack.map((group) => (
+            <p class="cv-sidebar-text">
+              <strong>{group.category}:</strong> {group.items.join(', ')}
+            </p>
+          ))}
+        </div>
+      </aside>
+
+      <main class="cv-main">
+        <section class="cv-section">
+          <span class="cv-label">Selected Projects</span>
+          <div class="cv-project-grid">
+            {cvData.projects.map((p) => (
+              <div class="cv-project">
+                <span class="cv-project-meta">{p.number} · {p.category}</span>
+                <strong class="cv-project-title">{p.title}</strong>
+                <p class="cv-project-desc">{p.description}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section class="cv-section">
+          <span class="cv-label">Ausbildung &amp; Background</span>
+          <div class="cv-competency-grid">
+            {cvData.education.map((e) => (
+              <div class="cv-competency">
+                <strong class="cv-competency-title">{e.title}</strong>
+                <p class="cv-competency-desc">{e.description}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section class="cv-section">
+          <span class="cv-label">Warum ich?</span>
+          <p class="cv-body-text">{cvData.whyMe}</p>
+        </section>
+      </main>
+    </div>
+
+  </div>
+</PrintLayout>
+
+<style>
+  /* ── A4-Seiten ────────────────────────────────────────────────────── */
+  @page {
+    size: A4;
+    margin: 0;
+  }
+
+  .cv-page {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .cv-sheet {
+    display: grid;
+    grid-template-columns: 210px 1fr;
+    gap: 32px;
+    width: 210mm;
+    min-height: 297mm;
+    padding: 20mm 16mm;
+    box-sizing: border-box;
+    break-after: page;
+  }
+
+  .cv-sheet--page2 {
+    break-after: auto;
+  }
+
+  /* ── Sidebar ──────────────────────────────────────────────────────── */
+  .cv-sidebar {
+    border-right: 1px solid color-mix(in oklch, var(--foreground) 12%, transparent);
+    padding-right: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .cv-portrait {
+    width: 100%;
+    aspect-ratio: 3 / 4;
+    object-fit: cover;
+    object-position: center top;
+    display: block;
+  }
+
+  .cv-sidebar-block {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    break-inside: avoid;
+  }
+
+  .cv-sidebar-text {
+    font-size: 9px;
+    line-height: var(--leading-normal);
+    color: var(--muted-foreground);
+    margin: 0;
+  }
+
+  .cv-sidebar-text strong {
+    color: var(--foreground);
+    font-weight: 500;
+  }
+
+  .cv-lang-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .cv-lang-list li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 9px;
+    color: var(--foreground);
+  }
+
+  .cv-dots {
+    display: inline-flex;
+    gap: 3px;
+  }
+
+  .cv-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: color-mix(in oklch, var(--foreground) 15%, transparent);
+    display: inline-block;
+  }
+
+  .cv-dot--filled {
+    background: var(--foreground);
+  }
+
+  /* ── Hauptspalte ──────────────────────────────────────────────────── */
+  .cv-main {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .cv-meta {
+    font-size: 8px;
+    letter-spacing: var(--tracking-wide);
+    text-transform: uppercase;
+    color: var(--muted-foreground);
+  }
+
+  .cv-name {
+    font-size: 26px;
+    font-weight: 500;
+    letter-spacing: var(--tracking-tight);
+    line-height: var(--leading-tight);
+    margin: 2px 0 0;
+  }
+
+  .cv-title {
+    font-size: 11px;
+    color: var(--muted-foreground);
+    margin: 0;
+  }
+
+  .cv-section {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    break-inside: avoid;
+  }
+
+  .cv-label {
+    font-size: 8px;
+    letter-spacing: var(--tracking-wide);
+    text-transform: uppercase;
+    color: var(--muted-foreground);
+    font-weight: 500;
+  }
+
+  .cv-body-text {
+    font-size: 10px;
+    line-height: var(--leading-normal);
+    color: var(--foreground);
+    margin: 0;
+  }
+
+  /* ── Kernkompetenzen / Ausbildung Grid ────────────────────────────── */
+  .cv-competency-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  .cv-competency {
+    break-inside: avoid;
+  }
+
+  .cv-competency-title {
+    font-size: 10px;
+    font-weight: 500;
+    color: var(--foreground);
+    display: block;
+    margin-bottom: 3px;
+  }
+
+  .cv-competency-desc {
+    font-size: 9px;
+    line-height: var(--leading-normal);
+    color: var(--muted-foreground);
+    margin: 0;
+  }
+
+  /* ── Berufserfahrung ──────────────────────────────────────────────── */
+  .cv-experience {
+    break-inside: avoid;
+    padding-bottom: 12px;
+    border-bottom: 1px solid color-mix(in oklch, var(--foreground) 8%, transparent);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .cv-experience:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+
+  .cv-experience-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+  }
+
+  .cv-experience-period {
+    font-size: 9px;
+    color: var(--muted-foreground);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .cv-experience-company {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--foreground);
+  }
+
+  .cv-experience-role {
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-wide);
+    color: var(--muted-foreground);
+  }
+
+  .cv-achievements {
+    list-style: none;
+    margin: 4px 0 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .cv-achievements li {
+    position: relative;
+    padding-left: 12px;
+    font-size: 9.5px;
+    line-height: var(--leading-normal);
+    color: var(--foreground);
+  }
+
+  .cv-achievements li::before {
+    content: '—';
+    position: absolute;
+    left: 0;
+    color: color-mix(in oklch, var(--foreground) 30%, transparent);
+  }
+
+  /* ── Projekte ─────────────────────────────────────────────────────── */
+  .cv-project-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  .cv-project {
+    break-inside: avoid;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .cv-project-meta {
+    font-size: 8px;
+    letter-spacing: var(--tracking-wide);
+    text-transform: uppercase;
+    color: var(--muted-foreground);
+  }
+
+  .cv-project-title {
+    font-size: 10px;
+    font-weight: 500;
+    color: var(--foreground);
+  }
+
+  .cv-project-desc {
+    font-size: 9px;
+    line-height: var(--leading-normal);
+    color: var(--muted-foreground);
+    margin: 0;
+  }
+</style>
