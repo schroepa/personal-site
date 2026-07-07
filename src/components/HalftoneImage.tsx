@@ -96,7 +96,7 @@ export const DEFAULT_HALFTONE_PARAMS: Partial<HalftoneConfig> = {
   softness: 0.9,
   contrast: 1.15,
   grainOverlay: 0.06,
-  rotation: 15,
+  rotation: 0,
   type: 'ink',
 };
 
