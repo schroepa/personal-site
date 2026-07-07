@@ -35,9 +35,10 @@ const ogImageURL = ogImage
   ? new URL(ogImage, siteUrl).toString()
   : `${siteUrl}/og-default.png`
 
-// OG-Bildgröße: Cover-Images sind 2100×900, Default ist 1920×1080
-const ogImageWidth = ogImage ? 2100 : 1920
-const ogImageHeight = ogImage ? 900 : 1080
+// OG-Bildgröße: Post-Cover werden als 1200×630-Halbton-Bild vorgerendert
+// (siehe scripts/generate-og-images.mjs), Default ist 1920×1080
+const ogImageWidth = ogImage ? 1200 : 1920
+const ogImageHeight = ogImage ? 630 : 1080
 
 const personSchema = {
   "@context": "https://schema.org",

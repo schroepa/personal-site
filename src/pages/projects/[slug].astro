@@ -49,6 +49,8 @@ const slug = project.id.replace(/\.md$/, '')
   coverImage={project.data.coverImage}
   body={project.body ?? ''}
   pageUrl={`https://ptrckschrdtr.de/projects/${slug}`}
+  slug={slug}
+  kind="projects"
   prev={prev}
   next={next}
 >

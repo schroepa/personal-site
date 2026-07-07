@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "astro dev",
     "build": "NODE_OPTIONS=--max-old-space-size=8192 astro build",
-    "postbuild": "node scripts/generate-cv-pdf.mjs",
+    "postbuild": "node scripts/generate-cv-pdf.mjs && node scripts/generate-og-images.mjs",
     "postinstall": "playwright install chromium",
     "preview": "astro preview",
     "astro": "astro",

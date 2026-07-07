@@ -47,6 +47,8 @@ const slug = post.id.replace(/\.md$/, '')
   coverImage={post.data.coverImage}
   body={post.body ?? ''}
   pageUrl={`https://ptrckschrdtr.de/blog/${slug}`}
+  slug={slug}
+  kind="blog"
   prev={prev}
   next={next}
 >

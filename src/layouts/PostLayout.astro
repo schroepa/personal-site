@@ -25,6 +25,10 @@ interface Props {
   coverImage?: string
   body?: string
   pageUrl?: string
+  /** Für den vorgerenderten Halbton-OG-Bild-Pfad — Slug der aktuellen Seite */
+  slug?: string
+  /** Default: blog — bei Projekt-Detailseiten "projects" setzen */
+  kind?: 'blog' | 'projects'
   prev?: PrevNextPost
   next?: PrevNextPost
 }
@@ -37,9 +41,19 @@ const {
   coverImage,
   body = '',
   pageUrl = Astro.url.href,
+  slug,
+  kind = 'blog',
   prev,
   next,
 } = Astro.props
+
+// Social-Share-Vorschauen (LinkedIn, Twitter, Slack …) führen kein JS aus und
+// sähen ohne diesen Schritt das rohe Originalbild statt des Halbton-Looks.
+// scripts/generate-og-images.mjs rendert für jeden Post mit Cover-Bild eine
+// vorgerenderte Halbton-Version genau unter diesem Pfad in dist/.
+const ogImage = coverImage && slug
+  ? `/images/og/${kind}-${slug}.png`
+  : coverImage
 
 const minutes = readingTime(body)
 
@@ -73,7 +87,7 @@ const halftoneScrollEffect = {
 <BaseLayout
   title={title}
   description={description}
-  ogImage={coverImage}
+  ogImage={ogImage}
   ogType="article"
   canonicalURL={pageUrl}
   articleDate={date}

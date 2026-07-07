@@ -9,6 +9,11 @@ export default defineConfig({
   output: 'static',
   integrations: [
     react(),
-    sitemap(),
+    sitemap({
+      // Rein interne Rendering-Hilfsseiten (noindex) — gehören nicht in die Sitemap
+      filter: (page) =>
+        !page.includes('/og-render/') &&
+        !/\/cv\/?$/.test(new URL(page).pathname),
+    }),
   ],
 })
