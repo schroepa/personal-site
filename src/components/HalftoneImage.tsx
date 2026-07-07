@@ -31,11 +31,11 @@ export interface HalftoneConfig {
 }
 
 export const LIGHT_DEFAULT_CONFIG: HalftoneConfig = {
-  colorBack: '#fbfaf4', // Matches warm page background
-  colorC: '#cbcbcb',   // Cyan
-  colorM: '#4d4d4d',   // Magenta
-  colorY: '#ffd900',   // Yellow
-  colorK: '#1a1817',   // Warm near-black
+  colorBack: '#000000', // black
+  colorC: '#363636',   // dark gray
+  colorM: '#8B8B8B',   // mid gray
+  colorY: '#B2B2B2',   // gray
+  colorK: '#D0D0D0',   // light gray
   size: 0.12,
   gridNoise: 0.05,
   type: 'ink',
