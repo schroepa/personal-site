@@ -47,7 +47,7 @@ Jeder Pillar hat eine Liste konkreter Themen-Ideen. Der Task wählt beim Schreib
 
 ### Design-Themen mit Dev-Background
 
-- [ ] Warum ich als Designer nie wieder ohne Browser-DevTools arbeiten will
+- [x] Warum ich als Designer nie wieder ohne Browser-DevTools arbeiten will
 - [ ] CSS Grid hat meine Art, Layouts zu denken, permanent verändert
 - [ ] Was mir 15 Jahre Sysadmin-Denken über gutes Interface-Design beigebracht haben
 - [ ] Der Unterschied zwischen "sieht fertig aus" und "ist production-ready" — eine Designer-Perspektive
@@ -98,3 +98,4 @@ Wird vom Cron-Task nach jedem Post ergänzt (Datum, Titel, Pillar) — dient der
 | Datum | Pillar | Titel | Slug |
 |---|---|---|---|
 | 2026-07-07 | Tech | shadcn/ui ist keine Component Library — und das ist der Punkt | shadcn-ist-kein-component-system |
+| 2026-07-07 | Design-Themen mit Dev-Background | Warum ich als Designer nie wieder ohne Browser-DevTools arbeiten will | nie-wieder-ohne-devtools |
