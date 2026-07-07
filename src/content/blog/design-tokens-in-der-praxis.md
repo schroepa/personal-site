@@ -3,7 +3,7 @@ title: "Design Tokens: Vom Konzept zur Praxis"
 description: "Wie Design Tokens ein System kohärent halten — und warum CSS custom properties die beste Implementierung dafür sind."
 date: 2024-09-03
 tags: ["Design Systems", "CSS", "Tooling"]
-coverImage: "/images/blog/blog-image-001.webp"
+coverImage: "/images/blog/blog-001.webp"
 draft: false
 ---
 
