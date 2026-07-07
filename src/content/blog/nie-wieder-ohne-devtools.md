@@ -4,7 +4,7 @@ description: "Figma zeigt dir eine Behauptung. DevTools zeigen dir die Wahrheit 
 date: 2026-07-07
 tags: ["Design", "Development"]
 coverImage: "/images/blog/blog-007.webp"
-draft: true
+draft: false
 ---
 
 Ich kenne den Moment, in dem ein Design stirbt. Es ist nicht der Moment, in dem ein Stakeholder es ablehnt. Es ist der Moment, in dem ein Entwickler `⌘+Option+I` drückt, in den echten Browser schaut und feststellt, dass das, was in Figma so sauber aussah, mit echtem Content, echten Schriftmetriken und einem echten Viewport überhaupt nicht funktioniert. Bis dahin war das Design nur eine Behauptung. Ab diesem Moment ist es eine Tatsache — und die meisten Designer sind nicht im Raum, wenn diese Tatsache entsteht.
