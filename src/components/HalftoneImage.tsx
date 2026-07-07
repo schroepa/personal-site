@@ -61,10 +61,10 @@ export const LIGHT_DEFAULT_CONFIG: HalftoneConfig = {
 
 export const DARK_DEFAULT_CONFIG: HalftoneConfig = {
   colorBack: '#1a1817', // Warm near-black background
-  colorC: '#00e5ff',   // Brighter cyan for contrast
-  colorM: '#ff5ea7',   // Brighter magenta for contrast
-  colorY: '#ffeb3b',   // Brighter yellow for contrast
-  colorK: '#fbfaf4',   // White/cream ink for high-contrast detail on dark backgrounds
+  colorC: '#363636',   // dark gray
+  colorM: '#8B8B8B',   // mid gray
+  colorY: '#B2B2B2',   // gray
+  colorK: '#D0D0D0',   // light gray
   size: 0.12,
   gridNoise: 0.05,
   type: 'ink',
