@@ -3,6 +3,8 @@
 **Status:** Living document — wird vom täglichen Cron-Task gelesen und aktualisiert.
 **Zweck:** Steuert, worüber der automatisierte Blog-Task jeden Tag schreibt.
 
+**Artikellänge:** Mindestens 2000 Wörter Fließtext (ohne Frontmatter). Ausführlich, mit echter fachlicher Tiefe — mehrere `##`-Abschnitte, konkrete Beispiele, Vergleiche mit Alternativen, keine oberflächliche Zusammenfassung. Lieber ein Thema erschöpfend behandeln als mehrere Themen anreißen.
+
 ---
 
 ## Rotationslogik
