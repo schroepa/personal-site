@@ -23,6 +23,8 @@ interface Props {
   date: Date
   tags?: string[]
   coverImage?: string
+  /** Ersetzt das Halbton-Cover durch ein autoplay-Loop-Video (stumm, muted, playsinline) */
+  coverVideo?: string
   body?: string
   pageUrl?: string
   /** Für den vorgerenderten Halbton-OG-Bild-Pfad — Slug der aktuellen Seite */
@@ -39,6 +41,7 @@ const {
   date,
   tags = [],
   coverImage,
+  coverVideo,
   body = '',
   pageUrl = Astro.url.href,
   slug,
@@ -99,7 +102,20 @@ const halftoneScrollEffect = {
   <article class="pb-24">
 
     <!-- Cover: volle Breite, normaler Dokumentfluss, kein Overlap -->
-    {coverImage ? (
+    {coverVideo ? (
+      <div class="cover-wrap">
+        <video
+          class="cover-img"
+          src={coverVideo}
+          poster={coverImage}
+          autoplay
+          loop
+          muted
+          playsinline
+          aria-label={title}
+        />
+      </div>
+    ) : coverImage ? (
       <div class="cover-wrap">
         <HalftoneImage
           client:only="react"
