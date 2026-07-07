@@ -5,6 +5,7 @@ import ArticleFooter from '@/components/astro/ArticleFooter.astro'
 import Lightbox from '@/components/astro/Lightbox.astro'
 import { Badge } from '@/components/ui/badge'
 import { readingTime } from '@/lib/reading-time'
+import HalftoneImage from '@/components/HalftoneImage'
 
 interface PrevNextPost {
   slug: string
@@ -57,6 +58,24 @@ const coverSrcset = coverImage?.startsWith('/images/blog/')
       return `${base}-480.webp 480w, ${base}-1200.webp 1200w, ${coverImage} 2100w`
     })()
   : undefined
+
+// Parameter für den CMYK-Halbton-Shader (https://shaders.paper.design/halftone-cmyk)
+// Hier kannst du die Darstellung für alle Beitragsbilder anpassen.
+const halftoneConfig = {
+  size: 0.12,          // Rastergröße der Punkte (0 bis 1)
+  gridNoise: 0.05,     // Organische Verschiebung der Punkte (0 bis 1)
+  softness: 0.9,       // Kantenweichheit der Punkte (0 bis 1)
+  contrast: 1.15,      // Bildkontrast (0 bis 2)
+  grainOverlay: 0.06,  // Stärke des Körnungs-Overlays (0 bis 1)
+  rotation: 15,        // Rasterwinkel (0 bis 360)
+  type: 'ink' as const, // Punkttyp: 'dots' | 'ink' | 'sharp'
+}
+
+// Scroll-Reaktionsparameter für die Animation (verändert nur das Punktraster, das Bild bleibt statisch)
+const halftoneScrollEffect = {
+  sizeFactor: -0.0001,      // Punkte werden beim Scrollen kleiner (z. B. -0.0001 pro Pixel)
+  gridNoiseFactor: 0.00015, // Punkte werden beim Scrollen unordentlicher/analoger (z. B. 0.00015 pro Pixel)
+}
 ---
 
 <BaseLayout
@@ -76,14 +95,13 @@ const coverSrcset = coverImage?.startsWith('/images/blog/')
     <!-- Cover: volle Breite, normaler Dokumentfluss, kein Overlap -->
     {coverImage ? (
       <div class="cover-wrap">
-        <img
+        <HalftoneImage
+          client:only="react"
           src={coverImage}
-          srcset={coverSrcset}
-          sizes="100vw"
-          alt=""
-          class="cover-img"
-          loading="eager"
-          decoding="async"
+          alt={title}
+          className="cover-img"
+          config={halftoneConfig}
+          scrollEffect={halftoneScrollEffect}
         />
       </div>
     ) : (

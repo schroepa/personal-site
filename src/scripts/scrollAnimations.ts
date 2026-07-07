@@ -13,14 +13,13 @@ export function initScrollAnimations(): void {
         ],
         {
           fill: 'both',
-          // @ts-ignore – ScrollTimeline not yet in TS lib
           timeline: new (window as any).ScrollTimeline({
             source: el,
             axis: 'block',
           }),
           rangeStart: 'entry 0%',
           rangeEnd: 'entry 60%',
-        }
+        } as any
       );
       void anim;
     });
