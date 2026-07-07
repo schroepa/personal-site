@@ -5,7 +5,7 @@ import ArticleFooter from '@/components/astro/ArticleFooter.astro'
 import Lightbox from '@/components/astro/Lightbox.astro'
 import { Badge } from '@/components/ui/badge'
 import { readingTime } from '@/lib/reading-time'
-import HalftoneImage from '@/components/HalftoneImage'
+import HalftoneImage, { DEFAULT_HALFTONE_PARAMS } from '@/components/HalftoneImage'
 
 interface PrevNextPost {
   slug: string
@@ -61,15 +61,7 @@ const coverSrcset = coverImage?.startsWith('/images/blog/')
 
 // Parameter für den CMYK-Halbton-Shader (https://shaders.paper.design/halftone-cmyk)
 // Hier kannst du die Darstellung für alle Beitragsbilder anpassen.
-const halftoneConfig = {
-  size: 0.12,          // Rastergröße der Punkte (0 bis 1)
-  gridNoise: 0.05,     // Organische Verschiebung der Punkte (0 bis 1)
-  softness: 0.9,       // Kantenweichheit der Punkte (0 bis 1)
-  contrast: 1.15,      // Bildkontrast (0 bis 2)
-  grainOverlay: 0.06,  // Stärke des Körnungs-Overlays (0 bis 1)
-  rotation: 15,        // Rasterwinkel (0 bis 360)
-  type: 'ink' as const, // Punkttyp: 'dots' | 'ink' | 'sharp'
-}
+const halftoneConfig = DEFAULT_HALFTONE_PARAMS
 
 // Scroll-Reaktionsparameter für die Animation (verändert nur das Punktraster, das Bild bleibt statisch)
 const halftoneScrollEffect = {

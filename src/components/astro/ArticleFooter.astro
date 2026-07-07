@@ -1,4 +1,6 @@
 ---
+import HalftoneImage, { DEFAULT_HALFTONE_PARAMS } from '@/components/HalftoneImage'
+
 interface PrevNextPost {
   slug: string
   kind?: "blog" | "projects"
@@ -148,11 +150,12 @@ const aiLinks = [
             <span class="pn-dir">← Vorheriger</span>
             <div class="pn-thumb">
               {prev.coverImage ? (
-                <img
+                <HalftoneImage
+                  client:only="react"
                   src={prev.coverImage}
                   alt=""
-                  loading="lazy"
-                  decoding="async"
+                  className="pn-thumb-halftone"
+                  config={DEFAULT_HALFTONE_PARAMS}
                 />
               ) : (
                 <div class="pn-thumb-fallback" aria-hidden="true" />
@@ -181,11 +184,12 @@ const aiLinks = [
             <span class="pn-dir">Nächster →</span>
             <div class="pn-thumb">
               {next.coverImage ? (
-                <img
+                <HalftoneImage
+                  client:only="react"
                   src={next.coverImage}
                   alt=""
-                  loading="lazy"
-                  decoding="async"
+                  className="pn-thumb-halftone"
+                  config={DEFAULT_HALFTONE_PARAMS}
                 />
               ) : (
                 <div class="pn-thumb-fallback" aria-hidden="true" />
@@ -346,15 +350,14 @@ const aiLinks = [
     background: var(--muted);
   }
 
-  .pn-thumb img {
+  .pn-thumb-halftone {
     width: 100%;
     height: 100%;
-    object-fit: cover;
     display: block;
     transition: transform 500ms cubic-bezier(0.25, 1, 0.5, 1);
   }
 
-  .pn-link:hover .pn-thumb img {
+  .pn-link:hover .pn-thumb-halftone {
     transform: scale(1.03);
   }
 
@@ -403,7 +406,7 @@ const aiLinks = [
     .pn-link {
       transition: none;
     }
-    .pn-link:hover .pn-thumb img {
+    .pn-link:hover .pn-thumb-halftone {
       transform: none;
     }
   }

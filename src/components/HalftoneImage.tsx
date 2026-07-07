@@ -31,11 +31,11 @@ export interface HalftoneConfig {
 }
 
 export const LIGHT_DEFAULT_CONFIG: HalftoneConfig = {
-  colorBack: '#000000', // black
-  colorC: '#363636',   // dark gray
-  colorM: '#8B8B8B',   // mid gray
-  colorY: '#B2B2B2',   // gray
-  colorK: '#D0D0D0',   // light gray
+  colorBack: '#ffffff', // white
+  colorC: '#b3b3b3',    // light gray
+  colorM: '#8c8c8c',    // mid gray
+  colorY: '#363636',    // dark gray
+  colorK: '#000000',    // black
   size: 0.12,
   gridNoise: 0.05,
   type: 'ink',
@@ -61,10 +61,10 @@ export const LIGHT_DEFAULT_CONFIG: HalftoneConfig = {
 
 export const DARK_DEFAULT_CONFIG: HalftoneConfig = {
   colorBack: '#1a1817', // Warm near-black background
-  colorC: '#363636',   // dark gray
-  colorM: '#8B8B8B',   // mid gray
-  colorY: '#B2B2B2',   // gray
-  colorK: '#D0D0D0',   // light gray
+  colorC: '#b3b3b3',    // light gray
+  colorM: '#8c8c8c',    // mid gray
+  colorY: '#363636',    // dark gray
+  colorK: '#000000',    // black
   size: 0.12,
   gridNoise: 0.05,
   type: 'ink',
@@ -86,6 +86,18 @@ export const DARK_DEFAULT_CONFIG: HalftoneConfig = {
   rotation: 15,
   offsetX: 0.0,
   offsetY: 0.0,
+};
+
+// Gemeinsame visuelle Parameter für alle Halftone-Einsatzstellen (Cover, Blog-
+// Übersicht, Prev/Next-Karten) — nur die Farben unterscheiden sich per Theme.
+export const DEFAULT_HALFTONE_PARAMS: Partial<HalftoneConfig> = {
+  size: 0.12,
+  gridNoise: 0.05,
+  softness: 0.9,
+  contrast: 1.15,
+  grainOverlay: 0.06,
+  rotation: 15,
+  type: 'ink',
 };
 
 export interface ScrollEffectConfig {

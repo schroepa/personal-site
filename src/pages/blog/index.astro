@@ -2,6 +2,7 @@
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import { getCollection } from 'astro:content';
 import { readingTime } from '@/lib/reading-time';
+import HalftoneImage, { DEFAULT_HALFTONE_PARAMS } from '@/components/HalftoneImage';
 
 const posts = await getCollection('blog', ({ data }) => !data.draft);
 const sorted = posts.sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
@@ -38,14 +39,14 @@ const formatDate = (date: Date) =>
               <!-- Thumbnail: immer sichtbar, kompakt -->
               <div class="post-thumb" aria-hidden="true">
                 {post.data.coverImage ? (
-                  <img
+                  <HalftoneImage
+                    client:only="react"
                     src={post.data.coverImage.startsWith('/images/blog/')
                       ? post.data.coverImage.replace(/\.webp$/, '-480.webp')
                       : post.data.coverImage}
                     alt=""
-                    loading="lazy"
-                    decoding="async"
-                    class="post-thumb-img"
+                    className="post-thumb-img"
+                    config={DEFAULT_HALFTONE_PARAMS}
                   />
                 ) : (
                   <div class="post-thumb-fallback"></div>
