@@ -4,7 +4,6 @@ description: "Figma zeigt dir eine Behauptung. DevTools zeigen dir die Wahrheit 
 date: 2026-07-07
 tags: ["Design", "Development"]
 coverImage: "/images/blog/blog-007.webp"
-coverVideo: "/videos/blog/nie-wieder-ohne-devtools.mp4"
 draft: false
 ---
 
