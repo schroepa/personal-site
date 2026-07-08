@@ -4,7 +4,7 @@ description: "Tailwind v4 hat die JavaScript-Config abgeschafft und Design Token
 date: 2026-07-08
 tags: ["Tech", "Tooling"]
 coverImage: "/images/blog/blog-008.webp"
-draft: true
+draft: false
 ---
 
 Als Tailwind v4 die `tailwind.config.js` abgeschafft hat, haben viele Leute in meiner Timeline das als kosmetische Änderung abgetan. Neue Syntax, gleiche Idee, nächstes Update. Das ist falsch, und zwar auf eine Art, die für jeden relevant ist, der Design Systems baut. Tailwind v4 hat nicht die Syntax geändert, mit der man Tokens definiert — es hat verändert, *wo Tokens leben* und *wann sie existieren*. Das ist ein Architektur-Statement, kein Facelift.
