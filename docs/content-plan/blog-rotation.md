@@ -59,7 +59,7 @@ Jeder Pillar hat eine Liste konkreter Themen-Ideen. Der Task wählt beim Schreib
 ### Tech (Paper Design, Figma, shadcn, Tooling)
 
 - [x] shadcn/ui ist keine Component Library — es ist ein Copy-Paste-Design-System, und das ist der Punkt
-- [ ] Warum Tailwind v4 die Art verändert, wie ich über Design Tokens denke
+- [x] Warum Tailwind v4 die Art verändert, wie ich über Design Tokens denke
 - [ ] Figma Variables vs. Code-Tokens: Wo die Synchronisation bricht
 - [ ] Was Shader-basierte Hintergründe (Paper Design & Co.) für Interface-Design bedeuten
 - [ ] Astro Islands aus Design-Sicht: Warum Partial Hydration auch eine UX-Entscheidung ist
@@ -99,3 +99,4 @@ Wird vom Cron-Task nach jedem Post ergänzt (Datum, Titel, Pillar) — dient der
 |---|---|---|---|
 | 2026-07-07 | Tech | shadcn/ui ist keine Component Library — und das ist der Punkt | shadcn-ist-kein-component-system |
 | 2026-07-07 | Design-Themen mit Dev-Background | Warum ich als Designer nie wieder ohne Browser-DevTools arbeiten will | nie-wieder-ohne-devtools |
+| 2026-07-08 | Tech | Warum Tailwind v4 die Art verändert, wie ich über Design Tokens denke | tailwind-v4-design-tokens |
