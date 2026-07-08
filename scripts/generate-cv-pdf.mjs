@@ -6,7 +6,7 @@ import path from 'node:path'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const projectRoot = path.resolve(__dirname, '..')
-const PORT = 4323
+const PORT = 4823
 const BASE_URL = `http://localhost:${PORT}`
 const OUTPUT_PATH = path.join(projectRoot, 'dist', 'cv.pdf')
 const ASTRO_BIN = path.join(projectRoot, 'node_modules', '.bin', 'astro')
@@ -54,7 +54,13 @@ async function main() {
     await waitForServer(`${BASE_URL}/cv`)
     console.log('[cv-pdf] Preview-Server bereit. Rendere PDF …')
 
-    const browser = await chromium.launch()
+    // --no-sandbox/--disable-setuid-sandbox: Chromium verweigert den Start ohne
+    // diese Flags, wenn der Build-Container als root läuft (u.a. auf Vercel).
+    // --disable-dev-shm-usage: /dev/shm ist in vielen Containern zu klein und
+    // lässt Chromium sonst mit "Renderer process crashed" abstürzen.
+    const browser = await chromium.launch({
+      args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
+    })
     try {
       const page = await browser.newPage()
       await page.goto(`${BASE_URL}/cv`, { waitUntil: 'networkidle' })
@@ -79,5 +85,5 @@ main().catch((err) => {
   // scheitern lassen — postbuild-Fehler würden sonst den kompletten Deploy blockieren.
   // Der Fehler wird klar geloggt, damit er in den Build-Logs sichtbar ist.
   console.error('[cv-pdf] Fehler — CV-PDF wurde NICHT generiert, der restliche Build läuft trotzdem weiter:')
-  console.error(err)
+  console.error(err?.stack ?? err)
 })

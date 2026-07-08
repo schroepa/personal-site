@@ -7,7 +7,7 @@ import fs from 'node:fs'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const projectRoot = path.resolve(__dirname, '..')
-const PORT = 4333
+const PORT = 4833
 const BASE_URL = `http://localhost:${PORT}`
 const ASTRO_BIN = path.join(projectRoot, 'node_modules', '.bin', 'astro')
 const OG_RENDER_DIR = path.join(projectRoot, 'dist', 'og-render')
@@ -73,7 +73,21 @@ async function main() {
     }
     await waitForServer(`${BASE_URL}/og-render/${targets[0].kind}/${targets[0].slug}`)
 
-    const browser = await chromium.launch()
+    // --no-sandbox/--disable-setuid-sandbox: Chromium verweigert den Start ohne
+    // diese Flags, wenn der Build-Container als root läuft (u.a. auf Vercel).
+    // --disable-dev-shm-usage: /dev/shm ist in vielen Containern zu klein.
+    // --use-gl=angle --use-angle=swiftshader: Der Halbton-Shader (WebGL2) auf
+    // der og-render-Seite braucht Software-Rendering, da Build-Container keine
+    // echte GPU haben — ohne diese Flags bleibt der Canvas leer/schwarz.
+    const browser = await chromium.launch({
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
+        '--use-gl=angle',
+        '--use-angle=swiftshader',
+      ],
+    })
     try {
       for (const { kind, slug } of targets) {
         const page = await browser.newPage({ viewport: { width: 1200, height: 630 } })
@@ -100,5 +114,5 @@ main().catch((err) => {
   // Wie beim CV-PDF-Export: ein Fehler hier darf den Gesamt-Build nicht
   // zum Scheitern bringen — nur klar loggen.
   console.error('[og-images] Fehler — OG-Bilder wurden NICHT vollständig generiert:')
-  console.error(err)
+  console.error(err?.stack ?? err)
 })
