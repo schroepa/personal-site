@@ -1,4 +1,5 @@
 import { chromium } from 'playwright'
+import sparticuzChromium from '@sparticuz/chromium'
 import { spawn } from 'node:child_process'
 import { setTimeout as sleep } from 'node:timers/promises'
 import { fileURLToPath } from 'node:url'
@@ -10,6 +11,24 @@ const PORT = 4823
 const BASE_URL = `http://localhost:${PORT}`
 const OUTPUT_PATH = path.join(projectRoot, 'dist', 'cv.pdf')
 const ASTRO_BIN = path.join(projectRoot, 'node_modules', '.bin', 'astro')
+
+// Auf Vercel scheitert Playwrights eigenes Chromium-Binary am Start, weil dem
+// Build-Container Shared Libraries fehlen, die Chromium normalerweise vom
+// Betriebssystem erwartet (libnss3 & co.) — reine --no-sandbox-Flags reichen
+// dafür nicht, das Binary crasht schon vorher. @sparticuz/chromium liefert ein
+// statisch gelinktes Chromium samt der in Serverless-/Build-Containern nötigen
+// Flags und behebt das zuverlässig.
+async function launchBrowser() {
+  if (process.env.VERCEL) {
+    return chromium.launch({
+      executablePath: await sparticuzChromium.executablePath(),
+      args: sparticuzChromium.args,
+    })
+  }
+  return chromium.launch({
+    args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
+  })
+}
 
 async function waitForServer(url, timeoutMs = 30000) {
   const start = Date.now()
@@ -54,13 +73,7 @@ async function main() {
     await waitForServer(`${BASE_URL}/cv`)
     console.log('[cv-pdf] Preview-Server bereit. Rendere PDF …')
 
-    // --no-sandbox/--disable-setuid-sandbox: Chromium verweigert den Start ohne
-    // diese Flags, wenn der Build-Container als root läuft (u.a. auf Vercel).
-    // --disable-dev-shm-usage: /dev/shm ist in vielen Containern zu klein und
-    // lässt Chromium sonst mit "Renderer process crashed" abstürzen.
-    const browser = await chromium.launch({
-      args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
-    })
+    const browser = await launchBrowser()
     try {
       const page = await browser.newPage()
       await page.goto(`${BASE_URL}/cv`, { waitUntil: 'networkidle' })

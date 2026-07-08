@@ -1,4 +1,5 @@
 import { chromium } from 'playwright'
+import sparticuzChromium from '@sparticuz/chromium'
 import { spawn } from 'node:child_process'
 import { setTimeout as sleep } from 'node:timers/promises'
 import { fileURLToPath } from 'node:url'
@@ -27,6 +28,29 @@ function findOgRenderSlugs() {
     }
   }
   return slugs
+}
+
+// Auf Vercel scheitert Playwrights eigenes Chromium-Binary am Start, weil dem
+// Build-Container Shared Libraries fehlen — reine --no-sandbox-Flags reichen
+// dafür nicht. @sparticuz/chromium liefert ein statisch gelinktes Chromium
+// samt WebGL/Software-Rendering-Flags (u.a. --use-gl=angle), die die
+// og-render-Seite für den Halbton-Shader braucht.
+async function launchBrowser() {
+  if (process.env.VERCEL) {
+    return chromium.launch({
+      executablePath: await sparticuzChromium.executablePath(),
+      args: sparticuzChromium.args,
+    })
+  }
+  return chromium.launch({
+    args: [
+      '--no-sandbox',
+      '--disable-setuid-sandbox',
+      '--disable-dev-shm-usage',
+      '--use-gl=angle',
+      '--use-angle=swiftshader',
+    ],
+  })
 }
 
 async function waitForServer(url, timeoutMs = 30000) {
@@ -73,21 +97,7 @@ async function main() {
     }
     await waitForServer(`${BASE_URL}/og-render/${targets[0].kind}/${targets[0].slug}`)
 
-    // --no-sandbox/--disable-setuid-sandbox: Chromium verweigert den Start ohne
-    // diese Flags, wenn der Build-Container als root läuft (u.a. auf Vercel).
-    // --disable-dev-shm-usage: /dev/shm ist in vielen Containern zu klein.
-    // --use-gl=angle --use-angle=swiftshader: Der Halbton-Shader (WebGL2) auf
-    // der og-render-Seite braucht Software-Rendering, da Build-Container keine
-    // echte GPU haben — ohne diese Flags bleibt der Canvas leer/schwarz.
-    const browser = await chromium.launch({
-      args: [
-        '--no-sandbox',
-        '--disable-setuid-sandbox',
-        '--disable-dev-shm-usage',
-        '--use-gl=angle',
-        '--use-angle=swiftshader',
-      ],
-    })
+    const browser = await launchBrowser()
     try {
       for (const { kind, slug } of targets) {
         const page = await browser.newPage({ viewport: { width: 1200, height: 630 } })
