@@ -1,5 +1,15 @@
-import React from 'react'
-import { AbsoluteFill, Sequence, interpolate, spring, useCurrentFrame, useVideoConfig } from 'remotion'
+import React, { useEffect, useState } from 'react'
+import {
+  AbsoluteFill,
+  Sequence,
+  continueRender,
+  delayRender,
+  interpolate,
+  spring,
+  useCurrentFrame,
+  useVideoConfig,
+} from 'remotion'
+import { GrainGradient } from '@paper-design/shaders-react'
 
 const FONT_STACK =
   '"Helvetica Neue", Helvetica, Arial, sans-serif'
@@ -12,6 +22,41 @@ const MONO_STACK = '"SF Mono", "Menlo", "Consolas", monospace'
 const COLOR_BG = '#0a0907'
 const COLOR_FG = '#f6f5f3'
 const COLOR_MUTED = '#918f8b'
+
+// Grain-Gradient-Shader (paper.design) als bewegter Hintergrund, in Grautönen
+// der Site-Palette. speed=0 + frame=ms macht das Rendering deterministisch,
+// sodass jeder Remotion-Frame exakt reproduzierbar exportiert wird — kein
+// zeitbasiertes rAF, das mit dem Frame-für-Frame-Export der Videos aus dem
+// Takt geraten könnte.
+const ShaderBackground: React.FC = () => {
+  const frame = useCurrentFrame()
+  const { fps } = useVideoConfig()
+  const [handle] = useState(() => delayRender('paper-shader-init'))
+
+  useEffect(() => {
+    // Der WebGL-Kontext braucht nach dem Mount kurz Zeit, bis der erste
+    // Frame tatsächlich gezeichnet ist — analog zum sleep() vor dem
+    // OG-Bild-Screenshot in scripts/generate-og-images.mjs.
+    const timeout = setTimeout(() => continueRender(handle), 400)
+    return () => clearTimeout(timeout)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  return (
+    <GrainGradient
+      style={{ position: 'absolute', inset: 0 }}
+      speed={0}
+      frame={(frame / fps) * 1000}
+      colorBack={COLOR_BG}
+      colors={['#141312', '#26221f', '#3a3530']}
+      softness={0.85}
+      intensity={0.35}
+      noise={0.4}
+      shape="ripple"
+      scale={1.4}
+    />
+  )
+}
 
 type BeatProps = {
   children: React.ReactNode
@@ -103,6 +148,8 @@ const Timecode: React.FC = () => {
 export const DevToolsTeaser: React.FC = () => {
   return (
     <AbsoluteFill style={{ backgroundColor: COLOR_BG }}>
+      <ShaderBackground />
+
       <Sequence from={0} durationInFrames={75}>
         <Beat fontSize={104}>Figma zeigt dir eine Behauptung.</Beat>
       </Sequence>
