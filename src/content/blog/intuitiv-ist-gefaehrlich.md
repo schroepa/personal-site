@@ -4,7 +4,7 @@ description: "\"Das sollte intuitiv sein\" ist keine Anforderung, sondern eine B
 date: 2026-07-09
 tags: ["UX Design"]
 coverImage: "/images/blog/blog-009.webp"
-draft: true
+draft: false
 ---
 
 Ich kenne den Moment aus jedem Projekt-Meeting der letzten fünfzehn Jahre: Jemand schaut auf einen Screen, den ein Team wochenlang gebaut hat, und sagt: "Das sollte intuitiver sein." Alle nicken. Niemand fragt nach. Der Satz klingt wie ein Argument. Er ist keins.
