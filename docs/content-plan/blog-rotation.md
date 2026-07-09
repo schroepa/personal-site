@@ -101,3 +101,4 @@ Wird vom Cron-Task nach jedem Post ergänzt (Datum, Titel, Pillar) — dient der
 | 2026-07-07 | Design-Themen mit Dev-Background | Warum ich als Designer nie wieder ohne Browser-DevTools arbeiten will | nie-wieder-ohne-devtools |
 | 2026-07-08 | Tech | Warum Tailwind v4 die Art verändert, wie ich über Design Tokens denke | tailwind-v4-design-tokens |
 | 2026-07-09 | UX Design | Warum "intuitiv" das gefährlichste Wort im UX-Vokabular ist | intuitiv-ist-gefaehrlich |
+| 2026-07-09 | Design-Themen mit Dev-Background (ad-hoc, manuell angefragt) | Warum diese Seite keine Screenshots meiner Designs zeigt | keine-screenshots-portfolio |
