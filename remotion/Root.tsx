@@ -4,6 +4,7 @@ import { TailwindTokensTeaser } from './TailwindTokensTeaser'
 import { IntuitivTeaser } from './IntuitivTeaser'
 import { ScreenshotsTeaser } from './ScreenshotsTeaser'
 import { TokensInfrastrukturTeaser } from './TokensInfrastrukturTeaser'
+import { PaperDesignTeaser } from './PaperDesignTeaser'
 
 const FPS = 30
 
@@ -49,6 +50,14 @@ export const RemotionRoot: React.FC = () => {
         fps={FPS}
         width={1920}
         height={1080}
+      />
+      <Composition
+        id="paper-design-teaser"
+        component={PaperDesignTeaser}
+        durationInFrames={600}
+        fps={FPS}
+        width={1080}
+        height={1920}
       />
     </>
   )
