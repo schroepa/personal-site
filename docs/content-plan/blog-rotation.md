@@ -103,3 +103,4 @@ Wird vom Cron-Task nach jedem Post ergänzt (Datum, Titel, Pillar) — dient der
 | 2026-07-09 | UX Design | Warum "intuitiv" das gefährlichste Wort im UX-Vokabular ist | intuitiv-ist-gefaehrlich |
 | 2026-07-09 | Design-Themen mit Dev-Background (ad-hoc, manuell angefragt) | Warum diese Seite keine Screenshots meiner Designs zeigt | keine-screenshots-portfolio |
 | 2026-07-09 | Design Systems | Tokens vs. Komponenten: Wo ein Design System aufhört, Design zu sein | tokens-vs-komponenten-infrastruktur |
+| 2026-07-09 | Tech (ad-hoc, manuell angefragt) | Paper.design ist noch kein Figma-Killer — aber ich sehe schon, wie es einer wird | paper-design-figma-killer |
