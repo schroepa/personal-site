@@ -110,15 +110,15 @@ const ClaimScene: React.FC = () => {
   const stampOpacity = interpolate(stampProgress, [0, 0.3], [0, 1], { extrapolateRight: 'clamp' })
 
   return (
-    <AbsoluteFill style={{ justifyContent: 'center', alignItems: 'center', opacity: fade, padding: '0 80px' }}>
+    <AbsoluteFill style={{ justifyContent: 'center', alignItems: 'center', opacity: fade, padding: '0 56px' }}>
       <div
         style={{
           opacity: enter,
           transform: `translateY(${(1 - enter) * 20}px)`,
           fontFamily: FONT_STACK,
           fontWeight: 800,
-          fontSize: 74,
-          lineHeight: 1.2,
+          fontSize: 108,
+          lineHeight: 1.12,
           color: COLOR_FG,
           textAlign: 'center',
         }}
@@ -127,15 +127,15 @@ const ClaimScene: React.FC = () => {
       </div>
       <div
         style={{
-          marginTop: 40,
-          padding: '14px 30px',
-          border: `3px solid ${COLOR_DANGER}`,
-          borderRadius: 12,
+          marginTop: 56,
+          padding: '20px 40px',
+          border: `4px solid ${COLOR_DANGER}`,
+          borderRadius: 16,
           color: COLOR_DANGER,
           fontFamily: FONT_STACK,
           fontWeight: 800,
-          fontSize: 30,
-          letterSpacing: '0.04em',
+          fontSize: 42,
+          letterSpacing: '0.03em',
           textTransform: 'uppercase',
           transform: `scale(${stampScale}) rotate(-3deg)`,
           opacity: stampOpacity,
@@ -157,26 +157,26 @@ const ArchScene: React.FC = () => {
   const bottomEnter = spring({ frame: frame - 20, fps: 30, config: { damping: 200, stiffness: 130 }, durationInFrames: 16 })
 
   return (
-    <AbsoluteFill style={{ justifyContent: 'center', alignItems: 'center', opacity: fade, padding: '0 80px' }}>
+    <AbsoluteFill style={{ justifyContent: 'center', alignItems: 'center', opacity: fade, padding: '0 56px' }}>
       <div
         style={{
           opacity: topEnter,
           transform: `translateY(${(1 - topEnter) * 20}px)`,
           textAlign: 'center',
-          marginBottom: 70,
+          marginBottom: 90,
         }}
       >
-        <div style={{ fontFamily: FONT_STACK, fontWeight: 800, fontSize: 46, color: COLOR_MUTED, marginBottom: 14 }}>
+        <div style={{ fontFamily: FONT_STACK, fontWeight: 800, fontSize: 76, color: COLOR_MUTED, marginBottom: 22 }}>
           FIGMA
         </div>
-        <div style={{ fontFamily: MONO_STACK, fontSize: 24, color: COLOR_MUTED, lineHeight: 1.5 }}>
+        <div style={{ fontFamily: MONO_STACK, fontSize: 34, color: COLOR_MUTED, lineHeight: 1.5 }}>
           eigene Engine.
           <br />
           CSS nur simuliert.
         </div>
       </div>
 
-      <div style={{ width: 90, height: 2, backgroundColor: 'rgba(145,143,139,0.3)', marginBottom: 70 }} />
+      <div style={{ width: 120, height: 3, backgroundColor: 'rgba(145,143,139,0.3)', marginBottom: 90 }} />
 
       <div
         style={{
@@ -185,10 +185,10 @@ const ArchScene: React.FC = () => {
           textAlign: 'center',
         }}
       >
-        <div style={{ fontFamily: FONT_STACK, fontWeight: 800, fontSize: 46, color: COLOR_BLUE, marginBottom: 14 }}>
+        <div style={{ fontFamily: FONT_STACK, fontWeight: 800, fontSize: 76, color: COLOR_BLUE, marginBottom: 22 }}>
           PAPER
         </div>
-        <div style={{ fontFamily: MONO_STACK, fontSize: 24, color: COLOR_FG, lineHeight: 1.5 }}>
+        <div style={{ fontFamily: MONO_STACK, fontSize: 34, color: COLOR_FG, lineHeight: 1.5 }}>
           die Canvas
           <br />
           ist echtes CSS.
@@ -209,13 +209,13 @@ const SnapshotScene: React.FC = () => {
   const resultEnter = spring({ frame: frame - 34, fps: 30, config: { damping: 200, stiffness: 130 }, durationInFrames: 16 })
 
   return (
-    <AbsoluteFill style={{ justifyContent: 'center', alignItems: 'center', opacity: fade, padding: '0 80px' }}>
+    <AbsoluteFill style={{ justifyContent: 'center', alignItems: 'center', opacity: fade, padding: '0 56px' }}>
       <div
         style={{
           fontFamily: MONO_STACK,
-          fontSize: 24,
+          fontSize: 32,
           color: COLOR_MUTED,
-          marginBottom: 56,
+          marginBottom: 72,
           textAlign: 'center',
         }}
       >
@@ -226,16 +226,18 @@ const SnapshotScene: React.FC = () => {
         style={{
           opacity: sourceEnter,
           transform: `translateY(${(1 - sourceEnter) * 16}px)`,
-          width: 340,
-          height: 110,
-          borderRadius: 16,
-          border: `2px solid ${COLOR_MUTED}`,
+          width: 620,
+          height: 150,
+          borderRadius: 20,
+          border: `3px solid ${COLOR_MUTED}`,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           fontFamily: MONO_STACK,
-          fontSize: 20,
+          fontSize: 28,
           color: COLOR_MUTED,
+          textAlign: 'center',
+          padding: '0 20px',
         }}
       >
         Element auf Live-Site
@@ -244,9 +246,9 @@ const SnapshotScene: React.FC = () => {
       <div
         style={{
           opacity: arrowEnter,
-          fontSize: 44,
+          fontSize: 64,
           color: COLOR_MUTED,
-          margin: '20px 0',
+          margin: '28px 0',
           transform: `scale(${arrowEnter})`,
         }}
       >
@@ -257,22 +259,22 @@ const SnapshotScene: React.FC = () => {
         style={{
           opacity: resultEnter,
           transform: `translateY(${(1 - resultEnter) * 16}px) scale(${0.95 + resultEnter * 0.05})`,
-          width: 360,
-          height: 130,
-          borderRadius: 16,
-          border: `2px solid ${COLOR_BLUE}`,
+          width: 660,
+          height: 180,
+          borderRadius: 20,
+          border: `3px solid ${COLOR_BLUE}`,
           backgroundColor: `color-mix(in oklch, ${COLOR_BLUE} 12%, transparent)`,
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          gap: 6,
+          gap: 12,
         }}
       >
-        <div style={{ fontFamily: FONT_STACK, fontWeight: 700, fontSize: 24, color: COLOR_FG }}>
+        <div style={{ fontFamily: FONT_STACK, fontWeight: 700, fontSize: 34, color: COLOR_FG }}>
           Sofort editierbar
         </div>
-        <div style={{ fontFamily: MONO_STACK, fontSize: 17, color: COLOR_BLUE }}>echtes CSS, kein Screenshot</div>
+        <div style={{ fontFamily: MONO_STACK, fontSize: 24, color: COLOR_BLUE }}>echtes CSS, kein Screenshot</div>
       </div>
     </AbsoluteFill>
   )
@@ -286,18 +288,18 @@ const GapScene: React.FC = () => {
   const enter = spring({ frame, fps: 30, config: { damping: 200, stiffness: 120 }, durationInFrames: 18 })
 
   return (
-    <AbsoluteFill style={{ justifyContent: 'center', alignItems: 'center', opacity: fade, padding: '0 80px' }}>
+    <AbsoluteFill style={{ justifyContent: 'center', alignItems: 'center', opacity: fade, padding: '0 56px' }}>
       <div
         style={{
           opacity: enter,
           transform: `translateY(${(1 - enter) * 20}px)`,
           fontFamily: FONT_STACK,
           fontWeight: 700,
-          fontSize: 52,
-          lineHeight: 1.3,
+          fontSize: 78,
+          lineHeight: 1.22,
           color: COLOR_FG,
           textAlign: 'center',
-          marginBottom: 30,
+          marginBottom: 48,
         }}
       >
         Was fehlt: ein Token-Editor.
@@ -305,12 +307,12 @@ const GapScene: React.FC = () => {
       <div
         style={{
           opacity: enter,
-          padding: '10px 24px',
-          border: `2px solid ${COLOR_DANGER}`,
+          padding: '18px 38px',
+          border: `3px solid ${COLOR_DANGER}`,
           borderRadius: 999,
           color: COLOR_DANGER,
           fontFamily: MONO_STACK,
-          fontSize: 20,
+          fontSize: 30,
           textTransform: 'uppercase',
           letterSpacing: '0.04em',
         }}
@@ -330,15 +332,15 @@ const ThesisScene: React.FC = () => {
   const translateY = interpolate(enter, [0, 1], [26, 0])
 
   return (
-    <AbsoluteFill style={{ justifyContent: 'center', alignItems: 'center', opacity: fade, padding: '0 80px' }}>
+    <AbsoluteFill style={{ justifyContent: 'center', alignItems: 'center', opacity: fade, padding: '0 56px' }}>
       <div
         style={{
           opacity: enter,
           transform: `translateY(${translateY}px)`,
           fontFamily: FONT_STACK,
           fontWeight: 800,
-          fontSize: 66,
-          lineHeight: 1.25,
+          fontSize: 98,
+          lineHeight: 1.16,
           letterSpacing: '-0.01em',
           color: COLOR_FG,
           textAlign: 'center',
@@ -361,15 +363,15 @@ const PayoffScene: React.FC = () => {
   const enter = spring({ frame, fps: 30, config: { damping: 200, stiffness: 120 }, durationInFrames: 16 })
 
   return (
-    <AbsoluteFill style={{ justifyContent: 'center', alignItems: 'center', opacity: fade, padding: '0 80px' }}>
+    <AbsoluteFill style={{ justifyContent: 'center', alignItems: 'center', opacity: fade, padding: '0 56px' }}>
       <div
         style={{
           opacity: enter,
           transform: `translateY(${(1 - enter) * 20}px)`,
           fontFamily: FONT_STACK,
           fontWeight: 700,
-          fontSize: 42,
-          lineHeight: 1.4,
+          fontSize: 64,
+          lineHeight: 1.35,
           color: COLOR_FG,
           textAlign: 'center',
         }}
@@ -389,12 +391,12 @@ const OutroScene: React.FC = () => {
   const opacity = interpolate(frame, [0, 15], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' })
 
   return (
-    <AbsoluteFill style={{ justifyContent: 'center', alignItems: 'center', padding: '0 80px' }}>
+    <AbsoluteFill style={{ justifyContent: 'center', alignItems: 'center', padding: '0 56px' }}>
       <div style={{ opacity, textAlign: 'center' }}>
-        <div style={{ fontFamily: FONT_STACK, fontWeight: 700, fontSize: 36, color: COLOR_FG, marginBottom: 30, lineHeight: 1.3 }}>
+        <div style={{ fontFamily: FONT_STACK, fontWeight: 700, fontSize: 52, color: COLOR_FG, marginBottom: 44, lineHeight: 1.3 }}>
           Ich beobachte die Roadmap genauer als jede Figma-Release-Note.
         </div>
-        <div style={{ fontFamily: MONO_STACK, fontSize: 24, fontWeight: 500, color: COLOR_MUTED, letterSpacing: '0.02em' }}>
+        <div style={{ fontFamily: MONO_STACK, fontSize: 32, fontWeight: 500, color: COLOR_MUTED, letterSpacing: '0.02em' }}>
           ptrckschrdtr.de
         </div>
       </div>
