@@ -4,7 +4,7 @@ description: "Ein ehrlicher Praxis-Check von paper.design: warum das Chrome-Plug
 date: 2026-07-09
 tags: ["Tech", "Tooling"]
 coverImage: "/images/blog/blog-012.webp"
-draft: true
+draft: false
 ---
 
 Ich sage das nicht leichtfertig, weil ich seit über zehn Jahren Figma-Nutzer bin und meine gesamte Design-System-Arbeit darauf aufgebaut habe: Wenn paper.design in dem Tempo weiterentwickelt wird, in dem es sich gerade bewegt, kündige ich mein Figma-Abo. Nicht in fünf Jahren. Eher in ein bis zwei.
