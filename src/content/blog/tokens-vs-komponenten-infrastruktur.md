@@ -4,7 +4,7 @@ description: "Design Tokens sind Infrastruktur, keine Design-Entscheidung — un
 date: 2026-07-09
 tags: ["Design Systems"]
 coverImage: "/images/blog/blog-011.webp"
-draft: true
+draft: false
 ---
 
 Es gibt einen Satz, den ich in Design-System-Workshops immer wieder höre: "Lass uns erstmal die Komponenten bauen, die Tokens machen wir danach." Dieser Satz ist der zuverlässigste Indikator dafür, dass ein Design System in zwölf Monaten neu geschrieben werden muss. Nicht weil die Komponenten schlecht sind. Sondern weil die Reihenfolge falsch ist — und die Reihenfolge verrät, dass niemand im Raum verstanden hat, dass Tokens keine Design-Entscheidung sind. Sie sind Infrastruktur. Und Infrastruktur baut man zuerst, nicht nachträglich.
