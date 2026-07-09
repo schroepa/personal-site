@@ -2,6 +2,7 @@ import { Composition } from 'remotion'
 import { DevToolsTeaser } from './DevToolsTeaser'
 import { TailwindTokensTeaser } from './TailwindTokensTeaser'
 import { IntuitivTeaser } from './IntuitivTeaser'
+import { ScreenshotsTeaser } from './ScreenshotsTeaser'
 
 const FPS = 30
 
@@ -28,6 +29,14 @@ export const RemotionRoot: React.FC = () => {
         id="intuitiv-teaser"
         component={IntuitivTeaser}
         durationInFrames={450}
+        fps={FPS}
+        width={1920}
+        height={1080}
+      />
+      <Composition
+        id="screenshots-teaser"
+        component={ScreenshotsTeaser}
+        durationInFrames={465}
         fps={FPS}
         width={1920}
         height={1080}
