@@ -3,6 +3,7 @@ import { DevToolsTeaser } from './DevToolsTeaser'
 import { TailwindTokensTeaser } from './TailwindTokensTeaser'
 import { IntuitivTeaser } from './IntuitivTeaser'
 import { ScreenshotsTeaser } from './ScreenshotsTeaser'
+import { TokensInfrastrukturTeaser } from './TokensInfrastrukturTeaser'
 
 const FPS = 30
 
@@ -37,6 +38,14 @@ export const RemotionRoot: React.FC = () => {
         id="screenshots-teaser"
         component={ScreenshotsTeaser}
         durationInFrames={465}
+        fps={FPS}
+        width={1920}
+        height={1080}
+      />
+      <Composition
+        id="tokens-infrastruktur-teaser"
+        component={TokensInfrastrukturTeaser}
+        durationInFrames={600}
         fps={FPS}
         width={1920}
         height={1080}
