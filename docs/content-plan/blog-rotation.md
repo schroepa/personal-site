@@ -69,7 +69,7 @@ Jeder Pillar hat eine Liste konkreter Themen-Ideen. Der Task wählt beim Schreib
 
 ### UX Design
 
-- [ ] Warum "intuitiv" das gefährlichste Wort im UX-Vokabular ist
+- [x] Warum "intuitiv" das gefährlichste Wort im UX-Vokabular ist
 - [ ] Leerraum ist keine Verschwendung — eine Verteidigung des Ma-Prinzips im Interface-Design
 - [ ] Onboarding-Flows, die niemand braucht: Wann weniger Führung mehr Vertrauen schafft
 - [ ] Warum ich Nutzerfluss-Diagramme vor Wireframes zeichne
@@ -100,3 +100,4 @@ Wird vom Cron-Task nach jedem Post ergänzt (Datum, Titel, Pillar) — dient der
 | 2026-07-07 | Tech | shadcn/ui ist keine Component Library — und das ist der Punkt | shadcn-ist-kein-component-system |
 | 2026-07-07 | Design-Themen mit Dev-Background | Warum ich als Designer nie wieder ohne Browser-DevTools arbeiten will | nie-wieder-ohne-devtools |
 | 2026-07-08 | Tech | Warum Tailwind v4 die Art verändert, wie ich über Design Tokens denke | tailwind-v4-design-tokens |
+| 2026-07-09 | UX Design | Warum "intuitiv" das gefährlichste Wort im UX-Vokabular ist | intuitiv-ist-gefaehrlich |
