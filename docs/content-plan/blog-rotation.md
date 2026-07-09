@@ -36,7 +36,7 @@ Jeder Pillar hat eine Liste konkreter Themen-Ideen. Der Task wählt beim Schreib
 
 ### Design Systems
 
-- [ ] Tokens vs. Komponenten: Wo ein Design System aufhört, Design zu sein, und anfängt, Infrastruktur zu sein
+- [x] Tokens vs. Komponenten: Wo ein Design System aufhört, Design zu sein, und anfängt, Infrastruktur zu sein
 - [ ] Warum "Single Source of Truth" meistens eine Lüge ist — und wie man es trotzdem hinbekommt
 - [ ] Versionierung von Design Systems: Was Semver für Komponenten wirklich bedeutet
 - [ ] Der Unterschied zwischen einem Style Guide und einem Design System — und warum die meisten Teams nur Ersteres haben
@@ -102,3 +102,4 @@ Wird vom Cron-Task nach jedem Post ergänzt (Datum, Titel, Pillar) — dient der
 | 2026-07-08 | Tech | Warum Tailwind v4 die Art verändert, wie ich über Design Tokens denke | tailwind-v4-design-tokens |
 | 2026-07-09 | UX Design | Warum "intuitiv" das gefährlichste Wort im UX-Vokabular ist | intuitiv-ist-gefaehrlich |
 | 2026-07-09 | Design-Themen mit Dev-Background (ad-hoc, manuell angefragt) | Warum diese Seite keine Screenshots meiner Designs zeigt | keine-screenshots-portfolio |
+| 2026-07-09 | Design Systems | Tokens vs. Komponenten: Wo ein Design System aufhört, Design zu sein | tokens-vs-komponenten-infrastruktur |
