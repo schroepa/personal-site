@@ -4,7 +4,7 @@ description: "Kein Dribbble-Archiv, keine Mockup-Galerie. Warum ich lieber erkl�
 date: 2026-07-09
 tags: ["Design", "Development"]
 coverImage: "/images/blog/blog-010.webp"
-draft: true
+draft: false
 ---
 
 Wer auf dieser Seite nach einer Galerie sucht — bunte Screens, geschwungene Case-Study-Karussells, das übliche "Vorher/Nachher" mit Handy-Mockup und Schlagschatten — wird enttäuscht. Es gibt keine. Nicht, weil mir das Material fehlt. Ich habe fünfzehn Jahre Screens gebaut, bei DefShop, bei Oetker Digital, bei A Eins Digital Innovation. Es gibt genug Material für zehn Dribbble-Profile. Ich zeige es trotzdem nicht. Das ist eine bewusste Entscheidung, keine Notlage — und ich will erklären, warum ich sie für die richtige halte, gerade jetzt, in einer Zeit, in der schöne Screenshots weniger wert sind als je zuvor.
