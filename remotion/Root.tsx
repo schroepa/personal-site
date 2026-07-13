@@ -5,6 +5,8 @@ import { IntuitivTeaser } from './IntuitivTeaser'
 import { ScreenshotsTeaser } from './ScreenshotsTeaser'
 import { TokensInfrastrukturTeaser } from './TokensInfrastrukturTeaser'
 import { PaperDesignTeaser } from './PaperDesignTeaser'
+import { FigmaVariablesTeaser } from './FigmaVariablesTeaser'
+import { SsotLuegeTeaser } from './SsotLuegeTeaser'
 
 const FPS = 30
 
@@ -55,6 +57,22 @@ export const RemotionRoot: React.FC = () => {
         id="paper-design-teaser"
         component={PaperDesignTeaser}
         durationInFrames={600}
+        fps={FPS}
+        width={1080}
+        height={1920}
+      />
+      <Composition
+        id="figma-variables-teaser"
+        component={FigmaVariablesTeaser}
+        durationInFrames={630}
+        fps={FPS}
+        width={1080}
+        height={1920}
+      />
+      <Composition
+        id="ssot-luege-teaser"
+        component={SsotLuegeTeaser}
+        durationInFrames={630}
         fps={FPS}
         width={1080}
         height={1920}
