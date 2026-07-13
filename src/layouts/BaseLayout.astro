@@ -40,6 +40,16 @@ const ogImageURL = ogImage
 const ogImageWidth = ogImage ? 1200 : 1920
 const ogImageHeight = ogImage ? 630 : 1080
 
+// <title>/og:title/twitter:title auf ~60 Zeichen kürzen — lange Artikeltitel
+// werden von Google/Social-Plattformen sonst mitten im Wort abgeschnitten.
+// Die volle Überschrift bleibt unangetastet als H1 auf der Seite selbst.
+function truncateTitle(value: string, max = 60): string {
+  if (value.length <= max) return value
+  const cut = value.slice(0, max).replace(/\s+\S*$/, "")
+  return `${cut}…`
+}
+const metaTitle = truncateTitle(title)
+
 const personSchema = {
   "@context": "https://schema.org",
   "@type": "Person",
@@ -160,9 +170,15 @@ const email = { user: "kontakt", domain: "ptrckschrdtr.de" }
 
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0a0907" media="(prefers-color-scheme: dark)" />
 
     <!-- Primary -->
-    <title>{title}</title>
+    <title>{metaTitle}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonicalURL} />
 
@@ -170,12 +186,12 @@ const email = { user: "kontakt", domain: "ptrckschrdtr.de" }
     <meta property="og:type" content={ogType} />
     <meta property="og:url" content={canonicalURL} />
     <meta property="og:site_name" content={siteName} />
-    <meta property="og:title" content={title} />
+    <meta property="og:title" content={metaTitle} />
     <meta property="og:description" content={description} />
     <meta property="og:image" content={ogImageURL} />
     <meta property="og:image:width" content={String(ogImageWidth)} />
     <meta property="og:image:height" content={String(ogImageHeight)} />
-    <meta property="og:image:alt" content={title} />
+    <meta property="og:image:alt" content={metaTitle} />
     <meta property="og:locale" content="de_DE" />
     <meta property="og:logo" content={`${siteUrl}/logo.svg`} />
 
@@ -199,11 +215,11 @@ const email = { user: "kontakt", domain: "ptrckschrdtr.de" }
     }
 
     <!-- Twitter / X Card -->
-    <meta property="twitter:card" content="summary_large_image" />
-    <meta property="twitter:title" content={title} />
-    <meta property="twitter:description" content={description} />
-    <meta property="twitter:image" content={ogImageURL} />
-    <meta property="twitter:image:alt" content={title} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={metaTitle} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImageURL} />
+    <meta name="twitter:image:alt" content={metaTitle} />
 
     <!-- JSON-LD -->
     <script
