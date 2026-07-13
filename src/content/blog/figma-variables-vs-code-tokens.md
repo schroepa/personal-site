@@ -4,7 +4,7 @@ description: "Figma Variables sehen aus wie Design Tokens und heißen fast so �
 date: 2026-07-13
 tags: ["Tech", "Tooling"]
 coverImage: "/images/blog/blog-013.webp"
-draft: true
+draft: false
 ---
 
 Jedes Mal, wenn ich in einem Kickoff-Meeting höre "wir haben Figma Variables, das synct doch automatisch mit dem Code", korrigiere ich das sofort. Es synct nicht automatisch. Es hat noch nie automatisch gesynct, und es wird mit hoher Wahrscheinlichkeit auch die nächsten Jahre nicht automatisch syncen — nicht, weil Figma das technisch nicht könnte, sondern weil "Design Token" in Figma und "Design Token" im Code zwei unterschiedliche Datenmodelle beschreiben, die zufällig ähnliche Namen tragen. Diese Verwechslung kostet Teams, mit denen ich gearbeitet habe, real Zeit — meistens in Form von Farbwerten, die drei Sprints lang leicht auseinanderdriften, bis jemand den Unterschied bemerkt und ihn manuell wieder zusammenführt.

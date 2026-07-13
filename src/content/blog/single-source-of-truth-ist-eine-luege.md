@@ -4,7 +4,7 @@ description: "Jedes Design-System-Kickoff verspricht eine einzige Wahrheit. In d
 date: 2026-07-13
 tags: ["Design Systems"]
 coverImage: "/images/blog/blog-014.webp"
-draft: true
+draft: false
 ---
 
 "Single Source of Truth" ist der Satz, mit dem praktisch jedes Design-System-Kickoff beginnt. Er steht auf der ersten Folie, meistens neben einem Diagramm mit Figma links, Code rechts und einem selbstbewussten Pfeil dazwischen. Er klingt nach einer technischen Garantie. Er ist meistens ein Versprechen, das niemand im Raum einlösen kann — nicht weil das Team inkompetent ist, sondern weil die Prämisse falsch ist. Es gibt in den allermeisten realen Design-System-Setups nicht eine Wahrheit. Es gibt mindestens drei: die in Figma, die im Code, und die, die gerade in den Köpfen der Menschen existiert, die beide bedienen. Wer das ignoriert, baut ein System, das auf dem Papier great aussieht und in der Praxis nach zwölf Monaten leise auseinanderdriftet, bis niemand mehr weiß, welche der drei Wahrheiten gerade gilt.
