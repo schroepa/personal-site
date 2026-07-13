@@ -97,19 +97,23 @@ async function main() {
     await waitForServer(`${BASE_URL}/og-render/${targets[0].kind}/${targets[0].slug}`)
     console.log('[og-images] Preview-Server bereit.')
 
-    console.log(`[og-images] Starte Chromium (VERCEL=${process.env.VERCEL ? 'ja' : 'nein'}) …`)
-    const browser = await launchBrowser()
-    console.log('[og-images] Chromium gestartet.')
-
     let succeeded = 0
     let failed = 0
 
-    try {
-      for (const { kind, slug } of targets) {
-        // Ein fehlgeschlagenes Bild darf die restlichen nicht mitreißen —
-        // vorher brach hier ein einzelner Timeout/Fehler die gesamte
-        // for-Schleife ab, wodurch KEIN einziges der Bilder geschrieben
-        // wurde, obwohl nur eines tatsächlich Probleme hatte.
+    for (const { kind, slug } of targets) {
+      // Ein fehlgeschlagenes Bild darf die restlichen nicht mitreißen. Das
+      // reicht allein aber nicht: @sparticuz/chromium läuft mit
+      // --single-process (Browser- und Renderer-Prozess in einem OS-Prozess,
+      // nötig im eingeschränkten Vercel-Sandbox). Stürzt dabei EINE Seite ab,
+      // reißt das den kompletten Browser-Prozess mit — alle nachfolgenden
+      // newPage()-Aufrufe scheitern dann sofort mit "Target page, context or
+      // browser has been closed", selbst wenn sie für sich funktioniert
+      // hätten. Deshalb: frischer Browser-Prozess pro Bild statt Wiederverwendung
+      // — kostet etwas Build-Zeit, isoliert Abstürze aber zuverlässig auf
+      // genau das eine betroffene Bild.
+      try {
+        console.log(`[og-images] ${kind}/${slug}: starte Chromium …`)
+        const browser = await launchBrowser()
         try {
           const page = await browser.newPage({ viewport: { width: 1200, height: 630 } })
           try {
@@ -126,14 +130,14 @@ async function main() {
           } finally {
             await page.close()
           }
-        } catch (err) {
-          failed++
-          console.error(`[og-images] ${kind}/${slug} FEHLGESCHLAGEN:`)
-          console.error(err?.stack ?? err)
+        } finally {
+          await browser.close()
         }
+      } catch (err) {
+        failed++
+        console.error(`[og-images] ${kind}/${slug} FEHLGESCHLAGEN:`)
+        console.error(err?.stack ?? err)
       }
-    } finally {
-      await browser.close()
     }
 
     console.log(`[og-images] Fertig: ${succeeded} erfolgreich, ${failed} fehlgeschlagen (von ${targets.length}).`)
