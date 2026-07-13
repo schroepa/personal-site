@@ -37,7 +37,7 @@ Jeder Pillar hat eine Liste konkreter Themen-Ideen. Der Task wählt beim Schreib
 ### Design Systems
 
 - [x] Tokens vs. Komponenten: Wo ein Design System aufhört, Design zu sein, und anfängt, Infrastruktur zu sein
-- [ ] Warum "Single Source of Truth" meistens eine Lüge ist — und wie man es trotzdem hinbekommt
+- [x] Warum "Single Source of Truth" meistens eine Lüge ist — und wie man es trotzdem hinbekommt
 - [ ] Versionierung von Design Systems: Was Semver für Komponenten wirklich bedeutet
 - [ ] Der Unterschied zwischen einem Style Guide und einem Design System — und warum die meisten Teams nur Ersteres haben
 - [ ] Dark Mode ist kein Feature, es ist ein Architektur-Test für dein Design System
@@ -105,3 +105,4 @@ Wird vom Cron-Task nach jedem Post ergänzt (Datum, Titel, Pillar) — dient der
 | 2026-07-09 | Design Systems | Tokens vs. Komponenten: Wo ein Design System aufhört, Design zu sein | tokens-vs-komponenten-infrastruktur |
 | 2026-07-09 | Tech (ad-hoc, manuell angefragt) | Paper.design ist noch kein Figma-Killer — aber ich sehe schon, wie es einer wird | paper-design-figma-killer |
 | 2026-07-13 | Tech | Figma Variables vs. Code-Tokens: Wo die Synchronisation bricht | figma-variables-vs-code-tokens |
+| 2026-07-13 | Design Systems | Warum "Single Source of Truth" meistens eine Lüge ist — und wie man es trotzdem hinbekommt | single-source-of-truth-ist-eine-luege |
