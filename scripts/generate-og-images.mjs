@@ -32,9 +32,14 @@ function findOgRenderSlugs() {
 
 // Auf Vercel scheitert Playwrights eigenes Chromium-Binary am Start, weil dem
 // Build-Container Shared Libraries fehlen — reine --no-sandbox-Flags reichen
-// dafür nicht. @sparticuz/chromium liefert ein statisch gelinktes Chromium
-// samt WebGL/Software-Rendering-Flags (u.a. --use-gl=angle), die die
-// og-render-Seite für den Halbton-Shader braucht.
+// dafür nicht. @sparticuz/chromium liefert ein statisch gelinktes Chromium,
+// das dort zuverlässig startet.
+//
+// og-render nutzt bewusst KEIN WebGL mehr (siehe og-render/[kind]/[slug].astro)
+// — ein echter WebGL2-Kontext hat den Chromium-Prozess im Vercel-Build-Sandbox
+// zuverlässig zum Absturz gebracht, selbst mit SwiftShader-Software-Rendering-
+// Flags. Reines HTML/CSS-Rendering (wie beim funktionierenden CV-PDF-Export)
+// braucht keine GL-Flags mehr.
 async function launchBrowser() {
   if (process.env.VERCEL) {
     return chromium.launch({
@@ -43,13 +48,7 @@ async function launchBrowser() {
     })
   }
   return chromium.launch({
-    args: [
-      '--no-sandbox',
-      '--disable-setuid-sandbox',
-      '--disable-dev-shm-usage',
-      '--use-gl=angle',
-      '--use-angle=swiftshader',
-    ],
+    args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
   })
 }
 
@@ -119,9 +118,7 @@ async function main() {
               waitUntil: 'networkidle',
               timeout: 20000,
             })
-            console.log(`[og-images] ${kind}/${slug}: geladen, warte auf Shader-Render …`)
-            // Shader braucht kurz Zeit für den ersten Render nach Bild-Load
-            await sleep(1200)
+            console.log(`[og-images] ${kind}/${slug}: geladen, schieße Screenshot …`)
             const outputPath = path.join(OG_OUTPUT_DIR, `${kind}-${slug}.png`)
             await page.locator('#frame').screenshot({ path: outputPath, timeout: 10000 })
             console.log(`[og-images] ${kind}/${slug} → ${outputPath}`)
