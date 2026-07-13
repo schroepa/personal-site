@@ -80,7 +80,7 @@ Jeder Pillar hat eine Liste konkreter Themen-Ideen. Der Task wählt beim Schreib
 
 ### UX Writing
 
-- [ ] Warum ein Button-Label wichtiger ist als seine Farbe
+- [x] Warum ein Button-Label wichtiger ist als seine Farbe
 - [ ] Fehlermeldungen, die niemanden beschämen — ein Leitfaden
 - [ ] Microcopy ist Produktstrategie, keine Nachbearbeitung
 - [ ] Wie man Leere-Zustände (Empty States) schreibt, die nicht traurig wirken
@@ -106,3 +106,4 @@ Wird vom Cron-Task nach jedem Post ergänzt (Datum, Titel, Pillar) — dient der
 | 2026-07-09 | Tech (ad-hoc, manuell angefragt) | Paper.design ist noch kein Figma-Killer — aber ich sehe schon, wie es einer wird | paper-design-figma-killer |
 | 2026-07-13 | Tech | Figma Variables vs. Code-Tokens: Wo die Synchronisation bricht | figma-variables-vs-code-tokens |
 | 2026-07-13 | Design Systems | Warum "Single Source of Truth" meistens eine Lüge ist — und wie man es trotzdem hinbekommt | single-source-of-truth-ist-eine-luege |
+| 2026-07-13 | UX Writing | Warum ein Button-Label wichtiger ist als seine Farbe | button-label-wichtiger-als-farbe |
