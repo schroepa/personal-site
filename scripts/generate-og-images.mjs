@@ -96,25 +96,50 @@ async function main() {
       throw new Error(`Preview-Server konnte nicht gestartet werden: ${spawnError.message}`)
     }
     await waitForServer(`${BASE_URL}/og-render/${targets[0].kind}/${targets[0].slug}`)
+    console.log('[og-images] Preview-Server bereit.')
 
+    console.log(`[og-images] Starte Chromium (VERCEL=${process.env.VERCEL ? 'ja' : 'nein'}) …`)
     const browser = await launchBrowser()
+    console.log('[og-images] Chromium gestartet.')
+
+    let succeeded = 0
+    let failed = 0
+
     try {
       for (const { kind, slug } of targets) {
-        const page = await browser.newPage({ viewport: { width: 1200, height: 630 } })
+        // Ein fehlgeschlagenes Bild darf die restlichen nicht mitreißen —
+        // vorher brach hier ein einzelner Timeout/Fehler die gesamte
+        // for-Schleife ab, wodurch KEIN einziges der Bilder geschrieben
+        // wurde, obwohl nur eines tatsächlich Probleme hatte.
         try {
-          await page.goto(`${BASE_URL}/og-render/${kind}/${slug}`, { waitUntil: 'networkidle' })
-          // Shader braucht kurz Zeit für den ersten Render nach Bild-Load
-          await sleep(1200)
-          const outputPath = path.join(OG_OUTPUT_DIR, `${kind}-${slug}.png`)
-          await page.locator('#frame').screenshot({ path: outputPath })
-          console.log(`[og-images] ${kind}/${slug} → ${outputPath}`)
-        } finally {
-          await page.close()
+          const page = await browser.newPage({ viewport: { width: 1200, height: 630 } })
+          try {
+            console.log(`[og-images] ${kind}/${slug}: navigiere …`)
+            await page.goto(`${BASE_URL}/og-render/${kind}/${slug}`, {
+              waitUntil: 'networkidle',
+              timeout: 20000,
+            })
+            console.log(`[og-images] ${kind}/${slug}: geladen, warte auf Shader-Render …`)
+            // Shader braucht kurz Zeit für den ersten Render nach Bild-Load
+            await sleep(1200)
+            const outputPath = path.join(OG_OUTPUT_DIR, `${kind}-${slug}.png`)
+            await page.locator('#frame').screenshot({ path: outputPath, timeout: 10000 })
+            console.log(`[og-images] ${kind}/${slug} → ${outputPath}`)
+            succeeded++
+          } finally {
+            await page.close()
+          }
+        } catch (err) {
+          failed++
+          console.error(`[og-images] ${kind}/${slug} FEHLGESCHLAGEN:`)
+          console.error(err?.stack ?? err)
         }
       }
     } finally {
       await browser.close()
     }
+
+    console.log(`[og-images] Fertig: ${succeeded} erfolgreich, ${failed} fehlgeschlagen (von ${targets.length}).`)
   } finally {
     previewProcess.kill()
   }
