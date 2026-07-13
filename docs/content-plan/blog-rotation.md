@@ -60,7 +60,7 @@ Jeder Pillar hat eine Liste konkreter Themen-Ideen. Der Task wählt beim Schreib
 
 - [x] shadcn/ui ist keine Component Library — es ist ein Copy-Paste-Design-System, und das ist der Punkt
 - [x] Warum Tailwind v4 die Art verändert, wie ich über Design Tokens denke
-- [ ] Figma Variables vs. Code-Tokens: Wo die Synchronisation bricht
+- [x] Figma Variables vs. Code-Tokens: Wo die Synchronisation bricht
 - [ ] Was Shader-basierte Hintergründe (Paper Design & Co.) für Interface-Design bedeuten
 - [ ] Astro Islands aus Design-Sicht: Warum Partial Hydration auch eine UX-Entscheidung ist
 - [ ] Mein Workflow: Von Figma-Prototyp zu produktivem Code in unter einem Tag
@@ -104,3 +104,4 @@ Wird vom Cron-Task nach jedem Post ergänzt (Datum, Titel, Pillar) — dient der
 | 2026-07-09 | Design-Themen mit Dev-Background (ad-hoc, manuell angefragt) | Warum diese Seite keine Screenshots meiner Designs zeigt | keine-screenshots-portfolio |
 | 2026-07-09 | Design Systems | Tokens vs. Komponenten: Wo ein Design System aufhört, Design zu sein | tokens-vs-komponenten-infrastruktur |
 | 2026-07-09 | Tech (ad-hoc, manuell angefragt) | Paper.design ist noch kein Figma-Killer — aber ich sehe schon, wie es einer wird | paper-design-figma-killer |
+| 2026-07-13 | Tech | Figma Variables vs. Code-Tokens: Wo die Synchronisation bricht | figma-variables-vs-code-tokens |
