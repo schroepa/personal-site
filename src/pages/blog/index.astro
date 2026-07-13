@@ -9,6 +9,16 @@ const sorted = posts.sort((a, b) => b.data.date.getTime() - a.data.date.getTime(
 
 const formatDate = (date: Date) =>
   new Intl.DateTimeFormat('de-DE', { year: 'numeric', month: 'short' }).format(date);
+
+// Tag-Häufigkeit für den Filter zählen, absteigend sortiert — häufigste
+// Themen zuerst, damit die Filterzeile mit dem Wichtigsten beginnt.
+const tagCounts = new Map<string, number>();
+for (const post of sorted) {
+  for (const tag of post.data.tags ?? []) {
+    tagCounts.set(tag, (tagCounts.get(tag) ?? 0) + 1);
+  }
+}
+const tags = [...tagCounts.entries()].sort((a, b) => b[1] - a[1]);
 ---
 
 <BaseLayout title="Blog — Patrick Schröder" description="Gedanken zu Design, Frontend und Tooling.">
@@ -24,13 +34,28 @@ const formatDate = (date: Date) =>
 
   <!-- Liste scrollt darunter weiter -->
   <div class="page-grid pb-24">
+    {tags.length > 0 && (
+      <div class="tag-filter" role="group" aria-label="Nach Thema filtern">
+        <button type="button" class="tag-filter-item is-active" data-tag-filter="" aria-pressed="true">
+          Alle <span class="tag-filter-count">{sorted.length}</span>
+        </button>
+        {tags.map(([tag, count]) => (
+          <button type="button" class="tag-filter-item" data-tag-filter={tag} aria-pressed="false">
+            {tag} <span class="tag-filter-count">{count}</span>
+          </button>
+        ))}
+      </div>
+    )}
+
+    <p class="tag-filter-empty" hidden>Keine Artikel mit diesem Tag.</p>
+
     <ol class="post-list" aria-label="Alle Artikel">
       {sorted.map((post) => {
         const slug = post.id.replace(/\.md$/, '')
         const mins = readingTime(post.body ?? '')
 
         return (
-          <li class="post-item">
+          <li class="post-item" data-tags={(post.data.tags ?? []).join('|')}>
             <a
               href={`/blog/${slug}`}
               class="post-link"
@@ -96,6 +121,71 @@ const formatDate = (date: Date) =>
   /* ── Header ──────────────────────────────────────────────────────────── */
   .blog-header {
     margin-bottom: 0;
+  }
+
+  /* ── Tag-Filter: plain text wie .post-tag, kein Pill/Rahmen ───────────── */
+  .tag-filter {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    row-gap: 0.625rem;
+    column-gap: 1.5rem;
+    padding-bottom: 1.5rem;
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid color-mix(in oklch, var(--foreground) 12%, transparent);
+  }
+
+  .tag-filter-item {
+    appearance: none;
+    background: none;
+    border: none;
+    padding: 0;
+    margin: 0;
+    cursor: pointer;
+    font-family: var(--font-sans);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-wide);
+    text-transform: uppercase;
+    color: var(--muted-foreground);
+    text-underline-offset: 4px;
+    transition: color 200ms ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .tag-filter-item:hover {
+    color: var(--foreground);
+  }
+
+  .tag-filter-item:focus-visible {
+    outline: 2px solid var(--foreground);
+    outline-offset: 4px;
+    border-radius: 2px;
+  }
+
+  .tag-filter-item.is-active {
+    color: var(--foreground);
+    text-decoration: underline;
+  }
+
+  .tag-filter-count {
+    color: color-mix(in oklch, var(--muted-foreground) 70%, transparent);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .tag-filter-item.is-active .tag-filter-count {
+    color: var(--muted-foreground);
+  }
+
+  .tag-filter-empty {
+    font-size: var(--text-sm);
+    color: var(--muted-foreground);
+    padding: 2rem 0;
+    margin: 0;
+  }
+
+  /* Gefilterte Items ausblenden statt aus dem DOM zu entfernen */
+  .post-item[hidden] {
+    display: none;
   }
 
   /* ── Liste ───────────────────────────────────────────────────────────── */
@@ -233,3 +323,59 @@ const formatDate = (date: Date) =>
     .post-link:hover .post-thumb-img { transform: none; }
   }
 </style>
+
+<script>
+  function initTagFilter() {
+    const filterGroup = document.querySelector<HTMLElement>('.tag-filter')
+    const items = document.querySelectorAll<HTMLLIElement>('.post-item')
+    const emptyMsg = document.querySelector<HTMLElement>('.tag-filter-empty')
+    if (!filterGroup || items.length === 0) return
+    if (filterGroup.dataset.filterInit) return
+    filterGroup.dataset.filterInit = '1'
+
+    const buttons = filterGroup.querySelectorAll<HTMLButtonElement>('[data-tag-filter]')
+
+    function applyFilter(tag: string) {
+      let visibleCount = 0
+      items.forEach((item) => {
+        const itemTags = (item.dataset.tags ?? '').split('|')
+        const match = tag === '' || itemTags.includes(tag)
+        item.hidden = !match
+        if (match) visibleCount++
+      })
+      if (emptyMsg) emptyMsg.hidden = visibleCount > 0
+
+      buttons.forEach((btn) => {
+        const isActive = (btn.dataset.tagFilter ?? '') === tag
+        btn.classList.toggle('is-active', isActive)
+        btn.setAttribute('aria-pressed', String(isActive))
+      })
+    }
+
+    buttons.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const tag = btn.dataset.tagFilter ?? ''
+        const url = new URL(window.location.href)
+        if (tag) {
+          url.searchParams.set('tag', tag)
+        } else {
+          url.searchParams.delete('tag')
+        }
+        window.history.pushState({}, '', url)
+        applyFilter(tag)
+      })
+    })
+
+    window.addEventListener('popstate', () => {
+      const tag = new URL(window.location.href).searchParams.get('tag') ?? ''
+      applyFilter(tag)
+    })
+
+    // Deep-Link: Filter aus der URL übernehmen, falls z.B. ein gefilterter
+    // Blog-Link geteilt wurde (?tag=Design%20Systems)
+    const initialTag = new URL(window.location.href).searchParams.get('tag') ?? ''
+    if (initialTag) applyFilter(initialTag)
+  }
+
+  document.addEventListener('astro:page-load', initTagFilter)
+</script>
