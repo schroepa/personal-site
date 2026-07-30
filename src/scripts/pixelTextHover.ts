@@ -9,9 +9,9 @@ void main() {
 `
 
 /**
- * Brush displace along mouse velocity + RGB split under the tip.
- * Chromatic fringes are built from the alpha mask so they stay visible
- * on dark text (light mode) and light text (dark mode).
+ * Brush displace + true RGB channel split.
+ * Glyphs are stored as white+alpha; theme color tints the core, while
+ * R/G/B samples at chroma offsets create the glitch (works light + dark).
  */
 const FRAGMENT = /* glsl */ `
 uniform sampler2D uTexture;
@@ -45,19 +45,19 @@ void main() {
   vec2 perp = vec2(-dir.y, dir.x);
   vec2 chroma = (dir * 0.65 + perp * 0.35) * uRgbSplit * amount;
 
-  float aR = texture2D(uTexture, uv + offset + chroma).a;
-  float aG = texture2D(uTexture, uv + offset).a;
-  float aB = texture2D(uTexture, uv + offset - chroma).a;
+  vec4 sampleR = texture2D(uTexture, uv + offset + chroma);
+  vec4 sampleG = texture2D(uTexture, uv + offset);
+  vec4 sampleB = texture2D(uTexture, uv + offset - chroma);
 
-  // Core glyph in theme foreground color
-  vec3 color = uTextColor * aG;
-  // Additive RGB fringes where channels diverge (works for black and white text)
-  float fringe = clamp(amount * 1.35, 0.0, 1.0);
-  color.r += max(aR - aG, 0.0) * fringe;
-  color.b += max(aB - aG, 0.0) * fringe;
-  color.g += max(min(aR, aB) - aG, 0.0) * fringe * 0.25;
+  // True RGB split from white glyph texture
+  vec3 rgb = vec3(sampleR.r, sampleG.g, sampleB.b);
+  float alpha = max(sampleG.a, max(sampleR.a, sampleB.a));
 
-  float alpha = max(aG, max(aR, aB) * fringe);
+  // Theme-colored core + RGB fringe where channels diverge
+  vec3 core = uTextColor * sampleG.a;
+  vec3 fringe = rgb - vec3(sampleG.a);
+  vec3 color = core + fringe * clamp(amount * 1.25, 0.0, 1.0);
+
   gl_FragColor = vec4(color, alpha);
 }
 `
@@ -108,11 +108,6 @@ function cssColorToVec3(cssColor: string): THREE.Vector3 {
   ctx.fillRect(0, 0, 1, 1)
   const [r, g, b] = ctx.getImageData(0, 0, 1, 1).data
   return new THREE.Vector3(r / 255, g / 255, b / 255)
-}
-
-function cssColorToRgb(cssColor: string): string {
-  const v = cssColorToVec3(cssColor)
-  return `rgb(${Math.round(v.x * 255)} ${Math.round(v.y * 255)} ${Math.round(v.z * 255)})`
 }
 
 function collectLines(heading: HTMLElement): LineSource[] {
@@ -180,7 +175,6 @@ async function drawTextTexture(
   textWidth: number,
   textHeight: number,
   dpr: number,
-  color: string,
   pad: number
 ): Promise<HTMLCanvasElement> {
   const width = textWidth + pad * 2
@@ -194,7 +188,6 @@ async function drawTextTexture(
   const style = getComputedStyle(heading)
   const fontSize = parseFloat(style.fontSize) || 16
   const fontFamily = "PP Editorial New"
-  const fill = cssColorToRgb(color)
   const lines = collectLines(heading)
 
   let fontFaceCss = ""
@@ -214,6 +207,7 @@ async function drawTextTexture(
     })
     .join("")
 
+  // White glyphs: shader applies theme color + true RGB channel split
   const svg = `<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
   <defs><style type="text/css"><![CDATA[
@@ -223,7 +217,7 @@ async function drawTextTexture(
       font-weight: 800;
       font-size: ${fontSize}px;
       letter-spacing: 0;
-      fill: ${fill};
+      fill: #fff;
       font-variant-ligatures: common-ligatures discretionary-ligatures;
       font-feature-settings: "liga" 1, "clig" 1, "dlig" 1;
     }
@@ -467,7 +461,6 @@ class PixelHeading {
         this.textWidth,
         this.textHeight,
         this.dpr,
-        this.textColor,
         PAD_PX
       )
     } catch {
