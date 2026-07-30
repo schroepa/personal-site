@@ -1,6 +1,7 @@
 /**
- * Kopiert Latin-Subset-WOFF2 aus @fontsource nach public/fonts/ für self-hosted Fonts.
- * Wird in prebuild ausgeführt — keine CDN-Abhängigkeit, zuverlässige Build-URLs.
+ * Kopiert Fonts nach public/fonts/ für stabile URLs (Preload + CSS).
+ * - Geist aus @fontsource
+ * - PP Editorial New aus src/fonts (Überschriften)
  */
 import { copyFile, mkdir } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
@@ -23,6 +24,14 @@ const copies = [
       'node_modules/@fontsource/geist-mono/files/geist-mono-latin-400-normal.woff2'
     ),
     to: join(outDir, 'geist-mono-latin.woff2'),
+  },
+  {
+    from: join(root, 'src/fonts/PPEditorialNew-Heavy.woff2'),
+    to: join(outDir, 'editorial-new-heavy.woff2'),
+  },
+  {
+    from: join(root, 'src/fonts/PPEditorialNew-Bold.woff2'),
+    to: join(outDir, 'editorial-new-bold.woff2'),
   },
 ]
 

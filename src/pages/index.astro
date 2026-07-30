@@ -50,10 +50,12 @@ const homeSections = [
         </span>
 
         <div class="intro-statement">
-          <h1 class="t-hero intro-heading">
-            <span class="intro-line">Ich entwerfe Systeme.</span>
-            <span class="intro-line">Ich baue sie auch.</span>
-          </h1>
+          <div class="pixel-text" data-pixel-text>
+            <h1 class="t-hero intro-heading">
+              <span class="intro-line">Ich entwerfe Systeme.</span>
+              <span class="intro-line">Ich baue sie auch.</span>
+            </h1>
+          </div>
         </div>
 
         <div class="scroll-hint" aria-hidden="true">
@@ -215,7 +217,9 @@ const homeSections = [
       <div class="page-grid snap-content kontakt-content">
         <div class="kontakt-body">
           <p class="t-label kontakt-label text-muted-foreground">Kontakt</p>
-          <h2 class="t-hero kontakt-heading">Lass uns reden.</h2>
+          <div class="pixel-text" data-pixel-text>
+            <h2 class="t-hero kontakt-heading">Lass uns reden.</h2>
+          </div>
           <!-- E-Mail: Bot-Schutz via data-Attribute, kein mailto im HTML -->
           <button
             class="kontakt-email"
@@ -308,6 +312,12 @@ const homeSections = [
     flex-direction: column;
   }
 
+  /* Room for padded distort canvas around hero type */
+  #section-intro,
+  #section-kontakt {
+    overflow: visible;
+  }
+
   .snap-content {
     flex: 1;
     display: flex;
@@ -330,6 +340,35 @@ const homeSections = [
 
   .intro-statement {
     max-width: 90vw;
+  }
+
+  /* Fluid text distort overlay (Three.js) — canvas size/offset set in JS (padding) */
+  .pixel-text {
+    position: relative;
+    display: block;
+    width: fit-content;
+    max-width: 100%;
+    z-index: 1;
+  }
+
+  .pixel-text :global(.pixel-text-canvas) {
+    pointer-events: none;
+    display: block;
+  }
+
+  .pixel-text.is-active .intro-heading,
+  .pixel-text.is-active .kontakt-heading {
+    color: transparent;
+    animation: none;
+  }
+
+  /* Desktop: skip weight-reveal — canvas takes over after fonts load */
+  @media (hover: hover) and (pointer: fine) {
+    @media (prefers-reduced-motion: no-preference) {
+      .pixel-text .intro-heading {
+        animation: none;
+      }
+    }
   }
 
   .intro-heading {
@@ -668,6 +707,11 @@ const homeSections = [
 </style>
 
 <script>
+  import {
+    destroyPixelTextHover,
+    initPixelTextHover,
+  } from "@/scripts/pixelTextHover"
+
   function initHomePage() {
     const preview = document.getElementById(
       "home-project-preview"
@@ -757,8 +801,13 @@ const homeSections = [
       })
   }
 
+  document.addEventListener("astro:before-swap", () => {
+    destroyPixelTextHover()
+  })
+
   document.addEventListener("astro:page-load", () => {
     initHomePage()
     initHomeTracking()
+    void initPixelTextHover()
   })
 </script>

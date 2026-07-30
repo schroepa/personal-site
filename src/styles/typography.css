@@ -1,37 +1,44 @@
 /* ─── Semantic Typography Classes ─────────────────────────────────────────── */
 
+/* Editorial New: Ligaturen brauchen letter-spacing: 0 (sonst schalten Browser dlig ab) */
+.t-hero,
+.t-h1,
+.t-h2,
+.t-h3 {
+  font-family: var(--font-heading);
+  letter-spacing: 0;
+  font-variant-ligatures: common-ligatures discretionary-ligatures;
+  font-feature-settings: "liga" 1, "clig" 1, "dlig" 1;
+}
+
 /* ── Display: clamp() — skaliert proportional mit dem Viewport ─────────────── */
 
 .t-hero {
   /* Mobile ~49px → Desktop 1280px ~90px → Wide 1920px 144px */
   font-size: clamp(3.052rem, 7vw, 9rem);
   line-height: var(--leading-tight);
-  letter-spacing: var(--tracking-tight);
-  font-weight: 500;
+  font-weight: 800; /* Heavy */
 }
 
 .t-h1 {
   /* Mobile ~39px → Desktop 1280px ~58px → Wide 1920px 80px */
   font-size: clamp(2.441rem, 4.5vw, 5rem);
   line-height: var(--leading-tight);
-  letter-spacing: var(--tracking-tight);
-  font-weight: 500;
+  font-weight: 800; /* Heavy */
 }
 
 .t-h2 {
   /* Mobile ~31px → Desktop 1280px ~40px → Wide 1920px 48px */
   font-size: clamp(1.953rem, 3vw, 3rem);
   line-height: var(--leading-snug);
-  letter-spacing: var(--tracking-snug);
-  font-weight: 500;
+  font-weight: 800; /* Heavy */
 }
 
 .t-h3 {
   /* Mobile ~25px → Desktop 1280px ~29px → Wide 1920px 36px */
   font-size: clamp(1.563rem, 2.2vw, 2.25rem);
   line-height: var(--leading-snug);
-  letter-spacing: var(--tracking-normal);
-  font-weight: 500;
+  font-weight: 700; /* Bold */
 }
 
 /* ── Text: fix — Lesbarkeit hat Vorrang vor Skalierung ─────────────────────── */
