@@ -278,6 +278,17 @@ const homeSections = [
             >
               Datenschutz
             </a>
+            <span class="t-small text-muted-foreground" aria-hidden="true"
+              >·</span
+            >
+            <button
+              type="button"
+              class="t-small kontakt-footer-link text-muted-foreground"
+              onclick="Cookiebot.renew()"
+              data-cursor="link"
+            >
+              Cookie-Einstellungen
+            </button>
           </div>
         </div>
       </div>
@@ -663,6 +674,12 @@ const homeSections = [
   .kontakt-footer-link {
     text-decoration: none;
     transition: color 200ms ease;
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    font: inherit;
+    color: inherit;
   }
   .kontakt-footer-link:hover {
     color: var(--foreground);
