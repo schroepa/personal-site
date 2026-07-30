@@ -110,6 +110,11 @@ function cssColorToVec3(cssColor: string): THREE.Vector3 {
   return new THREE.Vector3(r / 255, g / 255, b / 255)
 }
 
+function cssColorToRgb(cssColor: string): string {
+  const v = cssColorToVec3(cssColor)
+  return `rgb(${Math.round(v.x * 255)} ${Math.round(v.y * 255)} ${Math.round(v.z * 255)})`
+}
+
 function collectLines(heading: HTMLElement): LineSource[] {
   const root = heading.getBoundingClientRect()
   const lineEls = heading.querySelectorAll<HTMLElement>(".intro-line")
@@ -128,14 +133,56 @@ function collectLines(heading: HTMLElement): LineSource[] {
   })
 }
 
-function drawTextTexture(
+function escapeXml(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+}
+
+function arrayBufferToBase64(buffer: ArrayBuffer): string {
+  const bytes = new Uint8Array(buffer)
+  let binary = ""
+  const chunk = 0x8000
+  for (let i = 0; i < bytes.length; i += chunk) {
+    binary += String.fromCharCode(...bytes.subarray(i, i + chunk))
+  }
+  return btoa(binary)
+}
+
+let heavyFontDataUrl: string | null = null
+
+async function getHeavyFontDataUrl(): Promise<string> {
+  if (heavyFontDataUrl) return heavyFontDataUrl
+  const res = await fetch("/fonts/editorial-new-heavy.woff2")
+  if (!res.ok) throw new Error("Editorial New Heavy konnte nicht geladen werden")
+  const base64 = arrayBufferToBase64(await res.arrayBuffer())
+  heavyFontDataUrl = `data:font/woff2;base64,${base64}`
+  return heavyFontDataUrl
+}
+
+function loadImage(url: string): Promise<HTMLImageElement> {
+  return new Promise((resolve, reject) => {
+    const img = new Image()
+    img.onload = () => resolve(img)
+    img.onerror = () => reject(new Error("SVG-Textur fehlgeschlagen"))
+    img.src = url
+  })
+}
+
+/**
+ * Rasterize via SVG <text> so liga/dlig match the DOM.
+ * Canvas fillText ignores discretionary ligatures.
+ */
+async function drawTextTexture(
   heading: HTMLElement,
   textWidth: number,
   textHeight: number,
   dpr: number,
   color: string,
   pad: number
-): HTMLCanvasElement {
+): Promise<HTMLCanvasElement> {
   const width = textWidth + pad * 2
   const height = textHeight + pad * 2
   const canvas = document.createElement("canvas")
@@ -144,26 +191,55 @@ function drawTextTexture(
   const ctx = canvas.getContext("2d")
   if (!ctx) return canvas
 
-  ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
-  ctx.clearRect(0, 0, width, height)
-
   const style = getComputedStyle(heading)
-  const fontSize = style.fontSize
-  const fontFamily = style.fontFamily
-  ctx.font = `800 ${fontSize} ${fontFamily}`
-  ctx.fillStyle = color
-  ctx.textAlign = "left"
-  ctx.textBaseline = "top"
-  if ("letterSpacing" in ctx) {
-    ;(ctx as CanvasRenderingContext2D & { letterSpacing: string }).letterSpacing =
-      "0px"
-  }
-  const ctxExt = ctx as CanvasRenderingContext2D & { fontKerning?: string }
-  if ("fontKerning" in ctxExt) ctxExt.fontKerning = "normal"
+  const fontSize = parseFloat(style.fontSize) || 16
+  const fontFamily = "PP Editorial New"
+  const fill = cssColorToRgb(color)
+  const lines = collectLines(heading)
 
-  for (const line of collectLines(heading)) {
-    if (!line.text) continue
-    ctx.fillText(line.text, line.x + pad, line.y + pad)
+  let fontFaceCss = ""
+  try {
+    const fontUrl = await getHeavyFontDataUrl()
+    fontFaceCss = `@font-face{font-family:'${fontFamily}';font-weight:800;font-style:normal;src:url('${fontUrl}') format('woff2');}`
+  } catch {
+    // Page @font-face may still resolve in some browsers
+  }
+
+  const textNodes = lines
+    .filter((line) => line.text)
+    .map((line) => {
+      const x = line.x + pad
+      const y = line.y + pad
+      return `<text x="${x}" y="${y}" dominant-baseline="text-before-edge" xml:space="preserve">${escapeXml(line.text)}</text>`
+    })
+    .join("")
+
+  const svg = `<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
+  <defs><style type="text/css"><![CDATA[
+    ${fontFaceCss}
+    text {
+      font-family: '${fontFamily}', Georgia, serif;
+      font-weight: 800;
+      font-size: ${fontSize}px;
+      letter-spacing: 0;
+      fill: ${fill};
+      font-variant-ligatures: common-ligatures discretionary-ligatures;
+      font-feature-settings: "liga" 1, "clig" 1, "dlig" 1;
+    }
+  ]]></style></defs>
+  ${textNodes}
+</svg>`
+
+  const blob = new Blob([svg], { type: "image/svg+xml;charset=utf-8" })
+  const url = URL.createObjectURL(blob)
+  try {
+    const img = await loadImage(url)
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
+    ctx.clearRect(0, 0, width, height)
+    ctx.drawImage(img, 0, 0, width, height)
+  } finally {
+    URL.revokeObjectURL(url)
   }
 
   return canvas
@@ -193,6 +269,7 @@ class PixelHeading {
   private textWidth = 0
   private textHeight = 0
   private dpr = 1
+  private textureGen = 0
   private io: IntersectionObserver
   private ro: ResizeObserver
   private themeObserver: MutationObserver
@@ -314,7 +391,7 @@ class PixelHeading {
       ;(this.material.uniforms.uTextColor.value as THREE.Vector3).copy(
         cssColorToVec3(this.textColor)
       )
-      this.rebuildTexture()
+      void this.rebuildTexture()
     })
     this.themeObserver.observe(document.documentElement, {
       attributes: true,
@@ -376,20 +453,28 @@ class PixelHeading {
       1,
       fullH / fullW
     )
-    this.rebuildTexture()
+    void this.rebuildTexture()
   }
 
-  private rebuildTexture(): void {
-    if (this.textWidth <= 0 || this.textHeight <= 0) return
+  private async rebuildTexture(): Promise<void> {
+    if (this.textWidth <= 0 || this.textHeight <= 0 || this.disposed) return
+    const gen = ++this.textureGen
 
-    const canvas = drawTextTexture(
-      this.heading,
-      this.textWidth,
-      this.textHeight,
-      this.dpr,
-      this.textColor,
-      PAD_PX
-    )
+    let canvas: HTMLCanvasElement
+    try {
+      canvas = await drawTextTexture(
+        this.heading,
+        this.textWidth,
+        this.textHeight,
+        this.dpr,
+        this.textColor,
+        PAD_PX
+      )
+    } catch {
+      return
+    }
+
+    if (this.disposed || gen !== this.textureGen) return
 
     if (this.texture) {
       this.texture.dispose()
@@ -498,6 +583,7 @@ export async function initPixelTextHover(): Promise<void> {
   try {
     await document.fonts.load('800 1em "PP Editorial New"')
     await document.fonts.ready
+    await getHeavyFontDataUrl()
   } catch {
     // Font may already be available via CSS; continue
   }
