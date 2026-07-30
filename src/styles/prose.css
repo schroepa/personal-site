@@ -197,11 +197,14 @@
   margin-right: 0;
 }
 
-/* Alle Bilder: volle Breite, natürliche Proportionen */
+/* Bilder: intrinsische Breite, nie größer als der Container.
+   Breite Screenshots füllen weiter aus; schmale (z. B. Mobile) bleiben naturgroß. */
 .article-prose img {
-  width: 100%;
+  max-width: 100%;
+  width: auto;
   height: auto;
   display: block;
+  margin-inline: auto;
   cursor: zoom-in;
 }
 
