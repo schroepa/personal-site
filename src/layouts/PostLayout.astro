@@ -123,9 +123,9 @@ const articleSchema = {
 
     {coverImage ? (
       <div class="cover-wrap">
-        <!-- LCP: statisches Bild sofort im HTML (SSR), Halftone optional darüber -->
+        <!-- LCP: statisches Bild sofort im HTML (SSR); Halftone nur bei Blog -->
         <img
-          class="cover-img cover-fallback"
+          class:list={["cover-img", kind === "blog" && "cover-fallback"]}
           src={coverImage}
           srcset={coverSrcset}
           sizes={coverSrcset ? COVER_SIZES : undefined}
@@ -136,16 +136,18 @@ const articleSchema = {
           fetchpriority="high"
           decoding="async"
         />
-        <div class="cover-halftone" aria-hidden="true">
-          <HalftoneImage
-            client:visible
-            src={coverImage}
-            alt=""
-            className="cover-img"
-            config={halftoneConfig}
-            scrollEffect={halftoneScrollEffect}
-          />
-        </div>
+        {kind === "blog" && (
+          <div class="cover-halftone" aria-hidden="true">
+            <HalftoneImage
+              client:visible
+              src={coverImage}
+              alt=""
+              className="cover-img"
+              config={halftoneConfig}
+              scrollEffect={halftoneScrollEffect}
+            />
+          </div>
+        )}
       </div>
     ) : (
       <div class="cover-wrap cover-placeholder" aria-hidden="true">
