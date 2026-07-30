@@ -30,6 +30,10 @@ interface Props {
   pageUrl?: string
   slug?: string
   kind?: 'blog' | 'projects'
+  /** Live-URL des Projekts (nur Case Studies) */
+  projectUrl?: string
+  /** Repository-URL (nur Case Studies) */
+  projectRepo?: string
   prev?: PrevNextPost
   next?: PrevNextPost
 }
@@ -44,9 +48,13 @@ const {
   pageUrl = Astro.url.href,
   slug,
   kind = 'blog',
+  projectUrl,
+  projectRepo,
   prev,
   next,
 } = Astro.props
+
+const showProjectLinks = kind === 'projects' && (projectUrl || projectRepo)
 
 const siteUrl = 'https://www.ptrckschrdtr.de'
 
@@ -176,6 +184,33 @@ const articleSchema = {
             </div>
           )}
         </div>
+
+        {showProjectLinks && (
+          <nav class="project-links" aria-label="Projekt-Links">
+            {projectUrl && (
+              <a
+                href={projectUrl}
+                class="project-link"
+                target="_blank"
+                rel="noopener noreferrer"
+                data-cursor="link"
+              >
+                Live-Version ↗
+              </a>
+            )}
+            {projectRepo && (
+              <a
+                href={projectRepo}
+                class="project-link"
+                target="_blank"
+                rel="noopener noreferrer"
+                data-cursor="link"
+              >
+                Repository ↗
+              </a>
+            )}
+          </nav>
+        )}
       </header>
 
       <div class="article-prose prose">
@@ -282,6 +317,32 @@ const articleSchema = {
     max-width: var(--text-max);
     margin-bottom: 3rem;
     padding-top: 0.5rem;
+  }
+
+  .project-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+  }
+
+  .project-link {
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-wide);
+    text-transform: uppercase;
+    color: var(--muted-foreground);
+    text-decoration: none;
+    transition: color 200ms ease;
+  }
+
+  .project-link:hover {
+    color: var(--foreground);
+  }
+
+  .project-link:focus-visible {
+    outline: 2px solid var(--foreground);
+    outline-offset: 4px;
+    border-radius: 2px;
   }
 
   @media (max-width: 639px) {

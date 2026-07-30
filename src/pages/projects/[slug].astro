@@ -51,6 +51,8 @@ const slug = project.id.replace(/\.md$/, '')
   pageUrl={`https://www.ptrckschrdtr.de/projects/${slug}`}
   slug={slug}
   kind="projects"
+  projectUrl={project.data.url}
+  projectRepo={project.data.repo}
   prev={prev}
   next={next}
 >
