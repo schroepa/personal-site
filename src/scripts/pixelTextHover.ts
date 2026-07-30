@@ -23,6 +23,7 @@ uniform float uStrength;
 uniform float uRgbSplit;
 uniform vec3 uTextColor;
 uniform vec2 uAspect;
+uniform vec2 uDir;
 
 varying vec2 vUv;
 
@@ -35,11 +36,11 @@ void main() {
   brush *= brush;
 
   float speed = length(uVelocity);
-  float motion = smoothstep(0.00015, 0.01, speed);
-  float slowBoost = mix(1.45, 0.7, smoothstep(0.001, 0.022, speed));
-  float amount = brush * uHover * motion * slowBoost;
+  float slowBoost = mix(1.35, 0.75, smoothstep(0.001, 0.022, speed));
+  // uHover is already temporally smoothed in JS (sustain across letter gaps)
+  float amount = brush * uHover * slowBoost;
 
-  vec2 dir = speed > 0.00001 ? normalize(uVelocity) : vec2(0.0);
+  vec2 dir = uDir;
   vec2 offset = -dir * uStrength * amount;
 
   vec2 perp = vec2(-dir.y, dir.x);
@@ -64,10 +65,17 @@ void main() {
 
 const HOVER_MEDIA = "(hover: hover) and (pointer: fine)"
 const MAX_DPR = 2
-const LERP = 0.22
-const VEL_LERP = 0.32
-const VEL_DECAY = 0.9
-const EFFECT_RADIUS = 0.12
+/** Delayed brush follow — softens letter-to-letter jumps */
+const MOUSE_LERP = 0.12
+/** How fast velocity tracks movement */
+const VEL_LERP = 0.2
+/** Sustain while hovering so gaps between glyphs don't kill the effect */
+const VEL_DECAY = 0.955
+const VEL_DECAY_LEAVE = 0.88
+/** Effect amount ease-in / ease-out (out slower = less stutter) */
+const EFFECT_LERP_IN = 0.14
+const EFFECT_LERP_OUT = 0.055
+const EFFECT_RADIUS = 0.14
 const EFFECT_STRENGTH = 0.062
 const RGB_SPLIT = 0.012
 const PAD_PX = 100
@@ -256,9 +264,12 @@ class PixelHeading {
   private disposed = false
   private hoverTarget = 0
   private hoverCurrent = 0
+  private effectCurrent = 0
   private mouseTarget = new THREE.Vector2(0.5, 0.5)
   private mouseCurrent = new THREE.Vector2(0.5, 0.5)
+  private mousePrev = new THREE.Vector2(0.5, 0.5)
   private velocity = new THREE.Vector2(0, 0)
+  private lastDir = new THREE.Vector2(1, 0)
   private hasMouseSample = false
   private textWidth = 0
   private textHeight = 0
@@ -308,6 +319,7 @@ class PixelHeading {
         uRgbSplit: { value: RGB_SPLIT },
         uTextColor: { value: new THREE.Vector3(0, 0, 0) },
         uAspect: { value: new THREE.Vector2(1, 1) },
+        uDir: { value: new THREE.Vector2(1, 0) },
       },
       vertexShader: VERTEX,
       fragmentShader: FRAGMENT,
@@ -333,21 +345,16 @@ class PixelHeading {
       const pad = PAD_PX
       const fullW = rect.width + pad * 2
       const fullH = rect.height + pad * 2
-      const nextX = (e.clientX - (rect.left - pad)) / fullW
-      const nextY = 1 - (e.clientY - (rect.top - pad)) / fullH
-
-      if (this.hasMouseSample) {
-        const dx = nextX - this.mouseTarget.x
-        const dy = nextY - this.mouseTarget.y
-        this.velocity.x += (dx - this.velocity.x) * VEL_LERP
-        this.velocity.y += (dy - this.velocity.y) * VEL_LERP
-      } else {
+      this.mouseTarget.set(
+        (e.clientX - (rect.left - pad)) / fullW,
+        1 - (e.clientY - (rect.top - pad)) / fullH
+      )
+      if (!this.hasMouseSample) {
+        this.mouseCurrent.copy(this.mouseTarget)
+        this.mousePrev.copy(this.mouseTarget)
         this.hasMouseSample = true
         this.velocity.set(0, 0)
       }
-
-      this.mouseTarget.set(nextX, nextY)
-      this.mouseCurrent.set(nextX, nextY)
       this.hoverTarget = 1
     }
     this.onPointerEnter = () => {
@@ -503,26 +510,51 @@ class PixelHeading {
   private tick = (): void => {
     if (!this.running || this.disposed) return
 
-    this.hoverCurrent += (this.hoverTarget - this.hoverCurrent) * LERP
+    // Delayed brush position — continuous path across letter gaps
+    this.mouseCurrent.lerp(this.mouseTarget, MOUSE_LERP)
 
-    // Velocity decays every frame — displace only while moving
+    const dx = this.mouseCurrent.x - this.mousePrev.x
+    const dy = this.mouseCurrent.y - this.mousePrev.y
+    this.velocity.x += (dx - this.velocity.x) * VEL_LERP
+    this.velocity.y += (dy - this.velocity.y) * VEL_LERP
+    this.mousePrev.copy(this.mouseCurrent)
+
     this.velocity.multiplyScalar(
-      this.hoverTarget === 0 ? VEL_DECAY * 0.8 : VEL_DECAY
+      this.hoverTarget === 0 ? VEL_DECAY_LEAVE : VEL_DECAY
     )
 
-    if (this.hoverCurrent < 0.001 && this.hoverTarget === 0) {
+    const speed = this.velocity.length()
+    if (speed > 0.00005) {
+      this.lastDir.copy(this.velocity).normalize()
+    }
+
+    // Sustain effect while moving; release slowly so letter gaps don't click off
+    const motion = Math.min(1, Math.max(0, (speed - 0.00005) / 0.01))
+    const effectTarget =
+      this.hoverTarget === 0 ? 0 : Math.max(motion, this.effectCurrent * 0.92)
+    const effectLerp =
+      effectTarget > this.effectCurrent ? EFFECT_LERP_IN : EFFECT_LERP_OUT
+    this.effectCurrent += (effectTarget - this.effectCurrent) * effectLerp
+
+    this.hoverCurrent +=
+      (this.hoverTarget - this.hoverCurrent) *
+      (this.hoverTarget > 0 ? EFFECT_LERP_IN : EFFECT_LERP_OUT)
+
+    if (this.hoverTarget === 0 && this.effectCurrent < 0.001) {
       this.hoverCurrent = 0
+      this.effectCurrent = 0
       this.velocity.set(0, 0)
       this.hasMouseSample = false
     }
 
-    this.material.uniforms.uHover.value = this.hoverCurrent
+    this.material.uniforms.uHover.value = this.effectCurrent * this.hoverCurrent
     ;(this.material.uniforms.uMouse.value as THREE.Vector2).copy(
       this.mouseCurrent
     )
     ;(this.material.uniforms.uVelocity.value as THREE.Vector2).copy(
       this.velocity
     )
+    ;(this.material.uniforms.uDir.value as THREE.Vector2).copy(this.lastDir)
 
     this.renderFrame()
     this.raf = requestAnimationFrame(this.tick)
