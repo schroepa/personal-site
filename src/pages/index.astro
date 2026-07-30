@@ -312,10 +312,12 @@ const homeSections = [
     flex-direction: column;
   }
 
-  /* Room for padded distort canvas around hero type */
-  #section-intro,
-  #section-kontakt {
-    overflow: visible;
+  /* Room for padded distort canvas — desktop fine-pointer only (avoids mobile bleed) */
+  @media (hover: hover) and (pointer: fine) {
+    #section-intro,
+    #section-kontakt {
+      overflow: visible;
+    }
   }
 
   .snap-content {
@@ -379,11 +381,9 @@ const homeSections = [
 
   @keyframes weight-reveal {
     from {
-      font-weight: 100;
       opacity: 0;
     }
     to {
-      font-weight: 500;
       opacity: 1;
     }
   }
@@ -698,10 +698,19 @@ const homeSections = [
       top: 5rem;
     }
     .intro-content {
-      padding-bottom: 3rem;
+      padding-bottom: calc(3.5rem + env(safe-area-inset-bottom, 0px));
+    }
+    .ueber-content,
+    .arbeit-content,
+    .gedanken-content,
+    .kontakt-content {
+      padding-bottom: calc(3.5rem + env(safe-area-inset-bottom, 0px));
     }
     .kontakt-email {
       font-size: 1.25rem;
+    }
+    .scroll-hint {
+      margin-top: 1.75rem;
     }
   }
 </style>

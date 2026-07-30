@@ -353,31 +353,31 @@ const email = { user: "kontakt", domain: "ptrckschrdtr.de" }
               href={social.linkedin}
               target="_blank"
               rel="noopener noreferrer"
-              class="footer-link"
+              class="footer-link footer-link--external"
               data-cursor="link"
               aria-label="LinkedIn Profil"
             >
-              LinkedIn ↗
+              LinkedIn
             </a>
             <a
               href={social.instagram}
               target="_blank"
               rel="noopener noreferrer"
-              class="footer-link"
+              class="footer-link footer-link--external"
               data-cursor="link"
               aria-label="Instagram Profil"
             >
-              Instagram ↗
+              Instagram
             </a>
             <a
               href={social.github}
               target="_blank"
               rel="noopener noreferrer"
-              class="footer-link"
+              class="footer-link footer-link--external"
               data-cursor="link"
               aria-label="GitHub Profil"
             >
-              GitHub ↗
+              GitHub
             </a>
             <!-- E-Mail: Bot-Schutz via JS — kein mailto im HTML-Quelltext -->
             <button
@@ -1000,6 +1000,22 @@ const email = { user: "kontakt", domain: "ptrckschrdtr.de" }
         cursor: pointer;
         font-family: var(--font-sans);
         transition: color 200ms ease;
+      }
+
+      .footer-link--external {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3em;
+      }
+
+      .footer-link--external::after {
+        content: "";
+        display: block;
+        width: 0.45em;
+        height: 0.45em;
+        border-top: 1.5px solid currentColor;
+        border-right: 1.5px solid currentColor;
+        transform: translateY(0.02em) rotate(45deg);
       }
 
       .footer-link:hover {
