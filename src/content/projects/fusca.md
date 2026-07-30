@@ -5,6 +5,7 @@ coverImage: "/images/gallery/fusca/fusca-uebersicht.jpg"
 date: 2026-07-30
 tags: ["Astro", "React", "Supabase", "PWA", "Sports Tech"]
 url: "https://fusca-sepia.vercel.app"
+repo: "https://github.com/schroepa/fussball-scouting-app"
 featured: true
 ---
 
