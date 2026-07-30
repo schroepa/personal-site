@@ -10,7 +10,8 @@ void main() {
 
 /**
  * Brush displace along mouse velocity + RGB split under the tip.
- * Slow movement gets a stronger push; settles when the cursor stops.
+ * Chromatic fringes are built from the alpha mask so they stay visible
+ * on dark text (light mode) and light text (dark mode).
  */
 const FRAGMENT = /* glsl */ `
 uniform sampler2D uTexture;
@@ -20,6 +21,7 @@ uniform float uHover;
 uniform float uRadius;
 uniform float uStrength;
 uniform float uRgbSplit;
+uniform vec3 uTextColor;
 uniform vec2 uAspect;
 
 varying vec2 vUv;
@@ -33,25 +35,30 @@ void main() {
   brush *= brush;
 
   float speed = length(uVelocity);
-  // Engage earlier so slow drags still count
   float motion = smoothstep(0.00015, 0.01, speed);
-  // Stronger when slow, tapers a bit when fast
   float slowBoost = mix(1.45, 0.7, smoothstep(0.001, 0.022, speed));
   float amount = brush * uHover * motion * slowBoost;
 
   vec2 dir = speed > 0.00001 ? normalize(uVelocity) : vec2(0.0);
   vec2 offset = -dir * uStrength * amount;
 
-  // Chromatic split along motion; slight perpendicular for glitch edge
   vec2 perp = vec2(-dir.y, dir.x);
   vec2 chroma = (dir * 0.65 + perp * 0.35) * uRgbSplit * amount;
 
-  vec4 sampleR = texture2D(uTexture, uv + offset + chroma);
-  vec4 sampleG = texture2D(uTexture, uv + offset);
-  vec4 sampleB = texture2D(uTexture, uv + offset - chroma);
+  float aR = texture2D(uTexture, uv + offset + chroma).a;
+  float aG = texture2D(uTexture, uv + offset).a;
+  float aB = texture2D(uTexture, uv + offset - chroma).a;
 
-  float alpha = max(sampleG.a, max(sampleR.a, sampleB.a));
-  gl_FragColor = vec4(sampleR.r, sampleG.g, sampleB.b, alpha);
+  // Core glyph in theme foreground color
+  vec3 color = uTextColor * aG;
+  // Additive RGB fringes where channels diverge (works for black and white text)
+  float fringe = clamp(amount * 1.35, 0.0, 1.0);
+  color.r += max(aR - aG, 0.0) * fringe;
+  color.b += max(aB - aG, 0.0) * fringe;
+  color.g += max(min(aR, aB) - aG, 0.0) * fringe * 0.25;
+
+  float alpha = max(aG, max(aR, aB) * fringe);
+  gl_FragColor = vec4(color, alpha);
 }
 `
 
@@ -89,6 +96,18 @@ function readForegroundColor(el: HTMLElement): string {
   const color = getComputedStyle(probe).color
   probe.remove()
   return color || getComputedStyle(document.documentElement).color
+}
+
+function cssColorToVec3(cssColor: string): THREE.Vector3 {
+  const canvas = document.createElement("canvas")
+  canvas.width = 1
+  canvas.height = 1
+  const ctx = canvas.getContext("2d")
+  if (!ctx) return new THREE.Vector3(0, 0, 0)
+  ctx.fillStyle = cssColor
+  ctx.fillRect(0, 0, 1, 1)
+  const [r, g, b] = ctx.getImageData(0, 0, 1, 1).data
+  return new THREE.Vector3(r / 255, g / 255, b / 255)
 }
 
 function collectLines(heading: HTMLElement): LineSource[] {
@@ -216,6 +235,7 @@ class PixelHeading {
         uRadius: { value: EFFECT_RADIUS },
         uStrength: { value: EFFECT_STRENGTH },
         uRgbSplit: { value: RGB_SPLIT },
+        uTextColor: { value: new THREE.Vector3(0, 0, 0) },
         uAspect: { value: new THREE.Vector2(1, 1) },
       },
       vertexShader: VERTEX,
@@ -230,6 +250,9 @@ class PixelHeading {
     this.scene.add(this.mesh)
 
     this.textColor = readForegroundColor(this.heading)
+    ;(this.material.uniforms.uTextColor.value as THREE.Vector3).copy(
+      cssColorToVec3(this.textColor)
+    )
     this.wrapper.classList.add("is-active")
     this.resize()
 
@@ -288,6 +311,9 @@ class PixelHeading {
 
     this.themeObserver = new MutationObserver(() => {
       this.textColor = readForegroundColor(this.heading)
+      ;(this.material.uniforms.uTextColor.value as THREE.Vector3).copy(
+        cssColorToVec3(this.textColor)
+      )
       this.rebuildTexture()
     })
     this.themeObserver.observe(document.documentElement, {
