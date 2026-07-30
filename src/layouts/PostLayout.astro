@@ -3,13 +3,16 @@ import BaseLayout from './BaseLayout.astro'
 import ReadingProgress from '@/components/astro/ReadingProgress.astro'
 import ArticleFooter from '@/components/astro/ArticleFooter.astro'
 import Lightbox from '@/components/astro/Lightbox.astro'
-import { Badge } from '@/components/ui/badge'
 import { readingTime } from '@/lib/reading-time'
+import {
+  blogCoverSrcset,
+  COVER_SIZES,
+  isBlogCover,
+} from '@/lib/cover-image'
 import HalftoneImage, { DEFAULT_HALFTONE_PARAMS } from '@/components/HalftoneImage'
 
 interface PrevNextPost {
   slug: string
-  /** Default: blog — bei Projekt-Detailseiten `projects` setzen */
   kind?: 'blog' | 'projects'
   title: string
   description: string
@@ -25,9 +28,7 @@ interface Props {
   coverImage?: string
   body?: string
   pageUrl?: string
-  /** Für den vorgerenderten Halbton-OG-Bild-Pfad — Slug der aktuellen Seite */
   slug?: string
-  /** Default: blog — bei Projekt-Detailseiten "projects" setzen */
   kind?: 'blog' | 'projects'
   prev?: PrevNextPost
   next?: PrevNextPost
@@ -35,7 +36,7 @@ interface Props {
 
 const {
   title,
-  description,
+  description = '',
   date,
   tags = [],
   coverImage,
@@ -47,13 +48,15 @@ const {
   next,
 } = Astro.props
 
-// Social-Share-Vorschauen (LinkedIn, Twitter, Slack …) führen kein JS aus und
-// sähen ohne diesen Schritt das rohe Originalbild statt des Halbton-Looks.
-// scripts/generate-og-images.mjs rendert für jeden Post mit Cover-Bild eine
-// vorgerenderte Halbton-Version genau unter diesem Pfad in dist/.
+const siteUrl = 'https://www.ptrckschrdtr.de'
+
 const ogImage = coverImage && slug
   ? `/images/og/${kind}-${slug}.png`
   : coverImage
+
+const ogImageAbsolute = ogImage
+  ? new URL(ogImage, siteUrl).toString()
+  : `${siteUrl}/og-default.png`
 
 const minutes = readingTime(body)
 
@@ -63,24 +66,38 @@ const formattedDate = new Intl.DateTimeFormat('de-DE', {
   day: 'numeric',
 }).format(date)
 
-// Responsive srcset für Blog-Cover-Bilder: -640/-1050 Varianten liegen neben
-// dem Original (z.B. blog-image-3.webp + blog-image-3-640.webp + -1050.webp).
-// Andere Bilder (Projekte) bleiben unverändert, da bereits klein genug.
-const coverSrcset = coverImage?.startsWith('/images/blog/')
-  ? (() => {
-      const base = coverImage.replace(/\.webp$/, '')
-      return `${base}-480.webp 480w, ${base}-1200.webp 1200w, ${coverImage} 2100w`
-    })()
+const coverSrcset = coverImage && isBlogCover(coverImage)
+  ? blogCoverSrcset(coverImage)
   : undefined
 
-// Parameter für den CMYK-Halbton-Shader (https://shaders.paper.design/halftone-cmyk)
-// Hier kannst du die Darstellung für alle Beitragsbilder anpassen.
 const halftoneConfig = DEFAULT_HALFTONE_PARAMS
 
-// Scroll-Reaktionsparameter für die Animation (verändert nur das Punktraster, das Bild bleibt statisch)
 const halftoneScrollEffect = {
-  sizeFactor: -0.0001,      // Punkte werden beim Scrollen kleiner (z. B. -0.0001 pro Pixel)
-  gridNoiseFactor: 0.00015, // Punkte werden beim Scrollen unordentlicher/analoger (z. B. 0.00015 pro Pixel)
+  sizeFactor: -0.0001,
+  gridNoiseFactor: 0.00015,
+}
+
+const articleSchema = {
+  '@context': 'https://schema.org',
+  '@type': kind === 'blog' ? 'BlogPosting' : 'Article',
+  headline: title,
+  description,
+  datePublished: date.toISOString(),
+  dateModified: date.toISOString(),
+  author: {
+    '@type': 'Person',
+    name: 'Patrick Schröder',
+    url: siteUrl,
+  },
+  publisher: {
+    '@type': 'Person',
+    name: 'Patrick Schröder',
+    url: siteUrl,
+  },
+  image: ogImageAbsolute,
+  url: pageUrl,
+  inLanguage: 'de-DE',
+  ...(tags.length > 0 && { keywords: tags.join(', ') }),
 }
 ---
 
@@ -94,21 +111,41 @@ const halftoneScrollEffect = {
   articleAuthor="Patrick Schröder"
   articleTags={tags}
 >
+  <script
+    slot="head"
+    type="application/ld+json"
+    set:html={JSON.stringify(articleSchema)}
+  />
+
   <ReadingProgress />
 
   <article class="pb-24">
 
-    <!-- Cover: volle Breite, normaler Dokumentfluss, kein Overlap -->
     {coverImage ? (
       <div class="cover-wrap">
-        <HalftoneImage
-          client:only="react"
+        <!-- LCP: statisches Bild sofort im HTML (SSR), Halftone optional darüber -->
+        <img
+          class="cover-img cover-fallback"
           src={coverImage}
+          srcset={coverSrcset}
+          sizes={coverSrcset ? COVER_SIZES : undefined}
           alt={title}
-          className="cover-img"
-          config={halftoneConfig}
-          scrollEffect={halftoneScrollEffect}
+          width="2100"
+          height="900"
+          loading="eager"
+          fetchpriority="high"
+          decoding="async"
         />
+        <div class="cover-halftone" aria-hidden="true">
+          <HalftoneImage
+            client:visible
+            src={coverImage}
+            alt=""
+            className="cover-img"
+            config={halftoneConfig}
+            scrollEffect={halftoneScrollEffect}
+          />
+        </div>
       </div>
     ) : (
       <div class="cover-wrap cover-placeholder" aria-hidden="true">
@@ -118,7 +155,6 @@ const halftoneScrollEffect = {
       </div>
     )}
 
-    <!-- Content: max-w-5xl, Text auf max-w-2xl, Bilder auf volle Containerbreite -->
     <div class="page-grid">
 
       <header class="article-header">
@@ -133,14 +169,13 @@ const halftoneScrollEffect = {
           {tags.length > 0 && (
             <div class="flex flex-wrap gap-2">
               {tags.map((tag) => (
-                <Badge variant="secondary" client:visible>{tag}</Badge>
+                <span class="post-tag-badge">{tag}</span>
               ))}
             </div>
           )}
         </div>
       </header>
 
-      <!-- Prose: Text max-w-2xl, Bilder brechen auf volle max-w-5xl aus -->
       <div class="article-prose prose">
         <slot />
       </div>
@@ -158,7 +193,6 @@ const halftoneScrollEffect = {
 </BaseLayout>
 
 <style>
-  /* ── Cover: volle Breite, nach nav ─────────────────────────────────────── */
   .cover-wrap {
     position: relative;
     width: 100%;
@@ -177,17 +211,29 @@ const halftoneScrollEffect = {
     display: block;
   }
 
-  .cover-wrap::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    filter: url(#grain);
-    opacity: 0.06;
-    mix-blend-mode: overlay;
-    pointer-events: none;
+  .cover-fallback {
+    position: relative;
+    z-index: 0;
   }
 
-  /* ── Fallback-Placeholder ───────────────────────────────────────────────── */
+  .cover-halftone {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+  }
+
+  .post-tag-badge {
+    display: inline-flex;
+    align-items: center;
+    height: 1.25rem;
+    padding: 0 0.75rem;
+    border-radius: 9999px;
+    font-size: var(--text-sm);
+    font-weight: 500;
+    background: var(--secondary);
+    color: var(--secondary-foreground);
+  }
+
   .cover-placeholder {
     background: var(--background);
   }
@@ -230,15 +276,12 @@ const halftoneScrollEffect = {
     .cp-orb { animation: none; }
   }
 
-  /* ── Header ─────────────────────────────────────────────────────────────── */
   .article-header {
     max-width: var(--text-max);
     margin-bottom: 3rem;
     padding-top: 0.5rem;
   }
 
-
-  /* Mobile: weniger Cover-Höhe */
   @media (max-width: 639px) {
     .cover-wrap {
       height: 40vh;

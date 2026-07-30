@@ -153,18 +153,8 @@ const email = { user: "kontakt", domain: "ptrckschrdtr.de" }
     <!-- End Google Tag Manager -->
 
     <meta charset="UTF-8" />
-    <!-- Fonts: Fontsource-CSS aus dem Bundle nehmen — Vite löst url(./files/…) dort nicht zuverlässig auf (Build-Warnungen / Risiko abgebrochener Builds). Gleiche npm-Versionen wie zuvor, ausgeliefert über jsDelivr. -->
-    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/@fontsource-variable/geist@5.2.8/index.css"
-      crossorigin="anonymous"
-    />
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/@fontsource/geist-mono@5.2.7/index.css"
-      crossorigin="anonymous"
-    />
+    <link rel="preload" href="/fonts/geist-latin.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/geist-mono-latin.woff2" as="font" type="font/woff2" crossorigin />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="generator" content={Astro.generator} />
 
@@ -227,6 +217,8 @@ const email = { user: "kontakt", domain: "ptrckschrdtr.de" }
       type="application/ld+json"
       set:html={JSON.stringify(personSchema)}
     />
+
+    <slot name="head" />
 
     <ViewTransitions />
     <PostHog />

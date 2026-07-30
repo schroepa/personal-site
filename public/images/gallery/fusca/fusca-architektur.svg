@@ -1,0 +1,100 @@
+<svg viewBox="0 0 1200 780" xmlns="http://www.w3.org/2000/svg" font-family="'Geist', 'Inter', system-ui, sans-serif">
+  <style>
+    .bg { fill: #121110; }
+    .card { fill: #1a1815; stroke: #38352c; stroke-width: 1.5; }
+    .card-accent { fill: #16211c; stroke: #2f8f6d; stroke-width: 1.5; }
+    .card-cloud { fill: #161c21; stroke: #3a6b7a; stroke-width: 1.5; }
+    .title { fill: #f4f1ea; font-size: 14.5px; font-weight: 600; }
+    .sub { fill: #9c9686; font-size: 12px; }
+    .kicker { fill: #6f9c8a; font-size: 10.5px; letter-spacing: 1.3px; font-weight: 600; }
+    .kicker-cloud { fill: #6ea8bb; font-size: 10.5px; letter-spacing: 1.3px; font-weight: 600; }
+    .arrow { stroke: #55503f; stroke-width: 1.5; fill: none; marker-end: url(#arrow); }
+    .arrow2 { stroke: #3a6b7a; stroke-width: 1.5; fill: none; marker-end: url(#arrow2); stroke-dasharray: 5 4; }
+    .heading { fill: #f4f1ea; font-size: 20px; font-weight: 700; }
+  </style>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#55503f"/>
+    </marker>
+    <marker id="arrow2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#3a6b7a"/>
+    </marker>
+  </defs>
+
+  <rect class="bg" x="0" y="0" width="1200" height="780" rx="14"/>
+  <text x="40" y="46" class="heading">Fussball Scouting — eine Codebasis, zwei Arbeitsplätze</text>
+  <text x="40" y="68" class="sub">Gleiche Astro/React-App, unterschiedliches Layout je Gerät — synchronisiert über eine gemeinsame Cloud.</text>
+
+  <!-- Mobile column -->
+  <rect class="card" x="60" y="96" width="330" height="112" rx="10"/>
+  <text x="82" y="120" class="kicker">AM SPIELFELDRAND</text>
+  <text x="82" y="142" class="title">Mobile PWA</text>
+  <text x="82" y="162" class="sub">React-Islands, Bottom-Nav, Kamera</text>
+  <text x="82" y="180" class="sub">Formulare fürs schnelle Erfassen</text>
+  <text x="82" y="198" class="sub">funktioniert vollständig offline</text>
+
+  <!-- Desktop column -->
+  <rect class="card" x="810" y="96" width="330" height="112" rx="10"/>
+  <text x="832" y="120" class="kicker">ZUHAUSE</text>
+  <text x="832" y="142" class="title">Desktop-Arbeitsplatz</text>
+  <text x="832" y="162" class="sub">Sidebar-Layout, Dashboard, Filter</text>
+  <text x="832" y="180" class="sub">Spielervergleich, Import, Export</text>
+  <text x="832" y="198" class="sub">gleiche Codebasis, andere Ansicht</text>
+
+  <!-- Shared frontend core -->
+  <rect class="card-accent" x="330" y="238" width="540" height="72" rx="10"/>
+  <text x="352" y="262" class="kicker">GEMEINSAMER FRONTEND-KERN</text>
+  <text x="352" y="284" class="title">Astro 7 + React Islands + Tailwind CSS 4 + shadcn (Fusca-Theme)</text>
+  <text x="352" y="300" class="sub">Ein Codebase entscheidet responsiv über Layout, nicht über Feature-Umfang</text>
+
+  <path class="arrow" d="M225,208 L500,242"/>
+  <path class="arrow" d="M975,208 L700,242"/>
+
+  <path class="arrow" d="M600,310 L600,336"/>
+
+  <!-- Offline layer -->
+  <rect class="card" x="200" y="338" width="380" height="76" rx="10"/>
+  <text x="222" y="360" class="kicker">OFFLINE-SCHICHT</text>
+  <text x="222" y="382" class="title">Dexie (IndexedDB) + @vite-pwa/astro</text>
+  <text x="222" y="400" class="sub">Jeder Bericht landet zuerst lokal — Netz optional</text>
+
+  <path class="arrow" d="M580,376 L636,376"/>
+
+  <!-- Outbox sync -->
+  <rect class="card" x="640" y="338" width="360" height="76" rx="10"/>
+  <text x="662" y="360" class="kicker">OUTBOX-SYNC</text>
+  <text x="662" y="382" class="title">Warteschlange mit Status + Retry</text>
+  <text x="662" y="400" class="sub">Sync-Indikator: Online / Offline / Fehler</text>
+
+  <path class="arrow2" d="M900,414 L900,448"/>
+
+  <!-- Supabase cloud -->
+  <rect class="card-cloud" x="640" y="450" width="360" height="100" rx="10"/>
+  <text x="662" y="474" class="kicker-cloud">SUPABASE (CLOUD)</text>
+  <text x="662" y="496" class="title">Postgres · Auth (Google/Magic Link) · Storage</text>
+  <text x="662" y="516" class="sub">Row-Level-Security: ownerScoutId — nur eigene Daten</text>
+  <text x="662" y="534" class="sub">Schema verwaltet über Drizzle ORM</text>
+
+  <!-- Import adapters -->
+  <rect class="card" x="200" y="450" width="380" height="100" rx="10"/>
+  <text x="222" y="474" class="kicker">IMPORT-ADAPTER</text>
+  <text x="222" y="496" class="title">Transfermarkt · fussball.de · TheSportsDB · API</text>
+  <text x="222" y="516" class="sub">Kader-Import mit Dedup pro Scout</text>
+  <text x="222" y="534" class="sub">(ownerScoutId + externe Quelle/ID)</text>
+
+  <path class="arrow" d="M580,500 L636,500"/>
+
+  <!-- Export + hosting -->
+  <path class="arrow" d="M900,550 L900,584"/>
+  <rect class="card" x="720" y="586" width="280" height="72" rx="10"/>
+  <text x="742" y="608" class="kicker">EXPORT</text>
+  <text x="742" y="630" class="title">jsPDF — PDF- und JSON-Reports</text>
+  <text x="742" y="646" class="sub">für Vereins- und Trainerteams</text>
+
+  <rect class="card" x="200" y="586" width="280" height="72" rx="10"/>
+  <text x="222" y="608" class="kicker">HOSTING</text>
+  <text x="222" y="630" class="title">Vercel (@astrojs/vercel)</text>
+  <text x="222" y="646" class="sub">Repo-Push → automatisches Deployment</text>
+
+  <text x="40" y="734" class="sub">Qualität: Vitest (Unit) · Playwright-Smoke (E2E) · CSP &amp; Rate-Limiting · CI via GitHub Actions</text>
+</svg>

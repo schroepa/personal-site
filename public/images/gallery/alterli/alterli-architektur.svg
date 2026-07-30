@@ -1,0 +1,88 @@
+<svg viewBox="0 0 1200 760" xmlns="http://www.w3.org/2000/svg" font-family="'Geist', 'Inter', system-ui, sans-serif">
+  <style>
+    .bg { fill: #121110; }
+    .card { fill: #1a1815; stroke: #38352c; stroke-width: 1.5; }
+    .card-accent { fill: #16211c; stroke: #2f8f6d; stroke-width: 1.5; }
+    .title { fill: #f4f1ea; font-size: 15px; font-weight: 600; }
+    .sub { fill: #9c9686; font-size: 12.5px; }
+    .kicker { fill: #6f9c8a; font-size: 11px; letter-spacing: 1.5px; font-weight: 600; }
+    .arrow { stroke: #55503f; stroke-width: 1.5; fill: none; marker-end: url(#arrow); }
+    .bracket { stroke: #2f8f6d; stroke-width: 1.5; fill: none; stroke-dasharray: 3 3; }
+    .heading { fill: #f4f1ea; font-size: 20px; font-weight: 700; }
+  </style>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#55503f"/>
+    </marker>
+  </defs>
+
+  <rect class="bg" x="0" y="0" width="1200" height="760" rx="14"/>
+  <text x="40" y="46" class="heading">alterli — Architektur: kein Server im Spiel</text>
+  <text x="40" y="68" class="sub">Statisch gebaut, vollständig im Browser berechnet. Kein Backend, keine Datenbank, kein Tracking.</text>
+
+  <!-- Pipeline boxes -->
+  <g>
+    <rect class="card" x="110" y="96" width="700" height="58" rx="10"/>
+    <text x="132" y="118" class="kicker">01 · BESUCH</text>
+    <text x="132" y="140" class="title">Browser lädt alterli.vercel.app</text>
+  </g>
+
+  <path class="arrow" d="M460,154 L460,180"/>
+
+  <g>
+    <rect class="card" x="110" y="182" width="700" height="66" rx="10"/>
+    <text x="132" y="204" class="kicker">02 · BUILD</text>
+    <text x="132" y="226" class="title">Astro (output: static) — vorgerenderte Marketing-Seiten</text>
+    <text x="132" y="244" class="sub">HTML/CSS liegen fertig in dist/, kein Server-Rendering zur Laufzeit</text>
+  </g>
+
+  <path class="arrow" d="M460,248 L460,274"/>
+
+  <g>
+    <rect class="card" x="110" y="276" width="700" height="66" rx="10"/>
+    <text x="132" y="298" class="kicker">03 · HYDRATION</text>
+    <text x="132" y="320" class="title">/app hydriert React-Island »AlterliApp«</text>
+    <text x="132" y="338" class="sub">@astrojs/react — Rest der Seite bleibt statisches HTML</text>
+  </g>
+
+  <path class="arrow" d="M460,342 L460,368"/>
+
+  <g>
+    <rect class="card" x="110" y="370" width="700" height="80" rx="10"/>
+    <text x="132" y="392" class="kicker">04 · WIZARD</text>
+    <text x="132" y="414" class="title">7 Schritte im React-State (useState)</text>
+    <text x="132" y="432" class="sub">Beschäftigung → Details → Alter → Einkommen → Leben → Vorsorge → Ziel</text>
+    <text x="132" y="448" class="sub">Nichts wird persistiert — kein localStorage, kein Cookie</text>
+  </g>
+
+  <path class="arrow" d="M460,450 L460,476"/>
+
+  <g>
+    <rect class="card" x="110" y="478" width="700" height="80" rx="10"/>
+    <text x="132" y="500" class="kicker">05 · BERECHNUNG</text>
+    <text x="132" y="522" class="title">calc.ts + riesterSzenarien.ts — reine Funktionen</text>
+    <text x="132" y="540" class="sub">Grenzsteuersatz, Riester-Zulage, GRV/Pension/VBL, 3 Kapital-Projektionen</text>
+    <text x="132" y="556" class="sub">Läuft synchron im Browser-Thread — keine Netzwerk-Anfrage</text>
+  </g>
+
+  <path class="arrow" d="M460,558 L460,584"/>
+
+  <g>
+    <rect class="card" x="110" y="586" width="700" height="66" rx="10"/>
+    <text x="132" y="608" class="kicker">06 · ERGEBNIS</text>
+    <text x="132" y="630" class="title">Ehrlicher Moment, Ampel, Recharts-Diagramme, Empfehlungen</text>
+    <text x="132" y="646" class="sub">Alles React-State — bei Reload ist die Analyse wieder weg</text>
+  </g>
+
+  <!-- Side annotation bracket -->
+  <path class="bracket" d="M834,182 L860,182 L860,652 L834,652"/>
+  <rect class="card-accent" x="870" y="330" width="260" height="160" rx="10"/>
+  <text x="892" y="358" class="kicker">ZERO DATA</text>
+  <text x="892" y="382" class="sub" font-size="13">Kein fetch() zu einer API,</text>
+  <text x="892" y="400" class="sub" font-size="13">kein Cookie, keine Datenbank.</text>
+  <text x="892" y="422" class="sub" font-size="13">Alles was du siehst, entsteht</text>
+  <text x="892" y="440" class="sub" font-size="13">und verschwindet lokal in</text>
+  <text x="892" y="458" class="sub" font-size="13">deinem Browser-Tab.</text>
+
+  <text x="40" y="726" class="sub">Tech-Stack: Astro 4 · React 18 (Client Island) · TypeScript · Tailwind CSS · shadcn/ui · Recharts · Vercel (Static Hosting)</text>
+</svg>

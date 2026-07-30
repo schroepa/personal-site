@@ -1,0 +1,66 @@
+---
+// Isolierter Prototyp — nicht verlinkt, nicht in der Sitemap (siehe astro.config.mjs).
+// Zeigt den scroll-gebundenen Wort-Aufhellungseffekt, inspiriert von bymonolog.com,
+// zur Bewertung, bevor er (falls gewünscht) ins globale textReveal-System wandert.
+import BaseLayout from '@/layouts/BaseLayout.astro'
+---
+
+<BaseLayout title="Prototyp: Scroll-Text-Reveal" description="Interner Prototyp, nicht Teil der Navigation.">
+  <div class="page-grid pt-32 pb-32">
+    <p class="proto-note t-small text-muted-foreground">
+      Prototyp — scroll-gebundene Wort-Aufhellung (inspiriert von bymonolog.com). Scrolle langsam.
+    </p>
+
+    <p class="t-lead proto-text" data-reveal="scroll-words">
+      Ich kenne den Moment aus jedem Projekt-Meeting der letzten fünfzehn Jahre: Jemand schaut auf
+      einen Screen, den ein Team wochenlang gebaut hat, und sagt: Das sollte intuitiver sein. Alle
+      nicken. Niemand fragt nach. Der Satz klingt wie ein Argument. Er ist keins.
+    </p>
+
+    <div class="proto-spacer"></div>
+
+    <p class="t-lead proto-text" data-reveal="scroll-words">
+      Nichts an einem digitalen Interface ist von Natur aus intuitiv. Ein Wisch nach links, um eine
+      Nachricht zu löschen, ist keine angeborene menschliche Geste — sie ist eine Konvention, die
+      iOS Mail und später unzählige andere Apps über Jahre in Millionen von Nutzern eintrainiert
+      haben.
+    </p>
+
+    <div class="proto-spacer"></div>
+
+    <p class="t-lead proto-text" data-reveal="scroll-words">
+      Intuition ist in Wahrheit Wiedererkennung. Ein Interface fühlt sich intuitiv an, wenn es
+      einem mentalen Modell entspricht, das der Nutzer bereits mitbringt — nicht weil es
+      universellen Denkgesetzen folgt.
+    </p>
+
+    <div class="proto-spacer-end"></div>
+  </div>
+
+  <style>
+    .proto-note {
+      margin-bottom: 5rem;
+      max-width: 32rem;
+    }
+
+    .proto-text {
+      max-width: 42rem;
+      line-height: 1.5;
+    }
+
+    .proto-spacer {
+      height: 60vh;
+    }
+
+    .proto-spacer-end {
+      height: 40vh;
+    }
+  </style>
+
+  <script>
+    import { initScrollTextReveal } from '@/scripts/scrollTextReveal'
+    document.addEventListener('astro:page-load', () => {
+      initScrollTextReveal()
+    })
+  </script>
+</BaseLayout>

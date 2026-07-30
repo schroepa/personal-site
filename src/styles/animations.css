@@ -23,6 +23,12 @@
   animation: reveal-word 700ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
+/* Scroll-gebundene Wort-Aufhellung (Prototyp) — Farbe wird per rAF in
+   scrollTextReveal.ts gesetzt (inline style), hier nur der Startzustand. */
+.scroll-word {
+  color: var(--muted-foreground);
+}
+
 /* Reading Progress */
 @keyframes reading-progress {
   from { transform: scaleX(0); }
@@ -57,5 +63,10 @@
     animation: none;
     opacity: 1;
     transform: none;
+  }
+
+  .scroll-word {
+    animation: none;
+    color: var(--foreground);
   }
 }

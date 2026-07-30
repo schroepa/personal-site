@@ -1,0 +1,96 @@
+<svg viewBox="0 0 1200 820" xmlns="http://www.w3.org/2000/svg" font-family="'Geist', 'Inter', system-ui, sans-serif">
+  <style>
+    .bg { fill: #121110; }
+    .card { fill: #1a1815; stroke: #38352c; stroke-width: 1.5; }
+    .lane-riester { fill: #1c1f16; stroke: #5c6b34; stroke-width: 1.3; }
+    .lane-depot { fill: #161c1f; stroke: #35606b; stroke-width: 1.3; }
+    .lane-etf { fill: #1a171f; stroke: #5c4e8a; stroke-width: 1.3; }
+    .card-accent { fill: #16211c; stroke: #2f8f6d; stroke-width: 1.5; }
+    .title { fill: #f4f1ea; font-size: 14.5px; font-weight: 600; }
+    .sub { fill: #9c9686; font-size: 12px; }
+    .kicker { fill: #6f9c8a; font-size: 10.5px; letter-spacing: 1.3px; font-weight: 600; }
+    .arrow { stroke: #55503f; stroke-width: 1.5; fill: none; marker-end: url(#arrow); }
+    .heading { fill: #f4f1ea; font-size: 20px; font-weight: 700; }
+    .ampel-g { fill: #4ea37a; }
+    .ampel-y { fill: #c9a227; }
+    .ampel-r { fill: #c1553f; }
+  </style>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#55503f"/>
+    </marker>
+  </defs>
+
+  <rect class="bg" x="0" y="0" width="1200" height="820" rx="14"/>
+  <text x="40" y="46" class="heading">alterli — Entscheidungslogik hinter der Analyse</text>
+  <text x="40" y="68" class="sub">Von der Berufsgruppe bis zur Handlungsempfehlung — jede Berechnung in calc.ts nachvollziehbar.</text>
+
+  <!-- Step 1: Eingaben -->
+  <rect class="card" x="60" y="92" width="1080" height="56" rx="10"/>
+  <text x="82" y="112" class="kicker">EINGABEN (WIZARD)</text>
+  <text x="82" y="133" class="title">Hauptgruppe · Untergruppe · Alter/Geschlecht · Einkommen · Leben · Vorsorge · Wunschrente</text>
+
+  <path class="arrow" d="M600,148 L600,172"/>
+
+  <!-- Step 2: getGruppe -->
+  <rect class="card" x="200" y="174" width="800" height="60" rx="10"/>
+  <text x="222" y="196" class="kicker">GETGRUPPE()</text>
+  <text x="222" y="218" class="title">Boolesche Flags: istBeamter · istTvoed · istSelbst · istVW · hatGRV · riesterMöglich · rürupSinnvoll</text>
+
+  <path class="arrow" d="M600,234 L600,258"/>
+
+  <!-- Step 3: calc core -->
+  <rect class="card" x="140" y="260" width="920" height="72" rx="10"/>
+  <text x="162" y="282" class="kicker">CALC() — STEUER &amp; FÖRDERUNG</text>
+  <text x="162" y="304" class="title">Zu versteuerndes Einkommen → Grenzsteuersatz → Riester-Zulage (175 € + Kinder + Partner) + Eigenbeitrag</text>
+  <text x="162" y="322" class="sub">Parallel: gesetzliche Rente (Entgeltpunkte) · Pension (Beamte) · VBL-Zusatzversorgung (TVöD)</text>
+
+  <path class="arrow" d="M600,332 L600,356"/>
+
+  <!-- Step 4: three lanes -->
+  <text x="600" y="378" text-anchor="middle" class="kicker" fill="#9c9686">DREI PARALLELE KAPITAL-PROJEKTIONEN BIS RENTENEINTRITT</text>
+
+  <rect class="lane-riester" x="80" y="392" width="330" height="86" rx="10"/>
+  <text x="102" y="416" class="kicker" fill="#a3b56a">RIESTER</text>
+  <text x="102" y="438" class="title" font-size="13">Bestandsvertrag, ~1,2 % p.a.</text>
+  <text x="102" y="458" class="sub">Zulage + Eigenbeitrag, Jahr für Jahr verzinst</text>
+
+  <rect class="lane-depot" x="435" y="392" width="330" height="86" rx="10"/>
+  <text x="457" y="416" class="kicker" fill="#7fb4c2">ALTERSVORSORGEDEPOT 2027</text>
+  <text x="457" y="438" class="title" font-size="13">ETF-basiert, ~5,5 % p.a.</text>
+  <text x="457" y="458" class="sub">Gleiche Förderung, freiere Anlage</text>
+
+  <rect class="lane-etf" x="790" y="392" width="330" height="86" rx="10"/>
+  <text x="812" y="416" class="kicker" fill="#a48fd6">ETF-EIGENDEPOT</text>
+  <text x="812" y="438" class="title" font-size="13">Ohne Förderung, ~7,2 % p.a.</text>
+  <text x="812" y="458" class="sub">Kein Zuschuss, aber volle Flexibilität</text>
+
+  <path class="arrow" d="M245,478 L600,512"/>
+  <path class="arrow" d="M600,478 L600,512"/>
+  <path class="arrow" d="M955,478 L600,512"/>
+
+  <!-- Step 5: Lücke + Ampel -->
+  <rect class="card" x="200" y="514" width="800" height="70" rx="10"/>
+  <text x="222" y="536" class="kicker">VERSORGUNGSLÜCKE</text>
+  <text x="222" y="558" class="title">Lücke = Wunschrente − Gesamteinkommen im Alter (Basis + Aufstockung)</text>
+  <g transform="translate(870,528)">
+    <circle class="ampel-r" cx="0" cy="18" r="7"/>
+    <circle class="ampel-y" cx="20" cy="18" r="7"/>
+    <circle class="ampel-g" cx="40" cy="18" r="7"/>
+  </g>
+
+  <path class="arrow" d="M600,584 L600,608"/>
+
+  <!-- Step 6: Scores -->
+  <rect class="card" x="140" y="610" width="920" height="66" rx="10"/>
+  <text x="162" y="632" class="kicker">VIER SCORES (0–100)</text>
+  <text x="162" y="654" class="title">Förderung · Stabilität · Risiko · Nutzen — gewichtete Heuristik aus Familienstand, Immobilie, BU, Lücke</text>
+
+  <path class="arrow" d="M600,676 L600,700"/>
+
+  <!-- Step 7: Empfehlung -->
+  <rect class="card-accent" x="200" y="702" width="800" height="82" rx="10"/>
+  <text x="222" y="724" class="kicker">RIESTER-SZENARIEN &amp; EMPFEHLUNG</text>
+  <text x="222" y="746" class="title">weiterführen · beitragsfrei stellen · Wechsel ins Depot 2027 · Wohn-Riester · kündigen</text>
+  <text x="222" y="766" class="sub">Jede Option mit Endkapital, Monatsrente, Förderverlust und Steuernachteil vorgerechnet</text>
+</svg>

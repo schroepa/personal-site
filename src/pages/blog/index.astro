@@ -2,7 +2,7 @@
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import { getCollection } from 'astro:content';
 import { readingTime } from '@/lib/reading-time';
-import HalftoneImage, { DEFAULT_HALFTONE_PARAMS } from '@/components/HalftoneImage';
+import { blogCoverThumb } from '@/lib/cover-image';
 
 const posts = await getCollection('blog', ({ data }) => !data.draft);
 const sorted = posts.sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
@@ -64,14 +64,12 @@ const tags = [...tagCounts.entries()].sort((a, b) => b[1] - a[1]);
               <!-- Thumbnail: immer sichtbar, kompakt -->
               <div class="post-thumb" aria-hidden="true">
                 {post.data.coverImage ? (
-                  <HalftoneImage
-                    client:only="react"
-                    src={post.data.coverImage.startsWith('/images/blog/')
-                      ? post.data.coverImage.replace(/\.webp$/, '-480.webp')
-                      : post.data.coverImage}
+                  <img
+                    src={blogCoverThumb(post.data.coverImage)}
                     alt=""
-                    className="post-thumb-img"
-                    config={DEFAULT_HALFTONE_PARAMS}
+                    loading="lazy"
+                    decoding="async"
+                    class="post-thumb-img"
                   />
                 ) : (
                   <div class="post-thumb-fallback"></div>

@@ -5,9 +5,10 @@
   "private": true,
   "scripts": {
     "dev": "astro dev",
+    "prebuild": "node scripts/copy-fonts.mjs",
     "build": "NODE_OPTIONS=--max-old-space-size=8192 astro build",
     "postbuild": "node scripts/generate-cv-pdf.mjs && node scripts/generate-og-images.mjs",
-    "postinstall": "playwright install chromium",
+    "postinstall": "playwright install chromium && node scripts/copy-fonts.mjs",
     "preview": "astro preview",
     "astro": "astro",
     "lint": "eslint .",
@@ -17,6 +18,8 @@
   "dependencies": {
     "@astrojs/react": "^4.4.2",
     "@astrojs/sitemap": "^3.7.2",
+    "@fontsource-variable/geist": "5.2.8",
+    "@fontsource/geist-mono": "5.2.7",
     "@paper-design/shaders-react": "^0.0.77",
     "@radix-ui/react-accordion": "1.2.12",
     "@radix-ui/react-aspect-ratio": "1.1.7",

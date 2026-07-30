@@ -1,0 +1,112 @@
+<svg viewBox="0 0 1200 620" xmlns="http://www.w3.org/2000/svg" font-family="'Geist', 'Inter', system-ui, sans-serif">
+  <style>
+    .bg { fill: #121110; }
+    .card { fill: #1a1815; stroke: #38352c; stroke-width: 1.5; }
+    .card-accent { fill: #16211c; stroke: #2f8f6d; stroke-width: 1.5; }
+    .num { fill: #0f0e0c; font-size: 15px; font-weight: 700; }
+    .num-circle { fill: #6f9c8a; }
+    .title { fill: #f4f1ea; font-size: 14px; font-weight: 600; }
+    .sub { fill: #9c9686; font-size: 11.5px; }
+    .kicker { fill: #6f9c8a; font-size: 10.5px; letter-spacing: 1.3px; font-weight: 600; }
+    .arrow { stroke: #55503f; stroke-width: 1.5; fill: none; marker-end: url(#arrow); }
+    .heading { fill: #f4f1ea; font-size: 20px; font-weight: 700; }
+    .lane-label { fill: #6f9c8a; font-size: 11px; letter-spacing: 1.5px; font-weight: 700; }
+  </style>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#55503f"/>
+    </marker>
+  </defs>
+
+  <rect class="bg" x="0" y="0" width="1200" height="620" rx="14"/>
+  <text x="40" y="46" class="heading">Vom Spielfeldrand zum fertigen Bericht</text>
+  <text x="40" y="68" class="sub">Sieben Schritte vom ersten Eindruck bis zum Export — offline beginnend, in der Cloud synchronisiert.</text>
+
+  <rect x="40" y="92" width="1120" height="2" fill="#2a2820"/>
+  <text x="40" y="112" class="lane-label">AM SPIELFELDRAND · OFFLINE-FÄHIG</text>
+
+  <!-- Row 1: steps 1-3 -->
+  <g>
+    <circle class="num-circle" cx="76" cy="150" r="16"/>
+    <text x="76" y="155" text-anchor="middle" class="num">1</text>
+    <rect class="card" x="104" y="130" width="290" height="80" rx="10"/>
+    <text x="122" y="154" class="title">Spieler- oder Teambericht anlegen</text>
+    <text x="122" y="172" class="sub">Raster 1–10: Technik, Taktik, Athletik,</text>
+    <text x="122" y="188" class="sub">Mentalität + Freitext, optional Foto</text>
+  </g>
+
+  <path class="arrow" d="M394,170 L420,170"/>
+
+  <g>
+    <circle class="num-circle" cx="456" cy="150" r="16"/>
+    <text x="456" y="155" text-anchor="middle" class="num">2</text>
+    <rect class="card" x="484" y="130" width="290" height="80" rx="10"/>
+    <text x="502" y="154" class="title">Sofort lokal gespeichert</text>
+    <text x="502" y="172" class="sub">Dexie / IndexedDB — App bleibt nutzbar,</text>
+    <text x="502" y="188" class="sub">auch ganz ohne Netzempfang</text>
+  </g>
+
+  <path class="arrow" d="M774,170 L800,170"/>
+
+  <g>
+    <circle class="num-circle" cx="836" cy="150" r="16"/>
+    <text x="836" y="155" text-anchor="middle" class="num">3</text>
+    <rect class="card" x="864" y="130" width="290" height="80" rx="10"/>
+    <text x="882" y="154" class="title">Outbox merkt sich Änderungen</text>
+    <text x="882" y="172" class="sub">Status pending → sync → done,</text>
+    <text x="882" y="188" class="sub">Retry bei Fehlern</text>
+  </g>
+
+  <!-- transition arrow down -->
+  <path class="arrow" d="M1010,210 L1010,236 L600,236 L600,262"/>
+  <text x="1010" y="228" text-anchor="end" class="sub">sobald wieder online</text>
+
+  <rect x="40" y="266" width="1120" height="2" fill="#2a2820"/>
+  <text x="40" y="286" class="lane-label">ZUHAUSE · DESKTOP-ARBEITSPLATZ</text>
+
+  <!-- Row 2: step 4 sync + supabase -->
+  <g>
+    <circle class="num-circle" cx="456" cy="326" r="16"/>
+    <text x="456" y="331" text-anchor="middle" class="num">4</text>
+    <rect class="card-accent" x="484" y="306" width="290" height="80" rx="10"/>
+    <text x="502" y="330" class="title">Sync zu Supabase (Postgres)</text>
+    <text x="502" y="348" class="sub">RLS trennt Daten strikt pro Scout</text>
+    <text x="502" y="364" class="sub">(ownerScoutId) — nur deine Berichte</text>
+  </g>
+
+  <path class="arrow" d="M456,342 L456,368 L104,368 L104,394"/>
+
+  <!-- Row 3: steps 5-7 -->
+  <g>
+    <circle class="num-circle" cx="76" cy="434" r="16"/>
+    <text x="76" y="439" text-anchor="middle" class="num">5</text>
+    <rect class="card" x="104" y="414" width="290" height="80" rx="10"/>
+    <text x="122" y="438" class="title">Am Desktop nachbereiten</text>
+    <text x="122" y="456" class="sub">Sidebar-Layout, mehr Platz,</text>
+    <text x="122" y="472" class="sub">Berichte bearbeiten und ergänzen</text>
+  </g>
+
+  <path class="arrow" d="M394,454 L420,454"/>
+
+  <g>
+    <circle class="num-circle" cx="456" cy="434" r="16"/>
+    <text x="456" y="439" text-anchor="middle" class="num">6</text>
+    <rect class="card" x="484" y="414" width="290" height="80" rx="10"/>
+    <text x="502" y="438" class="title">Dashboard: filtern &amp; vergleichen</text>
+    <text x="502" y="456" class="sub">Spielervergleich, Formationen/Phasen,</text>
+    <text x="502" y="472" class="sub">Video-/VEO-Zeitmarken</text>
+  </g>
+
+  <path class="arrow" d="M774,454 L800,454"/>
+
+  <g>
+    <circle class="num-circle" cx="836" cy="434" r="16"/>
+    <text x="836" y="439" text-anchor="middle" class="num">7</text>
+    <rect class="card" x="864" y="414" width="290" height="80" rx="10"/>
+    <text x="882" y="438" class="title">Export für den Verein</text>
+    <text x="882" y="456" class="sub">PDF (jsPDF) oder JSON —</text>
+    <text x="882" y="472" class="sub">fertig für Trainerteam-Meetings</text>
+  </g>
+
+  <text x="40" y="560" class="sub">Ohne konfiguriertes Supabase läuft Fusca als reiner Lokal-Modus auf einem Gerät — Schritt 3–4 entfallen dann.</text>
+</svg>

@@ -126,15 +126,17 @@ export default function HalftoneImage({
   const [hasError, setHasError] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
 
-  // 1. Track Scroll Progress
+  // Scroll-Listener nur wenn Scroll-Effekt konfiguriert ist
   useEffect(() => {
+    if (!scrollEffect) return;
+
     const handleScroll = () => {
       setScrollProgress(window.scrollY);
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  }, [scrollEffect]);
 
   // 1. Synchronize Dark Mode Class
   useEffect(() => {
