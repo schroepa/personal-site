@@ -1,7 +1,10 @@
 ---
 import { ViewTransitions } from "astro:transitions"
+import { getCollection } from "astro:content"
 import CustomCursor from "@/components/astro/CustomCursor.astro"
 import PostHog from "@/components/posthog.astro"
+import SearchPalette from "@/components/SearchPalette"
+import LiquidToggle from "@/components/LiquidToggle"
 import "@/styles/global.css"
 import "@/styles/typography.css"
 import "@/styles/animations.css"
@@ -68,6 +71,28 @@ const navLinks = [
   { href: "/blog", label: "Blog" },
   { href: "/projects", label: "Projekte" },
 ]
+
+// ── Suchindex für die ⌘K-Palette ─────────────────────────────────────────
+const searchStaticPages = navLinks.map((link) => ({
+  title: link.label,
+  href: link.href,
+}))
+
+const searchBlogPosts = (await getCollection("blog", ({ data }) => !data.draft))
+  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime())
+  .map((post) => ({
+    title: post.data.title,
+    description: post.data.description,
+    href: `/blog/${post.id.replace(/\.md$/, "")}`,
+  }))
+
+const searchProjects = (await getCollection("projects"))
+  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime())
+  .map((project) => ({
+    title: project.data.title,
+    description: project.data.description,
+    href: `/projects/${project.id.replace(/\.md$/, "")}`,
+  }))
 
 // ── Social Links — hier updaten ───────────────────────────────────────────
 const social = {
@@ -267,17 +292,20 @@ const email = { user: "kontakt", domain: "ptrckschrdtr.de" }
           </a>
         ))
       }
+      <SearchPalette
+        client:load
+        staticPages={searchStaticPages}
+        projects={searchProjects}
+        posts={searchBlogPosts}
+      />
     </nav>
 
     <!-- ── Theme Toggle: unten links, fixiert ──────────────────────────── -->
-    <button
-      id="theme-toggle"
-      class="theme-toggle"
-      type="button"
-      aria-label="Zu Dunkel-Modus wechseln"
-    >
-      <span id="theme-toggle-label">DUNKEL</span>
-    </button>
+    <LiquidToggle
+      client:load
+      className="fixed bottom-8 left-10 z-[60] hidden -m-2 rounded-full p-2 sm:flex"
+      portalTargetId="theme-toggle-mobile-slot"
+    />
 
     <!-- ── Hamburger (Mobile only) ───────────────────────────────────── -->
     <button
@@ -320,14 +348,7 @@ const email = { user: "kontakt", domain: "ptrckschrdtr.de" }
       <div class="nav-overlay-footer">
         <a href="/impressum" class="nav-overlay-small">Impressum</a>
         <a href="/datenschutz" class="nav-overlay-small">Datenschutz</a>
-        <button
-          id="theme-toggle-mobile"
-          type="button"
-          class="nav-overlay-small"
-          style="background:none;border:none;padding:0;cursor:pointer;"
-        >
-          <span id="theme-toggle-mobile-label">DUNKEL</span>
-        </button>
+        <span id="theme-toggle-mobile-slot" class="inline-flex items-center"></span>
       </div>
     </div>
 
@@ -466,48 +487,10 @@ const email = { user: "kontakt", domain: "ptrckschrdtr.de" }
         initTextReveal()
         initScrollAnimations()
         initHamburger()
-        initThemeToggle()
         initEmailLinks()
         initSocialLinks()
         initScramble()
       })
-
-      function initThemeToggle() {
-        const label = document.getElementById("theme-toggle-label")
-        const toggle = document.getElementById("theme-toggle")
-        const labelM = document.getElementById("theme-toggle-mobile-label")
-        const toggleM = document.getElementById("theme-toggle-mobile")
-
-        function isDark() {
-          return document.documentElement.classList.contains("dark")
-        }
-
-        function updateLabels() {
-          const dark = isDark()
-          const text = dark ? "HELL" : "DUNKEL"
-          const aria = dark
-            ? "Zu Hell-Modus wechseln"
-            : "Zu Dunkel-Modus wechseln"
-          if (label) label.textContent = text
-          if (labelM) labelM.textContent = text
-          if (toggle) toggle.setAttribute("aria-label", aria)
-          if (toggleM) toggleM.setAttribute("aria-label", aria)
-        }
-
-        function applyTheme(dark: boolean) {
-          document.documentElement.classList.toggle("dark", dark)
-          localStorage.setItem("theme", dark ? "dark" : "light")
-          updateLabels()
-          window.posthog?.capture("theme_toggled", {
-            theme: dark ? "dark" : "light",
-          })
-        }
-
-        updateLabels()
-
-        toggle?.addEventListener("click", () => applyTheme(!isDark()))
-        toggleM?.addEventListener("click", () => applyTheme(!isDark()))
-      }
 
       function initHamburger() {
         const toggle = document.getElementById(
@@ -898,49 +881,13 @@ const email = { user: "kontakt", domain: "ptrckschrdtr.de" }
         border-radius: 2px;
       }
 
-      /* ── Theme Toggle ────────────────────────────────────────────────── */
-      .theme-toggle {
-        position: fixed;
-        bottom: 2rem;
-        left: 2.5rem;
-        z-index: 60;
-        background: none;
-        border: none;
-        padding: 0;
-        cursor: pointer;
-        font-size: var(--text-xs);
-        letter-spacing: var(--tracking-wide);
-        text-transform: uppercase;
-        font-family: var(--font-sans);
-        color: var(--muted-foreground);
-        transition: color 200ms ease;
-        -webkit-tap-highlight-color: transparent;
-      }
-
-      .theme-toggle:hover {
-        color: var(--foreground);
-      }
-
-      .theme-toggle:focus-visible {
-        outline: 2px solid var(--foreground);
-        outline-offset: 4px;
-        border-radius: 2px;
-      }
-
-      @media (max-width: 640px) {
-        .theme-toggle {
-          display: none; /* auf Mobile: Toggle nur im Hamburger-Overlay */
-        }
-      }
-
       @media (prefers-reduced-motion: reduce) {
         .corner-logo-link,
         .corner-nav-link,
         .bar,
         .nav-overlay,
         .nav-overlay-link,
-        .nav-overlay-footer,
-        .theme-toggle {
+        .nav-overlay-footer {
           transition: none !important;
         }
       }
