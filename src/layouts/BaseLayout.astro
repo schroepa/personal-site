@@ -1009,8 +1009,15 @@ const email = { user: "kontakt", domain: "ptrckschrdtr.de" }
         }
       }
 
-      /* Cookiebot floating renew widget — disabled; renew via footer / Kontakt */
-      #CookiebotWidget {
+    </style>
+
+    <!-- Cookiebot floating renew widget — disabled; renew via footer / Kontakt.
+         Muss is:global sein: Cookiebot injiziert #CookiebotWidget per Script
+         von außen, das Element bekommt also nie Astros scoped data-astro-cid-
+         Attribut — eine scoped <style>-Regel würde hier nie greifen. -->
+    <style is:global>
+      #CookiebotWidget,
+      #CookiebotWidget + #CookiebotWidgetUnderlay {
         display: none !important;
         visibility: hidden !important;
         pointer-events: none !important;
