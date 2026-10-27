@@ -23,6 +23,16 @@ const projects = defineCollection({
     url: z.string().url().optional(),
     repo: z.string().url().optional(),
     featured: z.boolean().default(false),
+    /** Wirkungszeile der Karte (ein Satz); fehlt sie, gilt der erste Satz der Beschreibung */
+    wirkung: z.string().optional(),
+    /** Seitenverhältnis des Bildes in der Projektkarte (Bento) */
+    format: z.enum(['16x10', '4x5', '1x1']).default('16x10'),
+    /** Drei Fakten (Rolle, Jahr, Stack): macht das Projekt zur Fallstudie mit fünf Pflichtabschnitten */
+    fakten: z.array(z.object({ label: z.string(), wert: z.string() })).length(3).optional(),
+    /** Kennzahlen im Abschnitt Ergebnis */
+    kennzahlen: z.array(z.object({ wert: z.string(), label: z.string() })).optional(),
+    /** true: erscheint in der Liste „Weitere Projekte“ statt im Bento „Ausgewählt“ */
+    weitere: z.boolean().default(false),
   }),
 });
 

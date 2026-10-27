@@ -15,36 +15,30 @@ import { KONTAKT_EMAIL } from "@/data/kontakt"
 import { coverMittel, coverThumbSrc } from "@/lib/cover-image"
 import { slugVon } from "@/lib/blog"
 import { readingTime } from "@/lib/reading-time"
+import { DIGITAL_ART_KAPITEL } from "@/data/digital-art"
+import { ausgewaehlte, weitereProjekte } from "@/lib/projekte"
 import {
   artikelMeta,
   kurzTitel,
   projektMeta,
   waehleGedanken,
-  waehleProjekte,
   wirkungAusBeschreibung,
 } from "@/lib/startseite"
 
 
-// Bento (Figma: 4 Karten + „Außerdem“-Liste): featured-Projekte, jüngste zuerst.
-// Das Format folgt der Position im Bento (Figma), nicht dem Inhalt; das Schema bekommt `format`/`wirkung` in Task 8.
-const BENTO_FORMATE = ["16x10", "4x5", "1x1", "1x1"] as const
+// Bento (Figma: 4 Karten + „Außerdem“-Liste): ausgewählte Projekte (featured, nicht weitere), jüngste zuerst.
+// Format und Wirkungszeile kommen aus dem Schema; ohne `wirkung` gilt der erste Satz der Beschreibung.
+const BENTO_ANZAHL = 4
 const AUSSERDEM_ANZAHL = 2
-const projekte = waehleProjekte(await getCollection("projects"), BENTO_FORMATE.length + AUSSERDEM_ANZAHL)
-const karten = projekte.slice(0, BENTO_FORMATE.length)
-const ausserdem = projekte.slice(BENTO_FORMATE.length)
+const alle = await getCollection("projects")
+const karten = ausgewaehlte(alle, BENTO_ANZAHL)
+const ausserdem = weitereProjekte(alle, BENTO_ANZAHL).slice(0, AUSSERDEM_ANZAHL)
 
 // Gedanken: die jüngsten veröffentlichten Beiträge (1 groß, 2 klein)
 const { gross, klein } = waehleGedanken(await getCollection("blog"))
 const beitraege = [gross, ...klein].filter((b) => b !== undefined)
 
-// TODO: Platzhalterkapitel mit vorhandenen Bildern; echte Kapitel, Titel und Ziele (statt /projects/digital-art) stehen bei Patrick aus.
-const kapitel = [
-  { titel: "Digital Art – Lettering, Graffiti, Tags & Styles", bild: "/images/gallery/digital-graffiti/IMG_0094.webp" },
-  { titel: "Lettering", bild: "/images/gallery/digital-graffiti/IMG_0128.webp" },
-  { titel: "Skizzen", bild: "/images/gallery/digital-graffiti/IMG_0132.webp" },
-  { titel: "Mode", bild: "/images/gallery/digital-graffiti/IMG_0133.webp" },
-  { titel: "Archiv", bild: "/images/gallery/digital-graffiti/IMG_0138.webp" },
-].map((k) => ({ ...k, href: "/projects/digital-art" }))
+const kapitel = DIGITAL_ART_KAPITEL
 ---
 
 <SiteLayout
@@ -92,13 +86,13 @@ const kapitel = [
   <Abschnitt id="arbeit" nummer="03" label="Arbeit" layout="oben">
     <div class="bento">
       {
-        karten.map((p, i) => (
+        karten.map((p) => (
           <div class="karte" data-projekt={slugVon(p.id)}>
             <ProjektKarte
-              format={BENTO_FORMATE[i]}
+              format={p.data.format}
               meta={projektMeta(p.data.tags, p.data.date)}
               titel={kurzTitel(p.data.title)}
-              wirkung={wirkungAusBeschreibung(p.data.description)}
+              wirkung={p.data.wirkung ?? wirkungAusBeschreibung(p.data.description)}
               bild={p.data.coverImage}
               href={`/projects/${slugVon(p.id)}`}
               slug={slugVon(p.id)}

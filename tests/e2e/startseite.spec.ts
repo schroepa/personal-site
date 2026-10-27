@@ -1,6 +1,6 @@
 import AxeBuilder from "@axe-core/playwright"
 import { expect, test, type Page } from "@playwright/test"
-import { entwuerfe, erwarteteGedanken, erwarteteProjekte } from "../content"
+import { entwuerfe, erwarteteGedanken, erwarteteProjekte, erwarteteWeitere } from "../content"
 import { KONTAKT_EMAIL } from "../../src/data/kontakt"
 import { expectNoHorizontalOverflow, expectSingleH1, setTheme } from "../helpers"
 
@@ -44,13 +44,13 @@ test("Signatur kommt genau einmal vor", async ({ page }) => {
   await expect(page.locator(".text-signatur")).toContainText("15+ Jahre.")
 })
 
-test("Bento zeigt nur featured-Projekte, jüngste zuerst", async ({ page }) => {
+test("Bento zeigt nur ausgewählte Projekte (featured, nicht weitere), jüngste zuerst", async ({ page }) => {
   await laden(page)
   const slugs = await page.locator("#arbeit [data-projekt]").evaluateAll((els) => els.map((e) => e.getAttribute("data-projekt")))
   expect(slugs).toHaveLength(BENTO_KARTEN)
   expect(slugs).toEqual(erwarteteProjekte(BENTO_KARTEN))
-  // „Außerdem“: die nächsten featured-Projekte (höchstens AUSSERDEM_ANZAHL), ohne Doppelungen
-  const rest = erwarteteProjekte(BENTO_KARTEN + AUSSERDEM_ANZAHL).slice(BENTO_KARTEN)
+  // „Außerdem“: die jüngsten weiteren Projekte (höchstens AUSSERDEM_ANZAHL), ohne Doppelungen
+  const rest = erwarteteWeitere(BENTO_KARTEN).slice(0, AUSSERDEM_ANZAHL)
   const ausserdem = await page.locator("#arbeit .weitere li a").evaluateAll((els) => els.map((e) => e.getAttribute("href")))
   expect(ausserdem).toEqual(rest.map((s) => `/projects/${s}`))
   expect(rest.length).toBeLessThanOrEqual(AUSSERDEM_ANZAHL)

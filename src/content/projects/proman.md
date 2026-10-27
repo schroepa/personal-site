@@ -3,10 +3,11 @@ title: "ProMan — Local-First Projektmanagement"
 description: "Kanban, Liste, Gantt, Kalender und Docs in einer App — gespeichert als Markdown in einem Ordner auf deiner Festplatte. Kein Backend, keine Telemetrie, Obsidian-kompatibel."
 coverImage: "/images/gallery/proman/proman-board.jpg"
 date: 2026-10-07
-tags: ["TypeScript", "Vite", "Local-First", "Design Systems", "Accessibility"]
+tags: ["Local-First", "TypeScript", "Vite", "Design Systems", "Accessibility"]
 url: "https://proman.ptrckschrdtr.de"
 repo: "https://github.com/schroepa/pro-man"
 featured: true
+wirkung: "Kein Backend, keine Telemetrie, Obsidian-kompatibel."
 ---
 
 Projektmanagement-Tools gibt es wie Sand am Meer — fast alle haben eines gemeinsam: Die Daten liegen auf fremden Servern, in einem Format, das man ohne das Tool kaum noch lesen kann. Für ein kleines Team oder die eigene Freelance-Arbeit ist das oft mehr Abhängigkeit als nötig. ProMan dreht das um: Die Quelle der Wahrheit ist ein ganz normaler Ordner voller Markdown-Dateien.

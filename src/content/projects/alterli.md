@@ -3,10 +3,12 @@ title: "alterli — Der ehrliche Altersvorsorge-Analyst"
 description: "Riester, Rürup, Pension und das neue Altersvorsorgedepot 2027 — ehrlich verglichen, für jede Berufsgruppe, ganz ohne Server und ohne Verkaufsabsicht."
 coverImage: "/images/gallery/alterli/alterli-hero.jpg"
 date: 2026-07-30
-tags: ["Astro", "React", "TypeScript", "FinTech", "Personal Finance"]
+tags: ["FinTech", "Astro", "React", "TypeScript", "Personal Finance"]
 url: "https://alterli.vercel.app"
 repo: "https://github.com/schroepa/Alterli"
 featured: true
+wirkung: "Altersvorsorge ehrlich verglichen, ohne Server."
+format: "1x1"
 ---
 
 Jeder, der in Deutschland einmal versucht hat herauszufinden, wie viel Rente er eigentlich zu erwarten hat, kennt das Gefühl: Man landet auf der Website einer Versicherung, gibt drei Zahlen ein, und am Ende steht ein Ergebnis da, das verdächtig gut aussieht — direkt gefolgt von einem Beratungstermin-Button. Genau dieses Muster wollte ich mit alterli durchbrechen.

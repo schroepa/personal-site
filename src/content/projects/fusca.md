@@ -3,10 +3,12 @@ title: "Fussball Scouting — vom Spielfeldrand direkt in die Analyse"
 description: "Eine mobile-first Scouting-App für den Amateur- und Jugendfußball: am Platz erfassen, offline arbeiten, zu Hause am Desktop auswerten."
 coverImage: "/images/gallery/fusca/fusca-uebersicht.jpg"
 date: 2026-07-30
-tags: ["Astro", "React", "Supabase", "PWA", "Sports Tech"]
+tags: ["Sports Tech", "Astro", "React", "Supabase", "PWA"]
 url: "https://fusca-sepia.vercel.app"
 repo: "https://github.com/schroepa/fussball-scouting-app"
 featured: true
+wirkung: "Scouting am Platz, offline, Auswertung am Desktop."
+format: "1x1"
 ---
 
 Wer schon einmal am Spielfeldrand eines Jugend- oder Amateurspiels stand und versucht hat, eine Spielerbeobachtung strukturiert festzuhalten, kennt das Dilemma: Entweder man kritzelt Stichworte in ein Notizbuch, das später kaum noch jemand entziffert, oder man tippt in eine Excel-Tabelle, die für unterwegs nie gemacht war. Eine Lösung, die für beide Situationen taugt — den Moment am Platz und die Auswertung am Schreibtisch —, gab es für den Amateur- und Jugendbereich schlicht nicht. Die großen Scouting-Plattformen sind für Profivereine mit eigenem Analyseabteilungsbudget gebaut, alles darunter bleibt bei Zettel, WhatsApp-Sprachnachrichten oder einer selbstgebastelten Tabelle hängen. Also habe ich mir die Zielgruppe genauer angeschaut, für die es bislang nichts Passendes gab — Scouts im deutschen Amateur- und Jugendbereich — und ein Werkzeug gebaut, das genau für diesen Alltag gemacht ist: Fusca.

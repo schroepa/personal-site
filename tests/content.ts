@@ -8,6 +8,7 @@ export interface Eintrag {
   date: string
   draft: boolean
   featured: boolean
+  weitere: boolean
   tags: string[]
 }
 
@@ -24,6 +25,7 @@ export function lese(sammlung: "blog" | "projects"): Eintrag[] {
         date: feld("date") ?? "",
         draft: feld("draft") === "true",
         featured: feld("featured") === "true",
+        weitere: feld("weitere") === "true",
         tags: [...(feld("tags") ?? "").matchAll(/"([^"]+)"/g)].map((m) => m[1]),
       }
     })
@@ -31,8 +33,15 @@ export function lese(sammlung: "blog" | "projects"): Eintrag[] {
 
 const neuesteZuerst = (a: Eintrag, b: Eintrag) => b.date.localeCompare(a.date) || (a.slug < b.slug ? 1 : -1)
 
+/** Bento „Ausgewählt“: featured ohne weitere, jüngste zuerst */
 export const erwarteteProjekte = (anzahl: number) =>
-  lese("projects").filter((p) => p.featured).sort(neuesteZuerst).slice(0, anzahl).map((p) => p.slug)
+  lese("projects").filter((p) => p.featured && !p.weitere).sort(neuesteZuerst).slice(0, anzahl).map((p) => p.slug)
+
+/** Alles außerhalb des Bentos („Weitere Projekte“, Startseite: „Außerdem“), jüngste zuerst */
+export const erwarteteWeitere = (bentoAnzahl: number) => {
+  const bento = new Set(erwarteteProjekte(bentoAnzahl))
+  return lese("projects").filter((p) => !bento.has(p.slug)).sort(neuesteZuerst).map((p) => p.slug)
+}
 
 export const erwarteteGedanken = () =>
   lese("blog").filter((b) => !b.draft).sort(neuesteZuerst).slice(0, 3).map((b) => b.slug)

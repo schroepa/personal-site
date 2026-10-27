@@ -28,7 +28,7 @@ export function waehleGedanken<T extends MitDatum & { data: { draft: boolean } }
   return { gross, klein }
 }
 
-/** Wirkungszeile der Karte: erster Satz der Beschreibung (bis das Schema ein eigenes Feld hat, Task 8). */
+/** Wirkungszeile der Karte: erster Satz der Beschreibung (Rückfall, wenn `wirkung` nicht gesetzt ist). */
 export function wirkungAusBeschreibung(beschreibung: string): string {
   const text = beschreibung.trim()
   const m = text.match(/^.*?[.!?](?=\s|$)/s)

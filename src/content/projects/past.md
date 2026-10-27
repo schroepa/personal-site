@@ -5,6 +5,7 @@ coverImage: "/images/gallery/past/past-3.webp"
 date: 2024-07-15
 tags: ["UI Design", "Data Visualization", "React", "Recharts"]
 featured: true
+weitere: true
 ---
 
 Manchmal gibt es diese Momente, da klickt es einfach. Man sitzt da, das iPad Pro vor sich, der Apple Pencil in der Hand, und plötzlich ist er da: der **Flow**. Kein langes Planen, kein Skizzieren – nur die Bewegung der Buchstaben, die sich fast wie von selbst auf das digitale Glas legen.
