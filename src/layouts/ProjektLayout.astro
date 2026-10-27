@@ -125,11 +125,15 @@ const bildName = `view-transition-name: projekt-bild-${slug}`
     </Seitenkopf>
   </div>
 
-  <div class="titelbild" data-titelbild>
-    <div class="bild" style={bildName}>
-      {coverImage && <img src={coverImage} alt="" loading="eager" fetchpriority="high" decoding="async" />}
-    </div>
-  </div>
+  {
+    coverImage && (
+      <div class="titelbild" data-titelbild>
+        <div class="bild" style={bildName}>
+          <img src={coverImage} alt="" loading="eager" fetchpriority="high" decoding="async" />
+        </div>
+      </div>
+    )
+  }
 
   {
     istFallstudie ? (
@@ -146,12 +150,12 @@ const bildName = `view-transition-name: projekt-bild-${slug}`
                 )}
                 <div class="text">
                   {einblick.bild?.meta && <p class="text-label meta">{einblick.bild.meta}</p>}
-                  <div class="prose" set:html={einblick.rest} />
+                  <div class="prose" data-prose set:html={einblick.rest} />
                 </div>
               </div>
             ) : (
               <div class="spalte">
-                <div class="prose" set:html={a.html} />
+                <div class="prose" data-prose set:html={a.html} />
               </div>
             )}
             {a.titel === "Ergebnis" && kennzahlen.length > 0 && (
@@ -179,10 +183,12 @@ const bildName = `view-transition-name: projekt-bild-${slug}`
   {
     istFallstudie && naechstes && (
       <Abschnitt id="naechstes-projekt" label="Nächstes Projekt" layout="oben">
-        <div class="bild-text" data-naechstes>
-          <div class="bild-flaeche" style={`view-transition-name: projekt-bild-${naechstes.slug}`}>
-            {naechstes.bild && <img src={naechstes.bild} alt="" loading="lazy" decoding="async" />}
-          </div>
+        <div class:list={["bild-text", { "ohne-bild": !naechstes.bild }]} data-naechstes>
+          {naechstes.bild && (
+            <div class="bild-flaeche" style={`view-transition-name: projekt-bild-${naechstes.slug}`}>
+              <img src={naechstes.bild} alt="" loading="lazy" decoding="async" />
+            </div>
+          )}
           <div class="text">
             <p class="text-label meta">{naechstes.meta}</p>
             <h3 class="text-h2 titel">{naechstes.titel}</h3>
@@ -317,8 +323,8 @@ const bildName = `view-transition-name: projekt-bild-${slug}`
     .bild {
       height: var(--global-size-480);
     }
-    .text {
-      max-width: 75%;
+    .bild-text > .text {
+      grid-column: 1 / span 6;
     }
   }
 
@@ -339,7 +345,9 @@ const bildName = `view-transition-name: projekt-bild-${slug}`
     .bild-text > .text {
       grid-column: 9 / span 4;
       grid-row: 1;
-      max-width: none;
+    }
+    .bild-text.ohne-bild > .text {
+      grid-column: 1 / span 4;
     }
   }
 </style>

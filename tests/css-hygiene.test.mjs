@@ -35,6 +35,8 @@ export function scanCss(text) {
     ["hex-color", /#[0-9a-fA-F]{3,8}\b/g],
     ["color-function", /\b(?:rgba?|hsla?|oklch|oklab|lab|lch|hwb|color)\(/g],
     ["unit-literal", /(?<![\w.#-])-?\d*\.?\d+(?:px|rem|em|ms|s|vh|vw|pt|ch|deg)\b/g],
+    // Prozentbreiten und -höhen außer 0% und 100% sind Designwerte (z. B. max-width: 75%); Spalten kommen aus dem Raster
+    ["percent-literal", /\b(?:max-|min-)?(?:width|height)\s*:[^;{}]*?(?<![\w.#-])(?!100%|0%)-?\d*\.?\d+%|\bflex-basis\s*:[^;{}]*?(?<![\w.#-])(?!100%|0%)-?\d*\.?\d+%/g],
     ["apply", /@apply\b/g],
     ["tailwind", /tailwind/gi],
   ]
@@ -83,6 +85,9 @@ test("scanCss: findet verbotene Literale", () => {
   assert.deepEqual(rules("a { margin: 12px; }"), ["unit-literal"])
   assert.deepEqual(rules("a { transition: opacity 200ms; }"), ["unit-literal"])
   assert.deepEqual(rules("a { margin: 1.5rem; }"), ["unit-literal"])
+  assert.deepEqual(rules("a { max-width: 75%; }"), ["percent-literal"])
+  assert.deepEqual(rules("a { flex-basis: 33.3%; }"), ["percent-literal"])
+  assert.deepEqual(rules("a { max-width: 100%; margin: 0%; }"), [])
   assert.deepEqual(rules("a { @apply p-4; }"), ["apply"])
   assert.deepEqual(rules('@import "tailwindcss";'), ["tailwind"])
   assert.deepEqual(rules("a { width: calc(var(--a) * 2); }"), ["calc-literal"])

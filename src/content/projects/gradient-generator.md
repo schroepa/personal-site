@@ -4,7 +4,6 @@ description: "Ein browserbasiertes Tool zum Erstellen und Exportieren körniger 
 date: 2026-05-07
 tags: ["React", "Canvas API", "CSS", "Tool"]
 featured: true
-weitere: true
 url: "https://ptrckschrdtr.de/tools/gradient-generator"
 ---
 

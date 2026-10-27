@@ -1,4 +1,5 @@
 // Gliederung einer Fallstudie: reine Funktionen ohne Astro-Abhängigkeit (node:test).
+import GithubSlugger from "github-slugger"
 
 /** Pflichtabschnitte der Fallstudie als Markdown-h2, in Figma-Reihenfolge (Figma 267:22189). */
 export const FALLSTUDIE_ABSCHNITTE = ["Ausgangslage", "Ansatz", "Einblicke", "Entscheidungen", "Ergebnis"] as const
@@ -62,4 +63,10 @@ export function trenneBild(html: string): { bild: { src: string; alt: string; me
   const src = attr("src")
   if (!src) return { bild: null, rest: html }
   return { bild: { src, alt: attr("alt"), meta: attr("title") }, rest: html.slice(m[0].length) }
+}
+
+/** Anker-IDs der Abschnitte mit demselben Slugger wie Astro für Markdown-Überschriften (Umlaute bleiben, Dubletten bekommen -1, -2 …). */
+export function abschnittIds(titel: readonly string[]): string[] {
+  const slugger = new GithubSlugger()
+  return titel.map((t) => slugger.slug(t))
 }

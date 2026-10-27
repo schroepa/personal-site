@@ -5,7 +5,7 @@ import { getCollection, render } from "astro:content"
 import type { InferGetStaticPropsType } from "astro"
 import ProjektLayout, { type FallstudieAbschnitt, type NaechstesProjekt } from "@/layouts/ProjektLayout.astro"
 import { slugVon } from "@/lib/blog"
-import { assertFallstudie, teileAbschnitte } from "@/lib/fallstudie"
+import { abschnittIds, assertFallstudie, teileAbschnitte } from "@/lib/fallstudie"
 import { markdownZuHtml } from "@/lib/markdown"
 import { naechstesProjekt } from "@/lib/projekte"
 import { kurzTitel, projektMeta, wirkungAusBeschreibung } from "@/lib/startseite"
@@ -42,9 +42,8 @@ if (d.fakten) {
   } catch (e) {
     throw new Error(`projects/${slug}.md: ${(e as Error).message}`)
   }
-  abschnitte = await Promise.all(
-    teile.map(async (t) => ({ id: t.titel.toLowerCase().replace(/[^a-z0-9]+/g, "-"), titel: t.titel, html: await markdownZuHtml(t.markdown) }))
-  )
+  const ids = abschnittIds(teile.map((t) => t.titel))
+  abschnitte = await Promise.all(teile.map(async (t, i) => ({ id: ids[i], titel: t.titel, html: await markdownZuHtml(t.markdown) })))
 } else {
   ;({ Content } = await render(project))
 }

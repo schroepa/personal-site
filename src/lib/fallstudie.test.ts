@@ -1,6 +1,6 @@
 import { test } from "node:test"
 import assert from "node:assert/strict"
-import { assertFallstudie, FALLSTUDIE_ABSCHNITTE, teileAbschnitte, trenneBild } from "./fallstudie.ts"
+import { assertFallstudie, FALLSTUDIE_ABSCHNITTE, teileAbschnitte, trenneBild, abschnittIds } from "./fallstudie.ts"
 
 const voll = ["Ausgangslage", "Ansatz", "Einblicke", "Entscheidungen", "Ergebnis"]
 
@@ -74,4 +74,10 @@ test("trenneBild: ohne Titel keine Meta, ohne führendes Bild kein Bild", () => 
 test("trenneBild: HTML-Entitäten in alt und title werden aufgelöst", () => {
   const r = trenneBild('<p><img src="/a.jpg" alt="A &amp; B" title="&quot;M&quot;"></p>')
   assert.deepEqual(r.bild, { src: "/a.jpg", alt: "A & B", meta: '"M"' })
+})
+
+test("abschnittIds: wie Astro-Überschriften (Umlaute, Sonderzeichen, Dubletten)", () => {
+  assert.deepEqual(abschnittIds(["Nächstes Projekt", "Größe & Ziel", "Ergebnis"]), ["nächstes-projekt", "größe--ziel", "ergebnis"])
+  assert.deepEqual(abschnittIds(["Ergebnis", "Ergebnis", "Ergebnis"]), ["ergebnis", "ergebnis-1", "ergebnis-2"])
+  assert.deepEqual(abschnittIds(FALLSTUDIE_ABSCHNITTE), ["ausgangslage", "ansatz", "einblicke", "entscheidungen", "ergebnis"])
 })

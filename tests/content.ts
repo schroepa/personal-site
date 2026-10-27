@@ -9,6 +9,10 @@ export interface Eintrag {
   draft: boolean
   featured: boolean
   weitere: boolean
+  /** Frontmatter enthält `fakten` (Fallstudie) */
+  hatFakten: boolean
+  /** Frontmatter enthält `coverImage` */
+  hatCover: boolean
   tags: string[]
 }
 
@@ -26,6 +30,8 @@ export function lese(sammlung: "blog" | "projects"): Eintrag[] {
         draft: feld("draft") === "true",
         featured: feld("featured") === "true",
         weitere: feld("weitere") === "true",
+        hatFakten: /^fakten:/m.test(kopf),
+        hatCover: /^coverImage:/m.test(kopf),
         tags: [...(feld("tags") ?? "").matchAll(/"([^"]+)"/g)].map((m) => m[1]),
       }
     })

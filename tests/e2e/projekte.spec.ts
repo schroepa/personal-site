@@ -9,9 +9,9 @@ const BENTO = 4
 const LANGES_WORT = "Donaudampfschifffahrtsgesellschaftskapitaensmuetzenherstellungsfabrikationsunternehmen" // 80 Zeichen, ohne Trennstelle
 const projekte = lese("projects")
 const ROUTEN = projekte.map((p) => `/projects/${p.slug}`)
-// Projekte ohne Fakten (einfache Seiten): alle außer Tintfield, solange nur Tintfield Fakten trägt
-const MIT_FAKTEN = ["tintfield"]
-const EINFACH = projekte.filter((p) => !MIT_FAKTEN.includes(p.slug))
+// Aus dem Frontmatter abgeleitet, damit die Erwartung nicht von den Inhalten abweicht
+const MIT_FAKTEN = projekte.filter((p) => p.hatFakten).map((p) => p.slug)
+const EINFACH = projekte.filter((p) => !p.hatFakten)
 const PFLICHT = ["Ausgangslage", "Ansatz", "Einblicke", "Entscheidungen", "Ergebnis"]
 
 /** Reihenfolge der Fallstudie: älteste zuerst, das nächstjüngere folgt, am Ende zyklisch das älteste */
@@ -221,8 +221,14 @@ test.describe("Fallstudie Tintfield", () => {
     await expectNoHorizontalOverflow(page)
   })
 
-  test("externe Links in neuem Tab tragen rel=noopener", async ({ page }) => {
+  test("externe Links in neuem Tab tragen rel=noopener (Faktenzeile und alle übrigen)", async ({ page }) => {
     await laden(page, TINTFIELD)
+    const aktionenRel = await page.locator(".faktenzeile .aktionen a").evaluateAll((els) => els.map((e) => [e.getAttribute("target"), e.getAttribute("rel")]))
+    expect(aktionenRel.length).toBe(2)
+    for (const [target, rel] of aktionenRel) {
+      expect(target).toBe("_blank")
+      expect(rel).toContain("noopener")
+    }
     const extern = await page.locator("main a[target='_blank']").evaluateAll((els) => els.map((e) => e.getAttribute("rel")))
     expect(extern.length).toBeGreaterThan(0)
     for (const rel of extern) expect(rel).toContain("noopener")
@@ -276,16 +282,21 @@ test.describe("Fallstudie Tintfield", () => {
     await expect(page.locator("#naechstes-projekt h3")).toBeVisible()
   })
 
-  test("Nächstes Projekt ist zyklisch: jedes Projekt wird genau einmal besucht", async ({ page }) => {
-    // Kette über die Seiten mit Fallstudien-Block; einfache Seiten haben keinen Block, die Kette folgt daher der erwarteten Reihenfolge
-    const gesehen = new Set<string>()
-    let aktuell = "tintfield"
-    for (let i = 0; i < projekte.length; i++) {
-      gesehen.add(aktuell)
-      aktuell = erwartetNaechstes(aktuell)!
-    }
-    expect(gesehen.size).toBe(projekte.length)
-    expect(aktuell).toBe("tintfield")
+  test("Nächstes Projekt: Link führt auf eine echte Seite mit dem erwarteten Titel (Zyklus: Unit-Tests von naechstesProjekt)", async ({ page }) => {
+    // Nur ein Projekt trägt `fakten`, die Kette Fallstudie -> Fallstudie lässt sich daher nicht per Seitenfolge ablaufen;
+    // der volle Zyklus (am Ende das älteste, nie das Projekt selbst, <2 Projekte) steckt in src/lib/projekte.test.ts.
+    expect(MIT_FAKTEN).toEqual(["tintfield"])
+    await laden(page, TINTFIELD)
+    const erwartet = erwartetNaechstes("tintfield")!
+    const href = await page.locator("#naechstes-projekt a").getAttribute("href")
+    expect(href).toBe(`/projects/${erwartet}`)
+    const res = await page.goto(href!)
+    expect(res?.status()).toBe(200)
+    await page.waitForSelector("body[data-bereit]")
+    await expect(page.locator("h1")).toHaveCount(1)
+    const titel = projekte.find((p) => p.slug === erwartet)!.title
+    const kurz = titel.split(/\s[—–]\s/)[0].trim()
+    await expect(page.locator("main h1")).toHaveText(MIT_FAKTEN.includes(erwartet) ? kurz : titel)
   })
 
   test("Titelbild hat denselben view-transition-name wie die Karte", async ({ page }) => {
@@ -331,12 +342,12 @@ test.describe("Fallstudie Tintfield", () => {
 
 test.describe("Projekte ohne Fakten (einfache Seiten)", () => {
   test("Projekt ohne fakten rendert als einfache Seite ohne Faktenzeile und Nächstes", async ({ page }) => {
-    for (const p of EINFACH.slice(0, 3)) {
+    for (const p of EINFACH) {
       await laden(page, `/projects/${p.slug}`)
       await expectSingleH1(page)
       await expect(page.locator(".faktenzeile")).toHaveCount(0)
       await expect(page.locator("#naechstes-projekt")).toHaveCount(0)
-      await expect(page.locator("[data-titelbild]")).toHaveCount(1)
+      await expect(page.locator("[data-titelbild]")).toHaveCount(p.hatCover ? 1 : 0)
       await expect(page.locator("[data-prose] p").first()).toBeVisible()
       await expect(page.locator("[data-kontakt]")).toHaveCount(1)
       await expect(page.locator("[data-kennzahlen]")).toHaveCount(0)
@@ -346,7 +357,16 @@ test.describe("Projekte ohne Fakten (einfache Seiten)", () => {
   test("alle Projektrouten: 200, eine h1, keine JavaScript-Fehler, kein Überlauf", async ({ page }) => {
     const fehler: string[] = []
     page.on("pageerror", (e) => fehler.push(e.message))
-    page.on("console", (m) => m.type() === "error" && !/Failed to load resource|favicon/.test(m.text()) && fehler.push(m.text()))
+    // Nur fremde Hosts (Cookiebot, PostHog) dürfen fehlschlagen; gleiche Herkunft, etwa ein kaputtes Bild, zählt
+    const herkunft = new URL(page.url() === "about:blank" ? "http://localhost:4322" : page.url()).origin
+    page.on("console", (m) => {
+      if (m.type() !== "error") return
+      const url = m.location().url
+      if (url && new URL(url).origin !== herkunft && new URL(url).origin !== "http://localhost:4322") return
+      // Bekannter Inhaltsfehler (nicht von dieser Seite): digital-art.md verweist auf ein fehlendes Bild. Nur dieser Eintrag ist ausgenommen.
+      if (url?.endsWith("/images/blog/post-square-11.webp")) return
+      fehler.push(`${m.text()} (${url})`)
+    })
     for (const route of ROUTEN) {
       const res = await page.goto(route)
       expect(res?.status(), route).toBe(200)
@@ -355,6 +375,27 @@ test.describe("Projekte ohne Fakten (einfache Seiten)", () => {
       await expectNoHorizontalOverflow(page)
     }
     expect(fehler).toEqual([])
+  })
+
+  test("einfache Seiten: Aktions-Links nach außen tragen rel=noopener", async ({ page }) => {
+    let gesehen = 0
+    for (const p of EINFACH) {
+      await laden(page, `/projects/${p.slug}`)
+      const rel = await page.locator("main a[target='_blank']").evaluateAll((els) => els.map((e) => e.getAttribute("rel")))
+      gesehen += rel.length
+      for (const r of rel) expect(r, p.slug).toContain("noopener")
+    }
+    expect(gesehen).toBeGreaterThan(0)
+  })
+
+  test("Projekt ohne Titelbild rendert keinen leeren Bildkasten", async ({ page }) => {
+    const ohne = EINFACH.filter((p) => !p.hatCover)
+    expect(ohne.length).toBeGreaterThan(0)
+    for (const p of ohne) {
+      await laden(page, `/projects/${p.slug}`)
+      await expect(page.locator("[data-titelbild]"), p.slug).toHaveCount(0)
+      await expectSingleH1(page)
+    }
   })
 
   test("lange Titel laufen auf einfachen Seiten nicht über", async ({ page }) => {

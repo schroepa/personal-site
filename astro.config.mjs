@@ -3,10 +3,12 @@
 import { defineConfig } from "astro/config"
 import react from "@astrojs/react"
 import sitemap from "@astrojs/sitemap"
+import { markdownConfig } from "./markdown.config.mjs"
 
 export default defineConfig({
   site: 'https://www.ptrckschrdtr.de',
   output: 'static',
+  markdown: markdownConfig,
   integrations: [
     react(),
     sitemap({

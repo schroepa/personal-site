@@ -4,7 +4,6 @@ description: "Redesign eines komplexen Daten-Dashboards mit Fokus auf kognitive 
 date: 2024-07-15
 tags: ["UI Design", "Data Visualization", "React", "Recharts"]
 featured: true
-weitere: true
 ---
 
 Meridian ist ein Analytics-Dashboard für ein Logistikunternehmen, das Echtzeitdaten aus 200+ Standorten aggregiert und visualisiert.

@@ -5,7 +5,6 @@ coverImage: "/images/gallery/bg-design-system-sander.png"
 date: 2024-10-01
 tags: ["Design Systems", "Figma", "React", "TypeScript"]
 featured: true
-weitere: true
 repo: "https://github.com"
 ---
 

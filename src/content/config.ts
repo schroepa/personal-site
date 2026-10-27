@@ -19,6 +19,7 @@ const projects = defineCollection({
     description: z.string(),
     coverImage: z.string().optional(),
     date: z.coerce.date(),
+    // Achtung: tags[0] ist das Label der Projektkarte und des Seitenkopfs (projektMeta: „Tool · 2026“); die Reihenfolge ändern heißt das Label ändern
     tags: z.array(z.string()),
     url: z.string().url().optional(),
     repo: z.string().url().optional(),

@@ -47,6 +47,10 @@ Gerechnet wird im OKLCH-Farbraum mit [culori](https://culorijs.org/), weil wahrg
 
 Basisstufe pro Farbe überschreiben, Ergebnisse in Vorschau und Kontrastansicht prüfen. Alles im Browser, ohne Account.
 
+<!-- TODO Patrick: alter Text, bitte prüfen ob er bleiben soll -->
+
+Im Generator selbst lassen sich mehrere Skalen nebeneinander anlegen, die Basisstufe pro Farbe überschreiben und die Ergebnisse in einer Vorschau- und einer Kontrastansicht prüfen. Alles läuft im Browser, ohne Account und ohne Limits.
+
 ## Entscheidungen
 
 ### Spricht dein System
@@ -57,9 +61,21 @@ Presets für Tailwind 50–950, Radix 1–12, Material 3, Ant Design, Carbon und
 
 Tailwind v4 (`@theme`), Tailwind v3, CSS Custom Properties oder Design Tokens, jeweils für Light und Dark.
 
+<!-- TODO Patrick: alter Text, bitte prüfen ob er bleiben soll -->
+
+**Von der Farbe zum Code in drei Schritten**
+
+1. **Farbe wählen** — Hex einfügen oder mit einem der Beispiele starten.
+2. **System wählen** — Tailwind, Radix, Material und weitere.
+3. **Exportieren** — als Tailwind v4 (`@theme`), Tailwind v3, CSS Custom Properties oder Design Tokens, jeweils für Light und Dark.
+
 ### Ein Projekt, zwei Teile
 
 Marketing-Site und App sind ein Astro-Projekt mit React-Islands. Die Farbmathematik ist mit Vitest abgesichert.
+
+<!-- TODO Patrick: alter Text, bitte prüfen ob er bleiben soll -->
+
+Marketing-Site und App sind ein gemeinsames Astro-Projekt mit React-Islands für die interaktiven Teile, gestylt mit Tailwind CSS und shadcn/ui-artigen Primitives. Die Landingpage gibt es auf Englisch und Deutsch.
 
 ## Ergebnis
 

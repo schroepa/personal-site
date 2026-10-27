@@ -5,7 +5,6 @@ coverImage: "/images/gallery/16bc-tshirt-augusta-white-mortel.webp"
 date: 2024-05-12
 tags: ["Urban Art", "Mural", "Berlin"]
 featured: true
-weitere: true
 ---
 
 Hier ist eine detaillierte Beschreibung des Projekts. Das Mural entstand in Zusammenarbeit mit lokalen Künstlern und Fashion-Brands, um die Verschmelzung von Straßenkunst und tragbarer Mode zu feiern.
