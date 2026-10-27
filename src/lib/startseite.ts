@@ -6,7 +6,7 @@ interface MitDatum {
   data: { date: Date }
 }
 
-function neuesteZuerst<T extends MitDatum>(liste: readonly T[]): T[] {
+export function neuesteZuerst<T extends MitDatum>(liste: readonly T[]): T[] {
   return [...liste].sort(
     (a, b) => b.data.date.getTime() - a.data.date.getTime() || (a.id < b.id ? 1 : a.id > b.id ? -1 : 0)
   )
