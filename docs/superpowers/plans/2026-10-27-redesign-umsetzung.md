@@ -4,9 +4,9 @@
 
 **Goal:** Die Astro-Seite ptrckschrdtr.de auf das fertige Figma-Design (11 Screens × 3 Breiten) umstellen und gemeinsam live bringen.
 
-**Architecture:** Figma-Variablen werden per Skript zu `src/styles/tokens.css` (Custom Properties mit den hinterlegten Code-Syntax-Namen). Ein neues `SiteLayout` plus 13 Astro-Komponenten ersetzen `BaseLayout`/`PostLayout` seitenweise auf dem Branch `redesign`; Bewegung kommt zuletzt als progressive Verbesserung (`motion`, `lenis`), die ihre Werte per `getComputedStyle` aus den Tokens liest.
+**Architecture:** Figma-Variablen werden per Skript zu `src/styles/tokens.css` (Custom Properties mit den hinterlegten Code-Syntax-Namen). Das neue Design nutzt **ausschließlich diese Tokens und handgeschriebenes Vanilla-CSS (kein Tailwind)**: Einstieg `src/styles/neu.css`, Komponenten mit Astro-Scoped-Styles. Ein neues `SiteLayout` plus 13 Astro-Komponenten ersetzen `BaseLayout`/`PostLayout` seitenweise auf dem Branch `redesign`; Bewegung kommt zuletzt als progressive Verbesserung (`motion`, `lenis`), die ihre Werte per `getComputedStyle` aus den Tokens liest.
 
-**Tech Stack:** Astro 5 (statisch), React 19 (nur Suche), TypeScript, Tailwind CSS 4 über `@tailwindcss/postcss`, Geist lokal, `motion` 14.1, `lenis` 1.3, Playwright Test + axe (E2E), `node:test` (Skripte), Vercel.
+**Tech Stack:** Astro 5 (statisch), React 19 (nur noch für das Tool gradient-generator), TypeScript, Vanilla CSS auf Figma-Tokens (Tailwind/shadcn nur noch im Legacy bis Task 15, dann entfernt), Geist lokal, `motion` 14.1, `lenis` 1.3, Playwright Test + axe (E2E), `node:test` (Skripte), Vercel.
 
 **Spec:** `docs/superpowers/specs/2026-10-27-redesign-design.md` (Quellen dort: Figma `7EQ8Ujy720sQuGCWpLyADN`, Übergabe-Datei vom 27.10.2026).
 
@@ -15,7 +15,7 @@
 - Branch `redesign` im Worktree `~/dev/personal-site-redesign` (außerhalb von iCloud); `main` wird erst beim Livegang berührt. Vercel baut jeden Push auf `main` automatisch, Branch-Pushes erzeugen nur Previews.
 - Kein Push und kein Merge ohne ausdrückliches Ja von Patrick im Chat.
 - Commit-Nachrichten enden mit `Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>`.
-- Keine hart gesetzten Farben, Größen oder Dauern in Komponenten: nur `var(--…)` aus `tokens.css`. Die CSS-Namen sind die in Figma hinterlegten Code-Syntax-Namen (WEB), exakt wie in `tokens.css`; in der Figma-Datei tragen sie den Collection-Präfix (z. B. `var(--theme-surface-page)`, `var(--global-size-4)`, `var(--component-input-spacing-x)`; Typography/Weight/Spacing/Layout/Motion ohne Präfix, z. B. `--text-body-size`). Wo dieses Dokument kürzere Namen wie `--surface-page` oder `--objekt-radius` nennt, gilt der tatsächliche Name aus `tokens.css`.
+- **Kein Tailwind, keine Utility-Klassen, kein shadcn im neuen Layer** (Entscheidung Patrick, 2026-10-27): handgeschriebenes CSS (`src/styles/neu.css`, Astro-Scoped-Styles in den Komponenten). Werte kommen **ausschließlich** aus den Figma-Tokens (`var(--…)` aus `tokens.css`); keine hart gesetzten Farben, Größen, Dauern. Erlaubt sind nur strukturelle Literale (0, 1, auto, 100%, fr, none, inherit). `scanCss()` aus `tests/css-hygiene.test.mjs` prüft das in jedem Task mit CSS. Neue Seiten laden `global.css` (Legacy/Tailwind) nie. Die CSS-Namen sind die in Figma hinterlegten Code-Syntax-Namen (WEB), exakt wie in `tokens.css`; in der Figma-Datei tragen sie den Collection-Präfix (z. B. `var(--theme-surface-page)`, `var(--global-size-4)`, `var(--component-input-spacing-x)`; Typography/Weight/Spacing/Layout/Motion ohne Präfix, z. B. `--text-body-size`). Wo dieses Dokument kürzere Namen wie `--surface-page` oder `--objekt-radius` nennt, gilt der tatsächliche Name aus `tokens.css`.
 - Breakpoints (Breite/Spalten/Rand/Spaltenabstand/Abschnittsabstand): 1920/12/96/32/128 · 1440/12/80/24/96 · 1024/12/48/24/80 · 768/8/32/24/64 · 844/8/32/16/48 · 390/4/20/16/48. 4-px-Raster.
 - Hell: `surface/page` #F4F2F0, `surface/secondary` #EEAD6B, `text/default` #5F5853, `text/muted` #6C645E. Dunkel: `surface/page` #24211F, `surface/secondary` #E69840, `text/muted` #A29A94. `text/on-secondary` neutral/950 in beiden Modi.
 - Radien: `objekt/radius` 24, `objekt/innenabstand` 8, `objekt/radius-verschachtelt` 16, `objekt/radius-gross` 32, `objekt/radius-klein` 4; zusätzlich `corner-shape: squircle`.
@@ -47,7 +47,9 @@ Zusätzlich je Task: leere oder sehr kurze Collections (Blog mit <2 Beiträgen, 
 | `design/figma-variables.json` | Eingefrorener Export der Figma-Variablen (Quelle für Tokens) |
 | `scripts/export-tokens.mjs` | `buildTokensCss(dump)` + CLI → `src/styles/tokens.css` |
 | `src/styles/tokens.css` | Generiert, nicht von Hand ändern |
-| `src/styles/global.css` | Tailwind-Import, `@theme`-Bindung an Tokens, Reset, Fokus |
+| `src/styles/neu.css`, `neu-fonts.css` | Vanilla-Einstieg des neuen Layers: Tokens importieren, Reset, Fokus, Textklassen, Geist |
+| `src/styles/global.css` | **Legacy** (Tailwind), nur für alte Seiten, entfällt in Task 15 |
+| `tests/css-hygiene.test.mjs` | `scanCss(text)`: verbietet Literalwerte, Tailwind und `@apply` in neuen Styles |
 | `src/layouts/SiteLayout.astro` | Neues Basislayout (löst `BaseLayout.astro` ab) |
 | `src/components/site/*.astro` | Die 13 Bausteine + SiteHead/SiteFooter |
 | `src/scripts/*.ts` | Kleine Skripte je Komponente (Schriftfeld, Akkordeon, Inhaltsverzeichnis, Filter) |
@@ -105,21 +107,20 @@ Zusätzlich je Task: leere oder sehr kurze Collections (Blog mit <2 Beiträgen, 
 
 ---
 
-### Task 2: Tailwind-Bindung, Schrift, globale Basis
+### Task 2: Vanilla-CSS-Basis aus Figma-Tokens (kein Tailwind)
 
 **Files:**
-- Modify: `src/styles/global.css`, `src/styles/fonts.css`, `src/styles/typography.css`, `scripts/copy-fonts.mjs`
-- Test: `tests/e2e/tokens.spec.ts`
+- Create: `src/styles/neu.css`, `src/styles/neu-fonts.css`, `src/pages/prototypes/tokens.astro`, `tests/e2e/tokens.spec.ts`, `tests/css-hygiene.test.mjs`
+- Unverändert: `src/styles/global.css`, `fonts.css`, `scripts/copy-fonts.mjs` (Legacy bis Task 15)
 
 **Interfaces:**
 - Consumes: `tokens.css` (Task 1).
-- Produces: Tailwind-Utilities über `@theme inline`, die auf Tokens zeigen (`--color-surface-page: var(--surface-page)` etc.); Klassen `.text-hero`, `.text-signatur`, `.text-h1`…`.text-label`, `.text-mono` entsprechend der Typografie-Tabelle der Übergabe (Größe/Zeilenhöhe/Laufweite/Gewicht aus `--text-<stil>-size` etc.).
+- Produces: `neu.css` (importiert `tokens.css` und `neu-fonts.css`): Reset, `body` (`--theme-surface-page`, `--theme-text-default`, Geist), `:focus-visible` (2 px `--theme-border-focus`, Abstand 3 px), Klassen `.text-signatur .text-hero .text-h1 .text-h2 .text-h3 .text-lead .text-body .text-prose .text-small .text-label .text-mono` (nur `--text-<stil>-*`-Tokens). `scanCss(text: string): { line: number; rule: string; snippet: string }[]`.
+- Schriftgrößen gelten laut Figma-Tokens je Breakpoint (Fließtext 16 px bis 1440, 17 px ab 1920).
 
-- [ ] **Step 1: Failing test** `tests/e2e/tokens.spec.ts`: `hell: body-Hintergrund ist #F4F2F0`, `dunkel: body-Hintergrund ist #24211F`, `Fließtext 17px auf 1440, 16px auf 390`, `--objekt-radius ist 24px`. Zuerst gegen eine Testseite `/prototypes/tokens` (noindex) mit `<p class="text-body">`.
-- [ ] **Step 2: Run.** Expected: FAIL (alte Farben).
-- [ ] **Step 3: `global.css` neu aufbauen:** `@import "./tokens.css"` vor Tailwind, `@theme inline` nur noch mit Token-Bindungen, `--font-sans: 'Geist Variable'`, `--font-mono: 'Geist Mono'`; Reset; `:focus-visible { outline: 2px solid var(--border-focus, currentColor); outline-offset: 3px }` (Tokenname aus `tokens.css` übernehmen). PP Editorial New entfernen (`fonts.css`, `copy-fonts.mjs`, `public/fonts/editorial-*`), Geist-Preload bleibt.
-- [ ] **Step 4: Run** Tests. Expected: PASS. `npm run build` muss grün bleiben.
-- [ ] **Step 5: Commit** `feat: Tokens an Tailwind gebunden, Geist als einzige Schrift`.
+- [ ] **Step 1: Failing tests** `tests/e2e/tokens.spec.ts` gegen `/prototypes/tokens` (noindex, lädt nur `neu.css`): Hintergrund hell/dunkel, Fließtext je Breite, Radius-Token, je Textklasse Größe, Zeilenhöhe, Laufweite und Gewicht gegen die Tokens, Label Versalien, Mono tabular-nums, Fokusring (Abstand und Farbe aus dem Token), kein Tailwind auf der neuen Seite, alte Startseite unverändert. Dazu `css-hygiene.test.mjs` mit Fixtures für `scanCss`.
+- [ ] **Step 2: Run** (FAIL). **Step 3: Implement** `neu.css`, `neu-fonts.css`, Testseite, `scanCss`. **Step 4: Run** (PASS); `npm run build` bleibt grün.
+- [ ] **Step 5: Commit** `feat: Vanilla-CSS-Basis aus Figma-Tokens (neu.css), kein Tailwind im neuen Layer`.
 
 ---
 
@@ -132,7 +133,9 @@ Zusätzlich je Task: leere oder sehr kurze Collections (Blog mit <2 Beiträgen, 
 **Interfaces:**
 - Produces: `SiteLayout` Props `{ title: string; description?: string; canonical?: string; ogImage?: string; blatt: string }` (`blatt` = Name der Seite für das Schriftfeld). Slot `default` landet in `<main id="inhalt">`. `initSchriftfeld(): () => void` (Teardown). `theme.ts` exportiert `applyStoredTheme(): void`, läuft **inline im `<head>`** vor dem ersten Paint.
 - Ebenen (alle `aria-hidden="true"`, dekorativ): `Papierkorn` (SVG `feTurbulence` fractalNoise, baseFrequency 0.68, numOctaves 4, Deckkraft `--effekt-papierkorn-deckkraft`), `LayoutRaster` (12 Spaltenelemente mit gepunkteten Kanten 2 px Punkt / 8 px Abstand, Anzahl sichtbarer Spalten folgt `--layout-columns`), `Schriftfeld` (fest unten, 16 px + `env(safe-area-inset-bottom)`; zeigt Blatt, Raster-Hover „Spalte a–b · n von N“, Ortszeit Europe/Berlin).
-- Übernommen aus `BaseLayout.astro` unverändert in der Funktion: Cookiebot-Skript zuerst, `PostHog`-Einbindung (`@/components/posthog.astro`), `<ClientRouter />` statt `<ViewTransitions />` (Astro 5), Skip-Link, Footer-Link „Cookie-Einstellungen“ (`Cookiebot.renew()`), `SearchPalette`.
+- Übernommen aus `BaseLayout.astro` unverändert in der Funktion: Cookiebot-Skript zuerst, `PostHog`-Einbindung (`@/components/posthog.astro`), `<ClientRouter />` statt `<ViewTransitions />` (Astro 5), Skip-Link, Footer-Link „Cookie-Einstellungen“ (`Cookiebot.renew()`).
+- **Vanilla (Entscheidung Patrick):** `SiteLayout` lädt ausschließlich `@/styles/neu.css`, nie `global.css`. Die React-`SearchPalette` (Tailwind/shadcn) ist im neuen Layout nicht nutzbar: neu als `src/components/site/Suche.astro` + `src/scripts/suche.ts` mit nativem `<dialog>`, ⌘K/Strg+K, gleicher Suchindex und gleiche Treffer wie bisher (Quelle: `SearchPalette.tsx` lesen, Verhalten übernehmen), Styles nur aus Tokens. Papierkorn und Raster: Werte aus `docs/reference/atmosphaere.js` (Patrick, Prototyp v14), CSS in der Komponente, keine injizierten `<style>`.
+- Tests ergänzen: `Suche öffnet mit ⌘K, schließt mit Escape, Fokus kehrt zurück`, `scanCss` meldet in allen neuen Layout-/Komponenten-Styles nichts.
 
 - [ ] **Step 1: Failing tests** in `layout.spec.ts` (je Projekt desktop/tablet/mobile) auf `/prototypes/layout` (Seite mit `SiteLayout`, Text, noindex): `hat Skip-Link als erstes fokussierbares Element`, `genau eine h1`, `Landmarks banner, main, contentinfo`, `Ebenen Papierkorn, Raster, Schriftfeld sind aria-hidden und liegen unter dem Inhalt`, `Schriftfeld klebt unten (bottom 16px)`, `dunkel: kein Hell-Blitz` (mit `addInitScript` Theme dark setzen und `document.documentElement.dataset.theme` beim ersten `DOMContentLoaded` prüfen), `Inhalt sichtbar mit JavaScript aus` (`javaScriptEnabled: false` ⇒ `main` hat Text sichtbar), `axe: keine Verstöße in hell und dunkel`, `Cookiebot blockiert: Seite lädt, window.posthog ist undefined` (Route `https://consent.cookiebot.com/**` abbrechen), `kein horizontaler Überlauf`.
 - [ ] **Step 2: Run.** Expected: FAIL (Layout fehlt).
@@ -327,14 +330,16 @@ Zusätzlich je Task: leere oder sehr kurze Collections (Blog mit <2 Beiträgen, 
 
 ---
 
-### Task 15: Aufräumen und Namen
+### Task 15: Aufräumen, Namen, Tailwind-Ausbau
+
+> Beim Zuteilen darf dieser Task in 15a (alte Layouts/Effekte/Namen/Testinhalte) und 15b (Tailwind/shadcn-Ausbau und Tool-Umbau) geteilt werden; beide Hälften behalten die Tests unten.
 
 **Files:**
-- Delete: `src/layouts/BaseLayout.astro`, `PostLayout.astro`, `main.astro`, `src/components/astro/{CustomCursor,HeroMesh,GrainOverlay,BaselineGrid,SectionIndicator}.astro`, `src/components/LiquidToggle.tsx`, `src/scripts/{pixelTextHover,textReveal,scrollTextReveal,scrollAnimations}.ts`, `docs/archiv/index-alt.astro` nach Abnahme, Testinhalte `src/content/blog/test-1.md`, `test-2.md`, `src/content/projects/sample-art-project.md`
+- Delete: `src/layouts/BaseLayout.astro`, `PostLayout.astro`, `main.astro`, `src/components/astro/{CustomCursor,HeroMesh,GrainOverlay,BaselineGrid,SectionIndicator}.astro`, `src/components/LiquidToggle.tsx`, `src/scripts/{pixelTextHover,textReveal,scrollTextReveal,scrollAnimations}.ts`, `docs/archiv/index-alt.astro` nach Abnahme, **Tailwind/shadcn komplett**: `src/styles/{global,typography,animations,prose,fonts}.css`, `src/components/ui/*`, `src/components/SearchPalette.tsx`, `components.json`, `postcss.config.mjs`, `src/lib/utils.ts` (falls nur `cn` für shadcn), Abhängigkeiten `tailwindcss @tailwindcss/postcss tw-animate-css tailwind-merge class-variance-authority shadcn prettier-plugin-tailwindcss` und alle nicht mehr importierten `@radix-ui/*` (per `npm uninstall`); `src/pages/tools/gradient-generator.astro` + `GradientGenerator.tsx` werden auf Vanilla-CSS (Tokens, `neu.css`) umgeschrieben, Funktion unverändert. Testinhalte `src/content/blog/test-1.md`, `test-2.md`, `src/content/projects/sample-art-project.md`
 - Modify: `ToolLayout.astro`, `src/pages/tools/gradient-generator.astro`, `src/pages/prototypes/*`, `src/pages/og-render/*` (auf `SiteLayout`/Tokens), `src/pages/llms*.txt.ts`, `astro.config.mjs`, `package.json`
 - Test: `tests/e2e/aufraeumen.spec.ts`
 
-- [ ] **Step 1: Failing tests:** `Repo enthält kein „Schröder“ außer in zitierten Quellen` (`node:test` mit `git grep -n "Schröder\b"`; Ausnahmenliste in der Testdatei), `kein Import von BaseLayout/PostLayout`, `kein PP Editorial New in dist`, `alle Routen aus ROUTES liefern 200 und haben ein title mit „Schrödter“ oder Seitentitel`, `Sitemap enthält /kontakt, nicht /prototypes oder /og-render`, `tools/gradient-generator läuft mit SiteLayout und hat genau eine h1`.
+- [ ] **Step 1: Failing tests:** `Repo enthält kein „Schröder“ außer in zitierten Quellen` (`node:test` mit `git grep -n "Schröder\b"`; Ausnahmenliste in der Testdatei), `kein Import von BaseLayout/PostLayout`, `kein PP Editorial New in dist`, `package.json und src/ enthalten kein „tailwind“, „@apply“, „shadcn“`, `dist/ enthält keine Tailwind-Banner-Kommentare`, `Gradient-Generator funktioniert (Slider ändert die Vorschau) ohne shadcn`, `alle Routen aus ROUTES liefern 200 und haben ein title mit „Schrödter“ oder Seitentitel`, `Sitemap enthält /kontakt, nicht /prototypes oder /og-render`, `tools/gradient-generator läuft mit SiteLayout und hat genau eine h1`.
 - [ ] **Step 2: Run** (FAIL). **Step 3: Entfernen und umstellen**, `ToolLayout` auf Tokens, Namen korrigieren (Impressum, Datenschutz, Seitentitel, Footer, `llms.txt`, Meta, `site.webmanifest`, `README.md`). `npm run build && npm run typecheck && npm run lint` grün. **Step 4: Run** (PASS). **Step 5: Commit** `refactor: alte Layouts und Effekte entfernt, Name korrigiert`.
 
 ---
