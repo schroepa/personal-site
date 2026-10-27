@@ -38,6 +38,8 @@ test.describe("Galerie-Akkordeon", () => {
     const s = streifen(root)
     await expect(s.nth(0)).toHaveAttribute("tabindex", "0")
     for (const i of [1, 2, 3, 4]) await expect(s.nth(i)).toHaveAttribute("tabindex", "-1")
+    await expect(s.nth(0)).toHaveAttribute("aria-current", "true")
+    for (const i of [1, 2, 3, 4]) await expect(s.nth(i)).not.toHaveAttribute("aria-current")
     await s.nth(0).focus()
     await page.keyboard.press("Tab")
     const imRoot = await root.evaluate((el) => el.contains(document.activeElement))
@@ -55,6 +57,8 @@ test.describe("Galerie-Akkordeon", () => {
     expect(await aktiv(root)).toBe("1")
     await expect(s.nth(1)).toBeFocused()
     await expect(s.nth(1)).toHaveAttribute("tabindex", "0")
+    await expect(s.nth(1)).toHaveAttribute("aria-current", "true")
+    await expect(s.nth(0)).not.toHaveAttribute("aria-current")
     await expect(s.nth(0)).toHaveAttribute("tabindex", "-1")
     await page.keyboard.press("ArrowRight")
     expect(await aktiv(root)).toBe("2")
@@ -70,24 +74,41 @@ test.describe("Galerie-Akkordeon", () => {
     expect(await aktiv(root)).toBe("0")
   })
 
-  test("Hover 90 ms: 40 ms Überfahrt ändert nichts, 120 ms Absicht aktiviert", async ({ page }) => {
-    test.skip(!istAkkordeon(page), "Zeigerlogik gilt für das Akkordeon ab 768")
+  // Deterministisch über page.clock: die Zeit steht, bis runFor sie bewegt. So wird 90 ms von beiden Seiten festgenagelt.
+  async function hoverVorbereiten(page: Page) {
+    await page.clock.install()
     await laden(page)
+    await page.clock.pauseAt(new Date(Date.now() + 60_000))
     const root = wurzel(page, "galerie-5")
     await root.scrollIntoViewIfNeeded()
     const s = streifen(root)
     const b = await box(s.nth(3))
     const rb = await box(root)
-    await page.mouse.move(b.x + b.width / 2, b.y + b.height / 2)
-    await page.waitForTimeout(40)
-    await page.mouse.move(rb.x + rb.width / 2, rb.y - 20)
-    await page.waitForTimeout(250)
+    return {
+      root,
+      drauf: () => page.mouse.move(b.x + b.width / 2, b.y + b.height / 2),
+      weg: () => page.mouse.move(rb.x + rb.width / 2, rb.y - 20),
+    }
+  }
+
+  test("Hover-Absicht: Verlassen nach 89 ms ändert nichts", async ({ page }) => {
+    test.skip(!istAkkordeon(page), "Zeigerlogik gilt für das Akkordeon ab 768")
+    const { root, drauf, weg } = await hoverVorbereiten(page)
+    await drauf()
+    await page.clock.runFor(89)
+    await weg()
+    await page.clock.runFor(500)
     expect(await aktiv(root)).toBe("0")
-    // die Streifenlage hat sich nicht verschoben, der Zeiger trifft wieder denselben Streifen
-    const b2 = await box(s.nth(3))
-    await page.mouse.move(b2.x + b2.width / 2, b2.y + b2.height / 2)
-    await page.waitForTimeout(120)
-    await expect.poll(() => aktiv(root)).toBe("3")
+  })
+
+  test("Hover-Absicht: Verweilen ab 90 ms aktiviert", async ({ page }) => {
+    test.skip(!istAkkordeon(page), "Zeigerlogik gilt für das Akkordeon ab 768")
+    const { root, drauf } = await hoverVorbereiten(page)
+    await drauf()
+    await page.clock.runFor(89)
+    expect(await aktiv(root)).toBe("0")
+    await page.clock.runFor(1)
+    expect(await aktiv(root)).toBe("3")
   })
 
   test("Bild hat feste Breite des offenen Streifens (kein Verzerren)", async ({ page }) => {
@@ -113,9 +134,9 @@ test.describe("Galerie-Akkordeon", () => {
   })
 
   test("mit 1 Kapitel kein Fehler, Streifen füllt die Breite", async ({ page }) => {
-    await laden(page)
     const fehler: string[] = []
     page.on("pageerror", (e) => fehler.push(String(e)))
+    await laden(page)
     const root = wurzel(page, "galerie-1")
     await expect(streifen(root)).toHaveCount(1)
     await expect(root).toHaveAttribute("data-aktiv", "0")
@@ -191,6 +212,7 @@ test.describe("Galerie-Akkordeon ohne JavaScript", () => {
     await expect(root).toHaveAttribute("data-aktiv", "0")
     const s = streifen(root)
     await expect(s).toHaveCount(5)
+    await expect(s.nth(0)).toHaveAttribute("aria-current", "true")
     for (const a of await s.all()) {
       await expect(a).toBeVisible()
       expect(await a.getAttribute("tabindex")).toBeNull()

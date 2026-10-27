@@ -25,7 +25,7 @@ const nummer = (i: number) => String(i + 1).padStart(2, "0")
 >
   {
     kapitel.map((k, i) => (
-      <a class="streifen" href={k.href}>
+      <a class="streifen" href={k.href} aria-current={i === 0 ? "true" : undefined}>
         <span class="bild">
           <img src={k.bild} alt="" loading="lazy" decoding="async" />
           <span class="seite">
@@ -99,7 +99,6 @@ const nummer = (i: number) => String(i + 1).padStart(2, "0")
     inset-inline: 0;
     justify-self: center;
     block-size: 100%;
-    inline-size: var(--galerie-offen);
     max-inline-size: none;
     object-fit: cover;
     pointer-events: none;
@@ -202,44 +201,17 @@ const nummer = (i: number) => String(i + 1).padStart(2, "0")
       display: none;
     }
 
-    /* Offener Streifen (Zustand data-aktiv am Wurzelelement) */
-    :is(
-        .galerie[data-aktiv="0"] > .streifen:nth-child(1),
-        .galerie[data-aktiv="1"] > .streifen:nth-child(2),
-        .galerie[data-aktiv="2"] > .streifen:nth-child(3),
-        .galerie[data-aktiv="3"] > .streifen:nth-child(4),
-        .galerie[data-aktiv="4"] > .streifen:nth-child(5)
-      ) {
+    /* Offener Streifen: aria-current="true" (Server: Streifen 1, danach vom Skript synchron zu data-aktiv) */
+    .streifen[aria-current="true"] {
       flex-grow: var(--galerie-gewicht);
     }
-    :is(
-        .galerie[data-aktiv="0"] > .streifen:nth-child(1),
-        .galerie[data-aktiv="1"] > .streifen:nth-child(2),
-        .galerie[data-aktiv="2"] > .streifen:nth-child(3),
-        .galerie[data-aktiv="3"] > .streifen:nth-child(4),
-        .galerie[data-aktiv="4"] > .streifen:nth-child(5)
-      )
-      .bild img {
+    .streifen[aria-current="true"] .bild img {
       filter: none;
     }
-    :is(
-        .galerie[data-aktiv="0"] > .streifen:nth-child(1),
-        .galerie[data-aktiv="1"] > .streifen:nth-child(2),
-        .galerie[data-aktiv="2"] > .streifen:nth-child(3),
-        .galerie[data-aktiv="3"] > .streifen:nth-child(4),
-        .galerie[data-aktiv="4"] > .streifen:nth-child(5)
-      )
-      .seite {
+    .streifen[aria-current="true"] .seite {
       display: none;
     }
-    :is(
-        .galerie[data-aktiv="0"] > .streifen:nth-child(1),
-        .galerie[data-aktiv="1"] > .streifen:nth-child(2),
-        .galerie[data-aktiv="2"] > .streifen:nth-child(3),
-        .galerie[data-aktiv="3"] > .streifen:nth-child(4),
-        .galerie[data-aktiv="4"] > .streifen:nth-child(5)
-      )
-      .beschriftung {
+    .streifen[aria-current="true"] .beschriftung {
       display: flex;
     }
   }

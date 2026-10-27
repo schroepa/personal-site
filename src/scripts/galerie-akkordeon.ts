@@ -23,7 +23,11 @@ export function initGalerieAkkordeon(root: HTMLElement): () => void {
   const setzen = (index: number) => {
     aktiv = index
     root.dataset.aktiv = String(index)
-    streifen.forEach((s, i) => s.setAttribute("tabindex", i === index ? "0" : "-1"))
+    streifen.forEach((s, i) => {
+      s.setAttribute("tabindex", i === index ? "0" : "-1")
+      if (i === index) s.setAttribute("aria-current", "true")
+      else s.removeAttribute("aria-current")
+    })
   }
   setzen(aktiv)
 
