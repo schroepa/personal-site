@@ -1,7 +1,7 @@
 import AxeBuilder from "@axe-core/playwright"
 import { expect, test, type Page } from "@playwright/test"
 import { KONTAKT_EMAIL } from "../../src/data/kontakt"
-import { expectNoHorizontalOverflow, setTheme } from "../helpers"
+import { expectNoHorizontalOverflow, setTheme, warteAufRuhe } from "../helpers"
 
 const URL = "/prototypes/komponenten"
 
@@ -426,6 +426,7 @@ test.describe("Galerie gesamt", () => {
     test(`axe ohne Verstöße (${theme})`, async ({ page }) => {
       await laden(page)
       await setTheme(page, theme)
+      await warteAufRuhe(page)
       const ergebnis = await new AxeBuilder({ page }).analyze()
       expect(ergebnis.violations.map((v) => `${v.id}: ${v.nodes.map((n) => n.target.join(" ")).join(", ")}`)).toEqual([])
     })

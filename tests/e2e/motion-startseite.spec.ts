@@ -1,4 +1,5 @@
 import AxeBuilder from "@axe-core/playwright"
+import { warteAufRuhe } from "../helpers"
 import { expect, test, type Page } from "@playwright/test"
 import { MOTION_WATCHDOG_MS } from "../../src/scripts/motion/gate"
 
@@ -416,7 +417,7 @@ test.describe("mit Bewegung", () => {
     page.on("console", (m) => m.type() === "error" && fehler.push(m.text()))
     page.on("pageerror", (e) => fehler.push(e.message))
     await laden(page)
-    await page.waitForTimeout(500)
+    await warteAufRuhe(page)
     const r = await new AxeBuilder({ page }).analyze()
     expect(r.violations).toEqual([])
     expect(fehler.filter((f) => !/cookiebot|ERR_|Failed to load resource/i.test(f))).toEqual([])

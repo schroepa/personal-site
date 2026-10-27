@@ -1,4 +1,5 @@
 import AxeBuilder from "@axe-core/playwright"
+import { warteAufRuhe } from "../helpers"
 import { expect, test, type Page } from "@playwright/test"
 
 declare global {
@@ -295,6 +296,7 @@ test.describe("Bewegungs-Infrastruktur", () => {
     page.on("pageerror", (e) => fehler.push(e.message))
     await page.emulateMedia({ reducedMotion: "no-preference" })
     await laden(page)
+    await warteAufRuhe(page)
     const r = await new AxeBuilder({ page }).analyze()
     expect(r.violations).toEqual([])
     expect(fehler.filter((f) => !/cookiebot|ERR_|Failed to load resource/i.test(f))).toEqual([])

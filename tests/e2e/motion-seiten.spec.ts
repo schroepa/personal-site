@@ -1,4 +1,5 @@
 import AxeBuilder from "@axe-core/playwright"
+import { warteAufRuhe } from "../helpers"
 import { expect, test, type Page } from "@playwright/test"
 import { BILD_ZOOM_FAKTOR, MAGNET_MAX_X, MAGNET_MAX_Y, SPERRUNG_START } from "../../src/scripts/motion/formen"
 
@@ -653,9 +654,9 @@ test.describe("Robustheit", () => {
       page.on("console", (m) => m.type() === "error" && fehler.push(m.text()))
       page.on("pageerror", (e) => fehler.push(e.message))
       await laden(page, url)
-      // mitten in der Label-Animation prüfen: aria-hidden-Scramble darf Axe nicht stören
+      // Label-Animation anstoßen, dann die Ruhe abwarten (Axe misst sonst Kontrast auf halbtransparenten Wörtern)
       await page.locator("h2").nth(2).scrollIntoViewIfNeeded()
-      await page.waitForTimeout(200)
+      await warteAufRuhe(page)
       const r = await new AxeBuilder({ page }).analyze()
       expect(r.violations).toEqual([])
       expect(fehler.filter((f) => !/cookiebot|ERR_|Failed to load resource/i.test(f))).toEqual([])

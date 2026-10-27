@@ -1,6 +1,6 @@
 import AxeBuilder from "@axe-core/playwright"
 import { expect, test, type Page } from "@playwright/test"
-import { expectNoHorizontalOverflow, expectSingleH1, setTheme } from "../helpers"
+import { expectNoHorizontalOverflow, expectSingleH1, setTheme, warteAufRuhe } from "../helpers"
 import { veroeffentlichteBeitraege } from "../content"
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs"
 import { join } from "node:path"
@@ -323,6 +323,7 @@ for (const [name, url] of [
       await laden(page, url)
       for (const theme of ["light", "dark"] as const) {
         await setTheme(page, theme)
+        await warteAufRuhe(page)
         const result = await new AxeBuilder({ page }).analyze()
         expect(result.violations, theme).toEqual([])
       }

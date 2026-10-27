@@ -1,6 +1,6 @@
 import AxeBuilder from "@axe-core/playwright"
 import { expect, test, type Page } from "@playwright/test"
-import { expectNoHorizontalOverflow, expectSingleH1, setTheme } from "../helpers"
+import { expectNoHorizontalOverflow, expectSingleH1, setTheme, warteAufRuhe } from "../helpers"
 
 const URL = "/prototypes/layout"
 
@@ -217,6 +217,7 @@ test.describe("SiteLayout", () => {
     await laden(page)
     for (const theme of ["light", "dark"] as const) {
       await setTheme(page, theme)
+      await warteAufRuhe(page)
       const result = await new AxeBuilder({ page }).analyze()
       expect(
         result.violations.map((v) => `${theme}: ${v.id} ${v.nodes.map((n) => n.target).join(" | ")}`)

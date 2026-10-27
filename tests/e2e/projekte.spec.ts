@@ -1,7 +1,7 @@
 import AxeBuilder from "@axe-core/playwright"
 import { expect, test, type Page } from "@playwright/test"
 import { erwarteteProjekte, erwarteteWeitere, lese } from "../content"
-import { expectNoHorizontalOverflow, expectSingleH1, setTheme } from "../helpers"
+import { expectNoHorizontalOverflow, expectSingleH1, setTheme, warteAufRuhe } from "../helpers"
 
 const UEBERSICHT = "/projects"
 const TINTFIELD = "/projects/tintfield"
@@ -173,6 +173,7 @@ test.describe("Projekt-Übersicht", () => {
     await laden(page)
     for (const theme of ["light", "dark"] as const) {
       await setTheme(page, theme)
+      await warteAufRuhe(page)
       const result = await new AxeBuilder({ page }).analyze()
       expect(result.violations, theme).toEqual([])
     }
@@ -334,6 +335,7 @@ test.describe("Fallstudie Tintfield", () => {
     await laden(page, TINTFIELD)
     for (const theme of ["light", "dark"] as const) {
       await setTheme(page, theme)
+      await warteAufRuhe(page)
       const result = await new AxeBuilder({ page }).analyze()
       expect(result.violations, theme).toEqual([])
     }
@@ -408,6 +410,7 @@ test.describe("Projekte ohne Fakten (einfache Seiten)", () => {
     await laden(page, `/projects/${EINFACH[0].slug}`)
     for (const theme of ["light", "dark"] as const) {
       await setTheme(page, theme)
+      await warteAufRuhe(page)
       const result = await new AxeBuilder({ page }).analyze()
       expect(result.violations, theme).toEqual([])
     }

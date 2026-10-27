@@ -1,6 +1,6 @@
 import AxeBuilder from "@axe-core/playwright"
 import { expect, test, type Page } from "@playwright/test"
-import { expectNoHorizontalOverflow, expectSingleH1, setTheme } from "../helpers"
+import { expectNoHorizontalOverflow, expectSingleH1, setTheme, warteAufRuhe } from "../helpers"
 import { KONTAKT_EMAIL, LINKEDIN_URL, WOFUER, ABLAUF } from "../../src/data/kontakt.ts"
 import { HALTUNG, KOMPETENZEN, STATIONEN, WERKZEUGE } from "../../src/data/ueber-mich.ts"
 
@@ -103,6 +103,7 @@ test.describe("Über mich", () => {
     await laden(page, ABOUT)
     for (const theme of ["light", "dark"] as const) {
       await setTheme(page, theme)
+      await warteAufRuhe(page)
       const result = await new AxeBuilder({ page }).analyze()
       expect(result.violations, theme).toEqual([])
     }
@@ -212,6 +213,7 @@ test.describe("Kontakt", () => {
     await laden(page, KONTAKT)
     for (const theme of ["light", "dark"] as const) {
       await setTheme(page, theme)
+      await warteAufRuhe(page)
       const result = await new AxeBuilder({ page }).analyze()
       expect(result.violations, theme).toEqual([])
     }

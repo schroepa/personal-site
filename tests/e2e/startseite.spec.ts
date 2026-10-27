@@ -2,7 +2,7 @@ import AxeBuilder from "@axe-core/playwright"
 import { expect, test, type Page } from "@playwright/test"
 import { entwuerfe, erwarteteGedanken, erwarteteProjekte, erwarteteWeitere } from "../content"
 import { KONTAKT_EMAIL } from "../../src/data/kontakt"
-import { expectNoHorizontalOverflow, expectSingleH1, setTheme } from "../helpers"
+import { expectNoHorizontalOverflow, expectSingleH1, setTheme, warteAufRuhe } from "../helpers"
 
 /** Anzahl der Projektkarten im Bento, wie im Figma-Entwurf (Knoten 268:533: 4 Karten + „Außerdem“-Liste) */
 const BENTO_KARTEN = 4
@@ -154,6 +154,7 @@ for (const theme of ["light", "dark"] as const) {
   test(`axe ohne Verstöße (${theme})`, async ({ page }) => {
     await laden(page)
     await setTheme(page, theme)
+    await warteAufRuhe(page)
     const ergebnis = await new AxeBuilder({ page }).analyze()
     expect(ergebnis.violations.map((v) => `${v.id}: ${v.nodes.map((n) => n.target.join(" ")).join(", ")}`)).toEqual([])
   })

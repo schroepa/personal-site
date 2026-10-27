@@ -1,6 +1,6 @@
 import AxeBuilder from "@axe-core/playwright"
 import { expect, test, type Locator, type Page } from "@playwright/test"
-import { expectNoHorizontalOverflow, setTheme } from "../helpers"
+import { expectNoHorizontalOverflow, setTheme, warteAufRuhe } from "../helpers"
 
 const URL = "/prototypes/komponenten"
 const ZEIGER_AB = 768 // erst ab dieser Breite ist es ein Akkordeon, darunter ein Wisch-Streifen
@@ -201,6 +201,7 @@ test.describe("Galerie-Akkordeon", () => {
     test(`axe ohne Verstöße (${theme})`, async ({ page }) => {
       await laden(page)
       await setTheme(page, theme)
+      await warteAufRuhe(page)
       const ergebnis = await new AxeBuilder({ page }).include("#galerie-1").include("#galerie-3").include("#galerie-5").analyze()
       expect(ergebnis.violations).toEqual([])
     })

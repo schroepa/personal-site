@@ -1,6 +1,6 @@
 import AxeBuilder from "@axe-core/playwright"
 import { expect, test, type Page } from "@playwright/test"
-import { setTheme } from "../helpers"
+import { setTheme, warteAufRuhe } from "../helpers"
 
 // Lichtband (Task 14). Erwartungswerte stammen aus den Tokens der Seite (getComputedStyle), nie als Zahl im Test;
 // nur Verhaltenswerte (Toleranzen, Wartezeiten) stehen hier. Die Zähler window.__lichtband gibt es nur im Dev-Server.
@@ -324,6 +324,7 @@ test.describe("Lichtband", () => {
     for (const theme of ["light", "dark"] as const) {
       await setTheme(page, theme)
       await page.waitForTimeout(300)
+      await warteAufRuhe(page)
       const r = await new AxeBuilder({ page }).analyze()
       expect(r.violations, theme).toEqual([])
     }

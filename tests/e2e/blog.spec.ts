@@ -1,7 +1,7 @@
 import AxeBuilder from "@axe-core/playwright"
 import { expect, test, type Page } from "@playwright/test"
 import { entwuerfe, jahrVon, veroeffentlichteBeitraege } from "../content"
-import { expectNoHorizontalOverflow, expectSingleH1, setTheme } from "../helpers"
+import { expectNoHorizontalOverflow, expectSingleH1, setTheme, warteAufRuhe } from "../helpers"
 
 const BLOG = "/blog"
 const ARTIKEL = "single-source-of-truth-ist-eine-luege" // 8 Zwischentitel, jüngster Beitrag
@@ -200,6 +200,7 @@ test.describe("Blog-Übersicht", () => {
     await laden(page)
     for (const theme of ["light", "dark"] as const) {
       await setTheme(page, theme)
+      await warteAufRuhe(page)
       const result = await new AxeBuilder({ page }).analyze()
       expect(result.violations, theme).toEqual([])
     }
@@ -415,6 +416,7 @@ test.describe("Artikel", () => {
     })
     for (const theme of ["light", "dark"] as const) {
       await setTheme(page, theme)
+      await warteAufRuhe(page)
       const result = await new AxeBuilder({ page }).analyze()
       expect(result.violations, theme).toEqual([])
     }
