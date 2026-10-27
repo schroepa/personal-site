@@ -23,6 +23,17 @@ export function fehlerDateien(ausgabe) {
   return [...dateien]
 }
 
+/** Einträge der Legacy-Liste, die keinen Fehler mehr melden: sie sind überholt und müssen aus der Liste. */
+export function veralteteLegacy(legacy, mitFehlern) {
+  const fehler = new Set(mitFehlern)
+  return [...legacy].filter((f) => !fehler.has(f)).sort()
+}
+
+test("veralteteLegacy: meldet Allowlist-Einträge ohne aktuellen Fehler", () => {
+  assert.deepEqual(veralteteLegacy(new Set(["a", "b"]), ["b", "c"]), ["a"])
+  assert.deepEqual(veralteteLegacy(new Set(["a"]), ["a"]), [])
+})
+
 /** Anzahl der Fehlerzeilen („Datei:Zeile:Spalte - error …“). */
 export function fehlerZeilen(ausgabe) {
   return ausgabe.replace(/\x1b\[[0-9;]*m/g, "").split("\n").filter((z) => /^(\S.*?):\d+:\d+ - error\b/.test(z)).length
@@ -65,6 +76,9 @@ test("astro check meldet keine Fehler in neuen Dateien (nur die Legacy-Liste ist
   assert.notEqual(summe, null, "astro check hat keine Zusammenfassung „Result … N errors“ ausgegeben (Ausgabeformat geändert?)")
   const zeilen = fehlerZeilen(ausgabe)
   assert.equal(zeilen, summe, `Fehlerzeilen (${zeilen}) und Zusammenfassung (${summe}) stimmen nicht überein (Ausgabeformat geändert?)`)
-  const neu = fehlerDateien(ausgabe).filter((f) => !LEGACY.has(f))
+  const mitFehlern = fehlerDateien(ausgabe)
+  const neu = mitFehlern.filter((f) => !LEGACY.has(f))
   assert.deepEqual(neu, [], `Typfehler in neuen Dateien: ${neu.join(", ")}`)
+  const veraltet = veralteteLegacy(LEGACY, mitFehlern)
+  assert.deepEqual(veraltet, [], `Legacy-Liste enthält Dateien ohne Fehler (bitte entfernen): ${veraltet.join(", ")}`)
 })

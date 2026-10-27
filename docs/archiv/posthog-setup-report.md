@@ -1,3 +1,5 @@
+> ARCHIV – beschreibt den Stand vor dem Redesign; die genannten Ereignisse und Dateien existieren nicht mehr.
+
 <wizard-report>
 # PostHog post-wizard report
 

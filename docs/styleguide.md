@@ -1,3 +1,5 @@
+> ARCHIV/veraltet – gilt für das alte Layout; maßgeblich sind design/README.md, docs/superpowers/specs/2026-10-27-redesign-design.md und src/styles/tokens.css.
+
 # ptrckschrdtr.de — Design Styleguide
 
 **Status:** Living document  

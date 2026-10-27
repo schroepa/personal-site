@@ -278,6 +278,7 @@ test.describe("mit Bewegung", () => {
 
   test("Anker-Sprung: übersprungene Abschnitte erscheinen sofort im Endzustand", async ({ page }) => {
     await laden(page, "/#kontakt")
+    // Poll-Fenster 8 s: zustandsbasierte Prüfung, die bei langsamer CI/Last dem Sprung hinterherläuft (3 s war zu knapp)
     await expect.poll(() => page.evaluate(() => scrollY)).toBeGreaterThan(500)
     await expect
       .poll(

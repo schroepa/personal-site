@@ -48,7 +48,7 @@ Axe-Prüfungen auf animierten Seiten rufen vorher `warteAufRuhe(page)` (`tests/h
 
 Die Seiten unter `/og-render/` und `/prototypes/` sind `noindex` und stehen nicht in der Sitemap.
 
-Hängt der Build, helfen frische Caches: `rm -rf dist .astro node_modules/.vite && npm install && npm run build`. (Der Hinweis zu Radix und Tailwind-PostCSS entfällt mit Task 15b.)
+Hängt der Build, helfen frische Caches: `rm -rf dist .astro node_modules/.vite && npm install && npm run build`.
 
 ## Inhalte
 

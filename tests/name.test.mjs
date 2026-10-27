@@ -38,7 +38,7 @@ test("die Erlaubnisliste ist klein und begründet", () => {
 })
 
 test("„Schröder“ kommt in versionierten Dateien nur in der Erlaubnisliste vor (richtig: Schrödter)", () => {
-  const r = spawnSync("git", ["grep", "-n", "-I", "-i", "-E", "schr(ö|oe)der", "--", ".", ":!package-lock.json"], {
+  const r = spawnSync("git", ["grep", "-n", "-I", "-E", "[Ss][Cc][Hh][Rr](ö|Ö|oe|OE|Oe)[Dd][Ee][Rr]", "--", ".", ":!package-lock.json"], {
     cwd: root,
     encoding: "utf8",
     maxBuffer: 64 * 1024 * 1024,
