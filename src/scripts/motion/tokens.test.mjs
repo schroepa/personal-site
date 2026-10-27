@@ -60,3 +60,21 @@ test("msToSeconds: Millisekunden in Sekunden (Federn erwarten visualDuration in 
   assert.equal(msToSeconds(0), 0)
   assert.equal(msToSeconds(1100), 1.1)
 })
+
+import { parseLength, parseEasing } from "./parse.mjs"
+
+test("parseLength: Pixel-Tokens", () => {
+  assert.equal(parseLength("24px"), 24)
+  assert.equal(parseLength(" 1.5px "), 1.5)
+  assert.throws(() => parseLength("24"), /Pixel/)
+  assert.throws(() => parseLength("2em"), /Pixel/)
+  assert.throws(() => parseLength(""), /leer/)
+})
+
+test("parseEasing: cubic-bezier wird zu vier Zahlen, Schlüsselwort bleibt", () => {
+  assert.deepEqual(parseEasing("cubic-bezier(0.22, 1, 0.36, 1)"), [0.22, 1, 0.36, 1])
+  assert.deepEqual(parseEasing("cubic-bezier(0.4,0,0.2,1)"), [0.4, 0, 0.2, 1])
+  assert.equal(parseEasing("ease"), "ease")
+  assert.throws(() => parseEasing("cubic-bezier(a, 1, 0.36, 1)"), /Easing/)
+  assert.throws(() => parseEasing(""), /leer/)
+})
