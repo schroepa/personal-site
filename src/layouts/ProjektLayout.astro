@@ -63,8 +63,8 @@ const projektSchema = {
   description,
   datePublished: date.toISOString(),
   dateModified: date.toISOString(),
-  author: { "@type": "Person", name: "Patrick Schröder", url: siteUrl },
-  publisher: { "@type": "Person", name: "Patrick Schröder", url: siteUrl },
+  author: { "@type": "Person", name: "Patrick Schrödter", url: siteUrl },
+  publisher: { "@type": "Person", name: "Patrick Schrödter", url: siteUrl },
   image: ogImageAbsolute,
   url: pageUrl,
   inLanguage: "de-DE",
@@ -87,7 +87,7 @@ const bildName = `view-transition-name: projekt-bild-${slug}`
   blatt={istFallstudie ? "Fallstudie" : "Projekt"}
   ogType="article"
   articleDate={date}
-  articleAuthor="Patrick Schröder"
+  articleAuthor="Patrick Schrödter"
   articleTags={tags}
 >
   <script slot="head" is:inline type="application/ld+json" set:html={jsonLd(projektSchema)} />

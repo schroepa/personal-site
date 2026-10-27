@@ -83,7 +83,7 @@ test.describe("Über mich", () => {
   test("JSON-LD enthält die Person", async ({ page }) => {
     await laden(page, ABOUT)
     const ld = await page.locator('script[type="application/ld+json"]').evaluateAll((els) => els.map((e) => JSON.parse(e.textContent ?? "null")))
-    expect(ld.some((d) => d["@type"] === "Person" && d.name === "Patrick Schröder")).toBe(true)
+    expect(ld.some((d) => d["@type"] === "Person" && d.name === "Patrick Schrödter")).toBe(true)
   })
 
   test("nicht noindex, kein Überlauf, auch mit langem Wort", async ({ page }) => {

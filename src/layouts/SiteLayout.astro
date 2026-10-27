@@ -31,7 +31,7 @@ interface Props {
 
 const {
   title,
-  description = "Personal site of Patrick Schröder, UI Designer and Frontend Developer.",
+  description = "Personal site of Patrick Schrödter, UI Designer and Frontend Developer.",
   canonical = Astro.url.href,
   ogImage,
   blatt,
@@ -58,7 +58,7 @@ const metaTitle = truncateTitle(title)
 const personSchema = {
   "@context": "https://schema.org",
   "@type": "Person",
-  name: "Patrick Schröder",
+  name: "Patrick Schrödter",
   url: siteUrl,
   jobTitle: "UI Designer & Frontend Developer",
 }
@@ -221,6 +221,8 @@ const themeInline = `(${applyStoredTheme.toString()})();document.documentElement
     display: flex;
     flex: 1;
     flex-direction: column;
+    /* Platz am Seitenende, damit das feste Schriftfeld den Footer nicht verdeckt (der Footer selbst bleibt so hoch wie in Figma) */
+    padding-bottom: calc(var(--site-schriftfeld-hoehe) + var(--site-schriftfeld-versatz));
   }
 
   .seite > header,

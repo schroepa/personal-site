@@ -180,8 +180,8 @@ test("alte Seite rendert weiter mit Tailwind: kein data-site, Hintergrund = --ba
 }) => {
   const ctx = await browser.newContext({ colorScheme: "light" })
   const page = await ctx.newPage()
-  // Muss eine Seite sein, die noch BaseLayout (Legacy, Tailwind) nutzt. Nach Task 10 (Rechtsseiten/404 migriert) hier entfernen oder anpassen.
-  await page.goto("/impressum")
+  // Muss eine Seite sein, die noch ein Legacy-Layout (Tailwind) nutzt: das Tool gradient-generator (ToolLayout). Entfällt mit Task 15.
+  await page.goto("/tools/gradient-generator")
   const r = await page.evaluate(() => {
     const probe = document.createElement("span")
     document.body.appendChild(probe)

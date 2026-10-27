@@ -18,7 +18,7 @@ test("jsonLd: >, & und U+2028/2029 werden maskiert, Rundlauf bleibt gleich", () 
 })
 
 test("jsonLd: gewöhnliche Daten bleiben lesbar (kein Umbau außer den Zeichen)", () => {
-  assert.equal(jsonLd({ name: "Patrick Schröder", n: 1 }), '{"name":"Patrick Schröder","n":1}')
+  assert.equal(jsonLd({ name: "Patrick Schrödter", n: 1 }), '{"name":"Patrick Schrödter","n":1}')
 })
 
 test("jsonLd: undefined auf oberster Ebene wirft einen klaren TypeError", () => {

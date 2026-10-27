@@ -460,7 +460,7 @@ test.describe("Alle veröffentlichten Artikel", () => {
       const meta = (n: string) => page.locator(`meta[property="${n}"]`).getAttribute("content")
       expect(await meta("og:type"), b.slug).toBe("article")
       expect(await meta("article:published_time"), b.slug).toContain(b.date)
-      expect(await meta("article:author"), b.slug).toBe("Patrick Schröder")
+      expect(await meta("article:author"), b.slug).toBe("Patrick Schrödter")
       await expect(page.locator('meta[property="article:tag"]'), b.slug).toHaveCount(b.tags.length)
       await expect(page.locator('link[rel="canonical"]'), b.slug).toHaveAttribute("href", `https://www.ptrckschrdtr.de/blog/${b.slug}`)
       expect(await meta("og:image"), b.slug).toMatch(/^https:\/\/www\.ptrckschrdtr\.de\//)
