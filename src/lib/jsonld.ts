@@ -4,5 +4,6 @@
  * Darum werden <, >, & sowie U+2028/U+2029 als \uXXXX geschrieben; JSON.parse liefert dasselbe Objekt.
  */
 export function jsonLd(data: unknown): string {
+  if (data === undefined) throw new TypeError("jsonLd: undefined lässt sich nicht als JSON schreiben")
   return JSON.stringify(data).replace(/[<>&\u2028\u2029]/g, (z) => `\\u${z.charCodeAt(0).toString(16).padStart(4, "0")}`)
 }

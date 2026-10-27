@@ -284,7 +284,10 @@ test.describe("Artikel", () => {
     await nav.locator("a").last().click()
     await expect(page).toHaveURL(new RegExp(`#${ziel.id}$`))
     const heading = page.locator(`[data-prose] h2#${ziel.id}`)
-    await expect.poll(async () => (await heading.boundingBox())!.y, { message: "scrollt zur Überschrift" }).toBeGreaterThanOrEqual(0)
+    // Warten, bis die Überschrift ihren Versatz (scroll-margin-top) erreicht hat, nicht nur im Bild ist
+    await expect
+      .poll(() => heading.evaluate((el) => Math.abs(el.getBoundingClientRect().top - parseFloat(getComputedStyle(el).scrollMarginTop))), { message: "scrollt zur Überschrift" })
+      .toBeLessThanOrEqual(2)
     const m = await heading.evaluate((el) => {
       const r = el.getBoundingClientRect()
       const feld = document.querySelector("[data-schriftfeld]")!.getBoundingClientRect()
