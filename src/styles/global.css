@@ -1,3 +1,4 @@
+@import "./tokens.css";
 @import "tailwindcss";
 @import "./fonts.css";
 @import "tw-animate-css";
@@ -5,9 +6,41 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* ═══ NEU: Token-Bindung (Quelle: tokens.css, generiert aus Figma) ═══════════ */
+
 @theme inline {
-    --font-heading: 'PP Editorial New', Georgia, 'Times New Roman', serif;
+    --font-heading: 'Geist Variable', sans-serif;
     --font-sans: 'Geist Variable', sans-serif;
+    --font-mono: 'Geist Mono', ui-monospace, monospace;
+
+    --color-surface-page: var(--theme-surface-page);
+    --color-surface-container: var(--theme-surface-container);
+    --color-surface-subtle: var(--theme-surface-subtle);
+    --color-surface-muted: var(--theme-surface-muted);
+    --color-surface-primary: var(--theme-surface-primary);
+    --color-surface-overlay: var(--theme-surface-overlay);
+    --color-text-default: var(--theme-text-default);
+    --color-text-strong: var(--theme-text-strong);
+    --color-text-muted: var(--theme-text-muted);
+    --color-text-inverse: var(--theme-text-inverse);
+    --color-text-on-primary: var(--theme-text-on-primary);
+    --color-border-default: var(--theme-border-default);
+    --color-border-input: var(--theme-border-input);
+    --color-border-focus: var(--theme-border-focus);
+    --color-border-raster: var(--border-raster);
+
+    --radius-objekt: var(--objekt-radius);
+    --radius-objekt-verschachtelt: var(--objekt-radius-verschachtelt);
+    --radius-objekt-gross: var(--objekt-radius-gross);
+    --radius-objekt-klein: var(--objekt-radius-klein);
+
+    --spacing-margin: var(--layout-margin);
+}
+
+/* ═══ LEGACY – entfällt in Task 15 ═══════════════════════════════════════════
+ * shadcn-/Alt-Variablen, solange alte Seiten und src/components/ui bestehen. */
+
+@theme inline {
     --color-sidebar-ring: var(--sidebar-ring);
     --color-sidebar-border: var(--sidebar-border);
     --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -50,8 +83,8 @@
 
 :root {
     /* ── Warm Near-Black Palette ─────────────────────────────────────── */
-    --background: oklch(1 0 0);
-    --foreground: oklch(0.15 0.005 75);
+    --background: var(--theme-surface-page);
+    --foreground: var(--theme-text-default);
 
     --card: oklch(1 0 0);
     --card-foreground: oklch(0.15 0.005 75);
@@ -158,9 +191,6 @@
 
 /* ─── Additive: Font Variables ───────────────────────────────────────────── */
 
-@theme {
-  --font-mono: 'Geist Mono', monospace;
-}
 
 
 /* ─── Additive: Typografie-Skala (Major Third, 1.250) ────────────────────── */
@@ -229,4 +259,102 @@
 /* Weite Spalte: für Bilder, Tabellen, Listen */
 .wide-col {
   max-width: min(100%, 1200px);
+}
+
+/* ═══ ENDE LEGACY ═══════════════════════════════════════════════════════════ */
+
+/* ═══ NEU: Basis und Textstile ═══════════════════════════════════════════════ */
+
+html {
+  font-family: var(--font-sans);
+}
+
+body {
+  margin: 0;
+  background: var(--theme-surface-page);
+  color: var(--theme-text-default);
+}
+
+:focus-visible {
+  outline: 2px solid var(--theme-border-focus, currentColor);
+  outline-offset: 3px;
+}
+
+.text-signatur,
+.text-hero,
+.text-h1,
+.text-h2,
+.text-h3,
+.text-lead,
+.text-body,
+.text-prose,
+.text-small,
+.text-label,
+.text-mono {
+  font-family: var(--font-sans);
+}
+
+.text-signatur {
+  font-size: var(--text-signatur-size);
+  line-height: var(--text-signatur-line-height);
+  letter-spacing: var(--text-signatur-letter-spacing);
+  font-weight: var(--text-signatur-weight);
+}
+.text-hero {
+  font-size: var(--text-hero-size);
+  line-height: var(--text-hero-line-height);
+  letter-spacing: var(--text-hero-letter-spacing);
+  font-weight: var(--text-hero-weight);
+}
+.text-h1 {
+  font-size: var(--text-h1-size);
+  line-height: var(--text-h1-line-height);
+  letter-spacing: var(--text-h1-letter-spacing);
+  font-weight: var(--text-h1-weight);
+}
+.text-h2 {
+  font-size: var(--text-h2-size);
+  line-height: var(--text-h2-line-height);
+  letter-spacing: var(--text-h2-letter-spacing);
+  font-weight: var(--text-h2-weight);
+}
+.text-h3 {
+  font-size: var(--text-h3-size);
+  line-height: var(--text-h3-line-height);
+  letter-spacing: var(--text-h3-letter-spacing);
+  font-weight: var(--text-h3-weight);
+}
+.text-lead {
+  font-size: var(--text-lead-size);
+  line-height: var(--text-lead-line-height);
+  letter-spacing: var(--text-lead-letter-spacing);
+  font-weight: var(--text-lead-weight);
+}
+.text-body,
+.text-prose {
+  font-size: var(--text-body-size);
+  line-height: var(--text-body-line-height);
+  letter-spacing: var(--text-body-letter-spacing);
+  font-weight: var(--text-body-weight);
+}
+.text-small {
+  font-size: var(--text-small-size);
+  line-height: var(--text-small-line-height);
+  letter-spacing: var(--text-small-letter-spacing);
+  font-weight: var(--text-small-weight);
+}
+.text-label {
+  font-size: var(--text-label-size);
+  line-height: var(--text-label-line-height);
+  letter-spacing: var(--text-label-letter-spacing);
+  font-weight: var(--text-label-weight);
+  text-transform: uppercase;
+}
+.text-mono {
+  font-family: var(--font-mono);
+  font-size: var(--text-mono-size);
+  line-height: var(--text-mono-line-height);
+  letter-spacing: var(--text-mono-letter-spacing);
+  font-weight: var(--text-code-weight);
+  font-variant-numeric: tabular-nums;
 }
