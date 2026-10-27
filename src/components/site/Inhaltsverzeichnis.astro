@@ -1,0 +1,57 @@
+---
+// Inhaltsverzeichnis (Figma 262:700): nav mit Sprungmarken auf die Zwischentitel.
+// Ohne JavaScript funktionieren die Links; src/scripts/inhaltsverzeichnis.ts setzt aria-current auf den aktiven Eintrag.
+interface Props {
+  eintraege: { id: string; text: string }[]
+}
+const { eintraege } = Astro.props
+---
+
+<nav class="inhaltsverzeichnis" aria-label="Inhalt" data-inhaltsverzeichnis>
+  <p class="text-label titel" aria-hidden="true">Inhalt</p>
+  <ul class="liste text-small">
+    {
+      eintraege.map((eintrag) => (
+        <li>
+          <a href={`#${eintrag.id}`}>{eintrag.text}</a>
+        </li>
+      ))
+    }
+  </ul>
+</nav>
+
+<style>
+  .inhaltsverzeichnis {
+    display: flex;
+    flex-direction: column;
+    gap: var(--inhaltsverzeichnis-abstand);
+    overflow-wrap: anywhere;
+  }
+
+  .titel {
+    margin: 0;
+    color: var(--inhaltsverzeichnis-label-farbe);
+  }
+
+  .liste {
+    display: flex;
+    flex-direction: column;
+    gap: var(--inhaltsverzeichnis-abstand);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  a {
+    display: block;
+    min-height: var(--global-size-24);
+    color: var(--inhaltsverzeichnis-eintrag-farbe);
+    text-decoration: none;
+  }
+
+  /* Aktiv: stärkere Farbe und zusätzlich unterstrichen (Zustand nicht nur über Farbe) */
+  a[aria-current="true"] {
+    color: var(--inhaltsverzeichnis-aktiv-farbe);
+    text-decoration: underline;
+  }
+</style>

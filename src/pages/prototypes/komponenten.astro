@@ -1,0 +1,146 @@
+---
+// Prüfseite für die Inhaltskomponenten — noindex, nicht in der Sitemap (siehe astro.config.mjs).
+// Rendert jede Variante; die Tests prüfen hier Computed Styles, Raster, Skripte und Barrierefreiheit.
+// Hinweis: Die Seite zeigt zwei Seitenköpfe (seite, artikel) und damit zwei h1; echte Seiten haben genau eine.
+import SiteLayout from "@/layouts/SiteLayout.astro"
+import Seitenkopf from "@/components/site/Seitenkopf.astro"
+import Abschnitt from "@/components/site/Abschnitt.astro"
+import KontaktPanel from "@/components/site/KontaktPanel.astro"
+import ProjektKarte from "@/components/site/ProjektKarte.astro"
+import ArtikelZeile from "@/components/site/ArtikelZeile.astro"
+import Inhaltsverzeichnis from "@/components/site/Inhaltsverzeichnis.astro"
+import Faktenzeile from "@/components/site/Faktenzeile.astro"
+
+const lang = "Datenschutzerklärungsüberarbeitungsvorbereitungsarbeitsgruppenleitungsstellvertretung"
+const fakten: [{ label: string; wert: string }, { label: string; wert: string }, { label: string; wert: string }] = [
+  { label: "Rolle", wert: "Konzept, Design, Code" },
+  { label: "Jahr", wert: "2026" },
+  { label: "Stack", wert: "Astro, React, TypeScript" },
+]
+const eintraege = [
+  { id: "verz-eins", text: "Die drei Wahrheiten" },
+  { id: "verz-zwei", text: "Warum die Lücke strukturell ist" },
+  { id: "verz-drei", text: "Eine kontrollierte Übersetzung" },
+]
+---
+
+<SiteLayout
+  title="Prüfseite Komponenten"
+  description="Interne Prüfseite für die Inhaltskomponenten."
+  blatt="Komponenten"
+  noindex
+>
+  <Seitenkopf
+    art="seite"
+    label="Komponenten"
+    titel="Prüfseite der Inhaltskomponenten"
+    einleitung="Jede Variante auf einer Seite, damit sich Maße, Farben und Verhalten prüfen lassen."
+  >
+    <Faktenzeile
+      slot="zusatz"
+      {fakten}
+      aktionen={[
+        { label: "Live ansehen", href: "https://example.com/" },
+        { label: "Code", href: "https://example.com/code" },
+      ]}
+    />
+  </Seitenkopf>
+
+  <Abschnitt id="abschnitt-links" nummer="01" label="Links" layout="links">
+    <p class="text-prose">
+      Label links über drei Spalten, Inhalt rechts über neun Spalten. Fließtext nimmt höchstens sieben dieser neun
+      Spalten ein, damit die Zeilen lesbar kurz bleiben. Darunter, auf schmalen Breiten, steht das Label über dem Inhalt.
+    </p>
+    <p class="text-prose">Ein zweiter Absatz zeigt den Abstand zwischen den Absätzen im Inhaltsbereich.</p>
+  </Abschnitt>
+
+  <Abschnitt id="abschnitt-oben" nummer="02" label="Oben" layout="oben">
+    <p class="text-prose">Label über dem Inhalt, der Inhalt läuft über die volle Breite.</p>
+  </Abschnitt>
+
+  <Abschnitt id="karten" nummer="03" label="Arbeit" layout="oben">
+    <div class="karten">
+      <ProjektKarte
+        format="16x10"
+        meta="Tool · 2026"
+        titel="Tintfield"
+        wirkung="Eine Farbe rein, eine kontrastsichere Skala raus."
+        href="/projects/tintfield"
+        slug="tintfield"
+      />
+      <ProjektKarte
+        format="4x5"
+        meta="System · 2026"
+        titel="ProMan"
+        wirkung="Aufgaben als Markdown auf der Platte."
+        href="/projects/proman"
+        slug="proman"
+      />
+      <ProjektKarte
+        format="1x1"
+        meta="Produkt · 2025"
+        titel="alterli"
+        wirkung="Erinnerungen, die mitwachsen."
+        href="/projects/alterli"
+        slug="alterli"
+      />
+    </div>
+  </Abschnitt>
+
+  <Abschnitt id="artikel" nummer="04" label="Gedanken" layout="links">
+    <ArtikelZeile
+      groesse="gross"
+      meta="Design Systems · 13. Juli 2026"
+      titel="Warum „Single Source of Truth“ meistens eine Lüge ist"
+      auszug="In der Praxis gibt es fast immer mindestens drei Wahrheiten."
+      href="/blog/single-source-of-truth"
+    />
+    <ArtikelZeile groesse="klein" meta="Code · 2. Mai 2026" titel="Tokens sind Verträge" href="/blog/tokens-sind-vertraege" />
+    <ArtikelZeile groesse="klein" meta="Handwerk · 9. März 2026" titel="Kleine Werkzeuge bauen" href="/blog/kleine-werkzeuge" />
+  </Abschnitt>
+
+  <Abschnitt id="verzeichnis" nummer="05" label="Verzeichnis" layout="links">
+    <Inhaltsverzeichnis {eintraege} />
+  </Abschnitt>
+  <Abschnitt id="verz-eins" nummer="06" label="Die drei Wahrheiten" layout="oben">
+    <div class="hoch"></div>
+  </Abschnitt>
+  <Abschnitt id="verz-zwei" nummer="07" label="Warum die Lücke strukturell ist" layout="oben">
+    <div class="hoch"></div>
+  </Abschnitt>
+  <Abschnitt id="verz-drei" nummer="08" label="Eine kontrollierte Übersetzung" layout="oben">
+    <div class="hoch"></div>
+  </Abschnitt>
+
+  <Abschnitt id="lang-kopf" nummer="09" label={lang} layout="oben">
+    <Seitenkopf art="artikel" label="Artikel" titel={lang} einleitung={`Einleitung mit ${lang}.`} />
+  </Abschnitt>
+
+  <Abschnitt id="lang" nummer="10" label={lang} layout="oben">
+    <div class="karten">
+      <ProjektKarte format="4x5" meta={lang} titel={lang} wirkung={lang} href="/projects/lang" slug="lang" />
+      <ArtikelZeile groesse="gross" meta={lang} titel={lang} auszug={lang} href="/blog/lang" />
+      <ArtikelZeile groesse="klein" meta={lang} titel={lang} href="/blog/lang-klein" />
+    </div>
+  </Abschnitt>
+
+  <KontaktPanel email="patrick@ptrckschrdtr.de" />
+</SiteLayout>
+
+<style>
+  .karten {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--layout-block-gap) var(--layout-gutter);
+  }
+
+  @media (min-width: 1024px) {
+    .karten {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+
+  .hoch {
+    min-height: var(--global-size-640);
+  }
+</style>

@@ -1,0 +1,104 @@
+---
+// Projekt-Karte (Figma 260:2): randlos, ganze Karte ein Linkziel (Titel-Link mit ::after), Titel als h3.
+// Bild mit leerem alt; view-transition-name am Bild (nur ein Name, kein Wert) für die Fallstudien-Transition.
+interface Props {
+  format: "16x10" | "4x5" | "1x1"
+  meta: string
+  titel: string
+  wirkung: string
+  bild?: string
+  href: string
+  slug: string
+}
+const { format, meta, titel, wirkung, bild, href, slug } = Astro.props
+---
+
+<article class:list={["projekt-karte", `format-${format}`]}>
+  <div class="bild" data-bild style={`view-transition-name: projekt-bild-${slug}`}>
+    {bild && <img src={bild} alt="" loading="lazy" decoding="async" />}
+  </div>
+  <div class="text">
+    <p class="text-label meta">{meta}</p>
+    <h3 class="text-h3 titel"><a {href}>{titel}</a></h3>
+    <p class="text-small wirkung">{wirkung}</p>
+  </div>
+</article>
+
+<style>
+  .projekt-karte {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: var(--projekt-karte-abstand);
+    padding: var(--projekt-karte-innenabstand);
+    border-radius: var(--projekt-karte-radius);
+    corner-shape: squircle;
+    background: var(--projekt-karte-flaeche);
+  }
+
+  /* Formate sind Seitenverhältnisse (Figma 400/250, 4x5, 1x1), kein Token vorhanden */
+  .bild {
+    overflow: hidden;
+    border-radius: var(--projekt-karte-bild-radius);
+    corner-shape: squircle;
+    background: var(--projekt-karte-bild-flaeche);
+  }
+  .format-16x10 .bild {
+    aspect-ratio: 16 / 10;
+  }
+  .format-4x5 .bild {
+    aspect-ratio: 4 / 5;
+  }
+  .format-1x1 .bild {
+    aspect-ratio: 1 / 1;
+  }
+
+  .bild img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .text {
+    display: flex;
+    flex-direction: column;
+    gap: var(--projekt-karte-zeilen-abstand);
+    padding: var(--projekt-karte-zeilen-abstand) var(--projekt-karte-text-abstand) var(--projekt-karte-text-abstand);
+    overflow-wrap: anywhere;
+    hyphens: auto;
+  }
+
+  .meta,
+  .titel,
+  .wirkung {
+    margin: 0;
+  }
+  .meta {
+    color: var(--projekt-karte-meta-farbe);
+  }
+  .titel {
+    color: var(--projekt-karte-titel-farbe);
+  }
+  .wirkung {
+    color: var(--projekt-karte-text-farbe);
+  }
+
+  /* Ein Linkziel: der Titel-Link deckt die ganze Karte ab; der Fokusrahmen sitzt an der Karte */
+  .titel a {
+    color: inherit;
+    text-decoration: none;
+  }
+  .titel a::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+  }
+  .titel a:focus-visible {
+    outline: none;
+  }
+  .projekt-karte:has(a:focus-visible) {
+    outline: var(--global-border-2) solid var(--theme-border-focus);
+    outline-offset: var(--global-size-4);
+  }
+</style>

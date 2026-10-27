@@ -1,0 +1,123 @@
+---
+// Kontakt-Panel (Figma 262:2): Abschluss der Seite auf der Farbfläche. Label, Titel, Text, E-Mail (text/h1),
+// Aktionen und optional das Handschrift-Tag (Slot „tag“, ohne Inhalt wird nichts gerendert).
+// Slot „aktionen“ nimmt weitere Knöpfe auf (z. B. Lebenslauf). Kopieren: src/scripts/kopieren.ts.
+import Knopf from "./Knopf.astro"
+
+interface Props {
+  label?: string
+  titel?: string
+  text?: string
+  email: string
+}
+const {
+  label = "Kontakt",
+  titel = "Lass uns reden.",
+  text = "Schreib mir ein paar Zeilen zu deinem Vorhaben. Ich antworte in der Regel innerhalb von zwei Werktagen.",
+  email,
+} = Astro.props
+const hatTag = Astro.slots.has("tag")
+---
+
+<section class="kontakt-panel" aria-labelledby="kontakt-titel" data-kontakt>
+  <p class="text-label label"><span aria-hidden="true">→ </span>{label}</p>
+  <div class="inhalt">
+    <h2 id="kontakt-titel" class="text-hero titel">{titel}</h2>
+    <p class="text-body text">{text}</p>
+    <a class="text-h1 email" href={`mailto:${email}`} data-email>{email}</a>
+    <div class="aktionen">
+      <Knopf art="primary" href={`mailto:${email}`}>E-Mail schreiben</Knopf>
+      <Knopf art="ghost" data-kopieren>Adresse kopieren</Knopf>
+      <slot name="aktionen" />
+    </div>
+    <p class="text-small meldung" aria-live="polite" data-meldung></p>
+  </div>
+  {
+    hatTag && (
+      <div class="tag" data-tag>
+        <slot name="tag" />
+      </div>
+    )
+  }
+</section>
+
+<style>
+  .kontakt-panel {
+    --knopf-ghost-farbe: var(--kontakt-panel-text-farbe);
+    display: grid;
+    grid-template-columns: repeat(var(--layout-columns), minmax(0, 1fr));
+    gap: var(--kontakt-panel-abstand-mobil) var(--kontakt-panel-spaltenabstand);
+    padding: var(--kontakt-panel-innenabstand-mobil-y) var(--kontakt-panel-innenabstand-mobil-x);
+    border-radius: var(--kontakt-panel-radius);
+    corner-shape: squircle;
+    background: var(--kontakt-panel-flaeche);
+    color: var(--kontakt-panel-text-farbe);
+  }
+
+  .label,
+  .inhalt,
+  .tag {
+    grid-column: 1 / -1;
+    min-width: 0;
+  }
+
+  .label {
+    margin: 0;
+  }
+
+  .inhalt {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--kontakt-panel-text-abstand);
+  }
+
+  .titel,
+  .text,
+  .email,
+  .meldung {
+    margin: 0;
+    max-width: 100%;
+    overflow-wrap: anywhere;
+  }
+
+  .email {
+    color: inherit;
+  }
+
+  .aktionen {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--kontakt-panel-aktion-abstand);
+  }
+
+  .tag {
+    min-height: var(--kontakt-panel-tag-hoehe);
+    border-radius: var(--kontakt-panel-tag-radius);
+    corner-shape: squircle;
+  }
+
+  @media (min-width: 768px) {
+    .kontakt-panel {
+      padding: var(--kontakt-panel-innenabstand-y) var(--kontakt-panel-innenabstand-x);
+    }
+  }
+
+  /* Desktop: Label links (3), Text in der Mitte (6), Handschrift rechts (3); darunter gestapelt */
+  @media (min-width: 1024px) {
+    .kontakt-panel {
+      gap: 0 var(--kontakt-panel-spaltenabstand);
+    }
+    .label {
+      grid-column: 1 / span 3;
+    }
+    .inhalt {
+      grid-column: 4 / span 6;
+      grid-row: 1;
+    }
+    .tag {
+      grid-column: 10 / span 3;
+      grid-row: 1;
+    }
+  }
+</style>
