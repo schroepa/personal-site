@@ -131,6 +131,7 @@ test("neue Styles (neu*.css, components/site) enthalten keine Literalwerte", () 
   const astroFiles = [
     ...collect(join(root, "src/components/site"), (n) => n.endsWith(".astro")),
     join(root, "src/layouts/SiteLayout.astro"),
+    join(root, "src/pages/index.astro"),
   ]
   assert.ok(astroFiles.length >= 8, "Layout und Site-Komponenten erwartet")
   for (const file of astroFiles) {
@@ -157,6 +158,7 @@ test("@media-Bedingungen der Komponenten stammen alle aus tokens.css", () => {
   const astroFiles = [
     ...collect(join(root, "src/components/site"), (n) => n.endsWith(".astro")),
     join(root, "src/layouts/SiteLayout.astro"),
+    join(root, "src/pages/index.astro"),
   ]
   for (const file of astroFiles) {
     for (const b of styleBlocks(readFileSync(file, "utf8"))) {

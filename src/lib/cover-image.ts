@@ -24,3 +24,9 @@ export function coverThumbSrc(path: string | undefined): string | undefined {
   if (!path) return undefined
   return isBlogCover(path) ? blogCoverThumb(path) : path
 }
+
+/** Mittlere Variante (1200 px) für große Zeilen; andere Pfade bleiben unverändert. */
+export function coverMittel(path: string | undefined): string | undefined {
+  if (!path) return undefined
+  return isBlogCover(path) ? path.replace(/\.webp$/, '-1200.webp') : path
+}

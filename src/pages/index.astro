@@ -1,839 +1,308 @@
 ---
-import BaseLayout from "@/layouts/BaseLayout.astro"
-import SectionIndicator from "@/components/astro/SectionIndicator.astro"
+// Startseite im neuen Design (Figma 237:154, Screens 268:440 / 268:782 / 268:1085).
+// Einstieg mit Lichtband · 02 Über mich · 03 Arbeit · 04 Digital Art · 05 Gedanken · 06 Kontakt.
+// Die alte Fassung liegt unter docs/archiv/index-alt.astro (Löschung in Task 15).
 import { getCollection } from "astro:content"
+import SiteLayout from "@/layouts/SiteLayout.astro"
+import Abschnitt from "@/components/site/Abschnitt.astro"
+import ArtikelZeile from "@/components/site/ArtikelZeile.astro"
+import GalerieAkkordeon from "@/components/site/GalerieAkkordeon.astro"
+import KontaktPanel from "@/components/site/KontaktPanel.astro"
+import Knopf from "@/components/site/Knopf.astro"
+import Lichtband from "@/components/site/Lichtband.astro"
+import ProjektKarte from "@/components/site/ProjektKarte.astro"
+import { coverMittel, coverThumbSrc } from "@/lib/cover-image"
+import { readingTime } from "@/lib/reading-time"
+import {
+  artikelMeta,
+  kurzTitel,
+  projektMeta,
+  waehleGedanken,
+  waehleProjekte,
+  wirkungAusBeschreibung,
+} from "@/lib/startseite"
 
-// Projekte: Featured zuerst, dann nach Datum, max 3
-const allProjects = await getCollection("projects")
-const featuredProjects = allProjects
-  .filter((p) => p.data.featured)
-  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime())
-  .slice(0, 3)
+const slugVon = (id: string) => id.replace(/\.md$/, "")
 
-// Blog: neueste zuerst, max 3, keine Drafts
-const allPosts = await getCollection("blog", ({ data }) => !data.draft)
-const latestPosts = allPosts
-  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime())
-  .slice(0, 3)
+// Bento (Figma: 4 Karten + „Außerdem“-Liste): featured-Projekte, jüngste zuerst.
+// Das Format folgt der Position im Bento (Figma), nicht dem Inhalt; das Schema bekommt `format`/`wirkung` in Task 8.
+const BENTO_FORMATE = ["16x10", "4x5", "1x1", "1x1"] as const
+const AUSSERDEM_ANZAHL = 2
+const projekte = waehleProjekte(await getCollection("projects"), BENTO_FORMATE.length + AUSSERDEM_ANZAHL)
+const karten = projekte.slice(0, BENTO_FORMATE.length)
+const ausserdem = projekte.slice(BENTO_FORMATE.length)
 
-const getYear = (date: Date) =>
-  new Intl.DateTimeFormat("de-DE", { year: "numeric" }).format(date)
+// Gedanken: die jüngsten veröffentlichten Beiträge (1 groß, 2 klein)
+const { gross, klein } = waehleGedanken(await getCollection("blog"))
+const beitraege = [gross, ...klein].filter((b) => b !== undefined)
 
-const formatDate = (date: Date) =>
-  new Intl.DateTimeFormat("de-DE", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  }).format(date)
-
-const homeSections = [
-  { id: "section-intro", label: "Intro" },
-  { id: "section-ueber", label: "Über" },
-  { id: "section-arbeit", label: "Arbeit" },
-  { id: "section-gedanken", label: "Gedanken" },
-  { id: "section-kontakt", label: "Kontakt" },
-]
+// Platzhalterkapitel mit vorhandenen Bildern, bis die echten Kapitel vorliegen
+const kapitel = [
+  { titel: "Digital Art – Lettering, Graffiti, Tags & Styles", bild: "/images/gallery/digital-graffiti/IMG_0094.webp" },
+  { titel: "Lettering", bild: "/images/gallery/digital-graffiti/IMG_0128.webp" },
+  { titel: "Skizzen", bild: "/images/gallery/digital-graffiti/IMG_0132.webp" },
+  { titel: "Mode", bild: "/images/gallery/digital-graffiti/IMG_0133.webp" },
+  { titel: "Archiv", bild: "/images/gallery/digital-graffiti/IMG_0138.webp" },
+].map((k) => ({ ...k, href: "/projects/digital-art" }))
 ---
 
-<BaseLayout
-  title="Patrick Schröder — UI Designer & Developer"
+<SiteLayout
+  title="Patrick Schröder — Design Engineer in Berlin"
   description="Design Engineer aus Berlin. Aufgewachsen mit Spraydosen, groß geworden mit Code."
+  blatt="Einstieg"
 >
-  <SectionIndicator sections={homeSections} />
-
-  <div class="scroll-container" id="scroll-container">
-    <!-- ── Section 01: INTRO ──────────────────────────────────────────── -->
-    <section id="section-intro" class="snap-section">
-      <div class="page-grid snap-content intro-content">
-        <span class="t-label intro-eyebrow text-muted-foreground">
-          Design Engineer — Berlin
-        </span>
-
-        <div class="intro-statement">
-          <div class="pixel-text" data-pixel-text>
-            <h1 class="t-hero intro-heading">
-              <span class="intro-line">Ich entwerfe Systeme.</span>
-              <span class="intro-line">Ich baue sie auch.</span>
-            </h1>
-          </div>
-        </div>
-
-        <div class="scroll-hint" aria-hidden="true">
-          <span class="scroll-hint-text">Scroll</span>
-          <span class="scroll-hint-arrow">↓</span>
-        </div>
-      </div>
-    </section>
-
-    <!-- ── Section 02: ÜBER ──────────────────────────────────────────── -->
-    <section id="section-ueber" class="snap-section">
-      <div class="page-grid snap-content ueber-content">
-        <span class="t-label ueber-eyebrow text-muted-foreground"
-          >Über mich</span
-        >
-
-        <div class="ueber-grid">
-          <!-- Linke Spalte: Stichworte / Statement -->
-          <div class="ueber-left">
-            <h2 class="t-h2 ueber-statement">
-              Design Engineer.<br />Berlin.<br />15+ Jahre.
-            </h2>
-            <p class="t-small ueber-keywords text-muted-foreground">
-              Systeme. Prozesse.<br />Menschen. Pixel.
-            </p>
-          </div>
-
-          <!-- Rechte Spalte: Bio-Text -->
-          <div class="ueber-right">
-            <p class="t-body ueber-para">
-              Seit über 15 Jahren gestalte ich digitale Produkte an der
-              Schnittstelle von Design und Code. Mein Weg führte mich von
-              High-Growth E-Commerce (DefShop) und Corporate Innovation (Oetker
-              Digital) bis hin zum Aufbau komplexer B2B-Plattformen und
-              Super-Apps.
-            </p>
-            <p class="t-body ueber-para">
-              Ich bezeichne mich selbst gerne als Design Engineer — weil ich die
-              Sprache der Entwickler spreche. Ob ich skalierbare Design-Systeme
-              auf Basis von shadcn/ui und Tailwind CSS entwerfe oder repetitive
-              Design-Ops durch n8n und KI-Workflows automatisiere — mein Ziel
-              ist immer ein nahtloser Übergang vom Pixel zum produktiven Code.
-            </p>
-            <p class="t-body ueber-para">
-              Ich glaube fest an die Kraft der physischen Zusammenarbeit.
-              Deshalb findet man mich meistens direkt im Berliner Office, wo ich
-              am liebsten in cross-funktionalen Teams komplexe Workflows in
-              intuitive Erlebnisse verwandele.
-            </p>
-            <a href="/about" class="ueber-link t-small" data-cursor="link">
-              Mehr über mich →
-            </a>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ── Section 03: ARBEIT ─────────────────────────────────────────── -->
-    <section id="section-arbeit" class="snap-section">
-      <div class="page-grid snap-content arbeit-content">
-        <div class="section-label-row">
-          <span class="t-label text-muted-foreground">Ausgewählte Arbeit</span>
-          <a
-            href="/projects"
-            class="section-all-link t-label"
-            data-cursor="link"
-          >
-            Alle Projekte →
-          </a>
-        </div>
-
-        <ol class="home-list" aria-label="Ausgewählte Projekte">
-          {
-            featuredProjects.map((project, i) => {
-              const slug = project.id.replace(/\.md$/, "")
-              const coverSrc = project.data.coverImage ?? undefined
-              const num = String(i + 1).padStart(2, "0")
-              const year = getYear(project.data.date)
-              return (
-                <li>
-                  <a
-                    href={`/projects/${slug}`}
-                    class="home-list-item"
-                    data-cursor="link"
-                    data-preview={coverSrc}
-                  >
-                    <span class="home-list-num" aria-hidden="true">
-                      {num}
-                    </span>
-                    <span class="home-list-title">{project.data.title}</span>
-                    <time
-                      class="home-list-year"
-                      datetime={project.data.date.toISOString()}
-                    >
-                      {year}
-                    </time>
-                  </a>
-                </li>
-              )
-            })
-          }
-        </ol>
-
-        <div id="home-project-preview" class="home-preview" aria-hidden="true">
-          <img
-            id="home-preview-img"
-            src=""
-            alt=""
-            loading="lazy"
-            decoding="async"
-          />
-        </div>
-      </div>
-    </section>
-
-    <!-- ── Section 03: GEDANKEN ───────────────────────────────────────── -->
-    <section id="section-gedanken" class="snap-section">
-      <div class="page-grid snap-content gedanken-content">
-        <div class="section-label-row">
-          <span class="t-label text-muted-foreground">Gedanken</span>
-          <a href="/blog" class="section-all-link t-label" data-cursor="link">
-            Alle Artikel →
-          </a>
-        </div>
-
-        <ol class="home-list" aria-label="Neueste Artikel">
-          {
-            latestPosts.map((post, i) => {
-              const slug = post.id.replace(/\.md$/, "")
-              const num = String(i + 1).padStart(2, "0")
-              return (
-                <li>
-                  <a
-                    href={`/blog/${slug}`}
-                    class="home-list-item"
-                    data-cursor="link"
-                  >
-                    <span class="home-list-num" aria-hidden="true">
-                      {num}
-                    </span>
-                    <span class="home-list-title">{post.data.title}</span>
-                    <time
-                      class="home-list-year"
-                      datetime={post.data.date.toISOString()}
-                    >
-                      {formatDate(post.data.date)}
-                    </time>
-                  </a>
-                </li>
-              )
-            })
-          }
-        </ol>
-      </div>
-    </section>
-
-    <!-- ── Section 05: KONTAKT ────────────────────────────────────────── -->
-    <section id="section-kontakt" class="snap-section">
-      <div class="page-grid snap-content kontakt-content">
-        <div class="kontakt-body">
-          <p class="t-label kontakt-label text-muted-foreground">Kontakt</p>
-          <div class="pixel-text" data-pixel-text>
-            <h2 class="t-hero kontakt-heading">Lass uns reden.</h2>
-          </div>
-          <!-- E-Mail: Bot-Schutz via data-Attribute, kein mailto im HTML -->
-          <button
-            class="kontakt-email"
-            data-user="kontakt"
-            data-domain="ptrckschrdtr.de"
-            data-cursor="link"
-            data-magnetic
-            type="button"
-            aria-label="E-Mail: kontakt@ptrckschrdtr.de"
-          >
-            kontakt@ptrckschrdtr.de
-          </button>
-          <div class="kontakt-secondary">
-            <a
-              href="/cv.pdf"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="t-small text-muted-foreground"
-              data-cursor="link"
-            >
-              Lebenslauf ↓
-            </a>
-            <span class="t-small text-muted-foreground" aria-hidden="true"
-              >·</span
-            >
-            <a
-              href="/projects"
-              class="t-small text-muted-foreground"
-              data-cursor="link"
-            >
-              Projekte ansehen
-            </a>
-          </div>
-        </div>
-
-        <!-- DSGVO-Pflichtlinks: sichtbar in der letzten Section (kein Footer auf Homepage) -->
-        <div class="kontakt-footer-links">
-          <span class="t-small text-muted-foreground">
-            © {new Date().getFullYear()} Patrick Schröder
-          </span>
-          <div class="kontakt-footer-legal">
-            <a
-              href="/impressum"
-              class="t-small kontakt-footer-link text-muted-foreground"
-              data-cursor="link"
-            >
-              Impressum
-            </a>
-            <span class="t-small text-muted-foreground" aria-hidden="true"
-              >·</span
-            >
-            <a
-              href="/datenschutz"
-              class="t-small kontakt-footer-link text-muted-foreground"
-              data-cursor="link"
-            >
-              Datenschutz
-            </a>
-            <span class="t-small text-muted-foreground" aria-hidden="true"
-              >·</span
-            >
-            <button
-              type="button"
-              class="t-small kontakt-footer-link text-muted-foreground"
-              onclick="Cookiebot.renew()"
-              data-cursor="link"
-            >
-              Cookie-Einstellungen
-            </button>
-          </div>
-        </div>
-      </div>
-    </section>
+  <div class="einstieg" id="einstieg">
+    <Lichtband />
+    <p class="text-label kopfzeile">
+      <span aria-hidden="true">→ </span>Design Engineer<span aria-hidden="true"> → </span>Berlin
+    </p>
+    <div class="aussage">
+      <h1 class="text-hero titel">
+        <span class="zeile">Ich entwerfe Systeme.</span>
+        <span class="zeile">Ich baue sie auch.</span>
+      </h1>
+      <p class="text-label scrollen" aria-hidden="true">Scrollen ↓</p>
+    </div>
   </div>
-</BaseLayout>
+
+  <Abschnitt id="ueber-mich" nummer="02" label="Über mich" layout="oben">
+    <div class="ueber">
+      <p class="text-signatur signatur">
+        <span class="zeile">Design Engineer.</span>
+        <span class="zeile">Berlin.</span>
+        <span class="zeile">15+ Jahre.</span>
+      </p>
+      <div class="text">
+        <p class="text-body">
+          Seit über 15 Jahren gestalte ich digitale Produkte an der Schnittstelle von Design und Code. Mein Weg führte
+          mich von High-Growth E-Commerce (DefShop) und Corporate Innovation (Oetker Digital) bis zum Aufbau komplexer
+          B2B-Plattformen und Super-Apps.
+        </p>
+        <p class="text-body">
+          Ich spreche die Sprache der Entwicklung. Ob skalierbare Design Systems mit shadcn/ui und Tailwind CSS oder
+          Design-Ops mit n8n und KI: Mein Ziel ist ein nahtloser Übergang vom Pixel zum produktiven Code.
+        </p>
+        <div class="aktion"><Knopf art="primary" href="/about">Mehr über mich</Knopf></div>
+      </div>
+      <p class="text-label stichworte">Systeme · Prozesse · Menschen · Pixel</p>
+    </div>
+  </Abschnitt>
+
+  <Abschnitt id="arbeit" nummer="03" label="Arbeit" layout="oben">
+    <div class="bento">
+      {
+        karten.map((p, i) => (
+          <div class="karte" data-projekt={slugVon(p.id)}>
+            <ProjektKarte
+              format={BENTO_FORMATE[i]}
+              meta={projektMeta(p.data.tags, p.data.date)}
+              titel={kurzTitel(p.data.title)}
+              wirkung={wirkungAusBeschreibung(p.data.description)}
+              bild={p.data.coverImage}
+              href={`/projects/${slugVon(p.id)}`}
+              slug={slugVon(p.id)}
+            />
+          </div>
+        ))
+      }
+      <div class="weitere">
+        {ausserdem.length > 0 && <p class="text-label meta">Außerdem</p>}
+        {
+          ausserdem.length > 0 && (
+            <ul class="liste text-body">
+              {ausserdem.map((p) => (
+                <li>
+                  <a href={`/projects/${slugVon(p.id)}`}>{kurzTitel(p.data.title)}</a>
+                </li>
+              ))}
+            </ul>
+          )
+        }
+        <div class="aktion"><Knopf art="primary" href="/projects">Alle Projekte</Knopf></div>
+      </div>
+    </div>
+  </Abschnitt>
+
+  <Abschnitt id="digital-art" nummer="04" label="Digital Art" layout="oben">
+    <GalerieAkkordeon {kapitel} label="Digital Art" />
+  </Abschnitt>
+
+  <Abschnitt id="gedanken" nummer="05" label="Gedanken" layout="links">
+    <div class="gedanken">
+      {
+        beitraege.map((b, i) => (
+          <div data-beitrag={slugVon(b.id)}>
+            <ArtikelZeile
+              groesse={i === 0 ? "gross" : "klein"}
+              meta={artikelMeta(b.data.tags, readingTime(b.body ?? ""), b.data.date)}
+              titel={b.data.title}
+              auszug={b.data.description}
+              bild={i === 0 ? coverMittel(b.data.coverImage) : coverThumbSrc(b.data.coverImage)}
+              href={`/blog/${slugVon(b.id)}`}
+            />
+          </div>
+        ))
+      }
+      <div class="aktion"><Knopf art="primary" href="/blog">Alle Artikel</Knopf></div>
+    </div>
+  </Abschnitt>
+
+  <div class="kontakt">
+    <KontaktPanel label="06 Kontakt" email="kontakt@ptrckschrdtr.de">
+      <Knopf slot="aktionen" art="ghost" href="/cv">Lebenslauf</Knopf>
+    </KontaktPanel>
+  </div>
+</SiteLayout>
 
 <style>
-  /* ── Scroll-Container ────────────────────────────────────────────────── */
-  .scroll-container {
-    height: 100dvh;
-    overflow-y: scroll;
-    scroll-snap-type: y mandatory;
-    overscroll-behavior: none;
-    scrollbar-width: none;
+  /* Einstieg: bündig über die ganze Seitenbreite, direkt unter dem Kopf. Lichtband und Text liegen übereinander. */
+  .einstieg {
+    display: grid;
+    margin-block-start: calc(-1 * var(--layout-section-gap));
+    margin-inline: calc(-1 * var(--layout-margin));
   }
-  .scroll-container::-webkit-scrollbar {
-    display: none;
+  .einstieg > :global(*) {
+    grid-area: 1 / 1;
   }
-
-  :global(body:has(.scroll-container)) {
-    overflow: hidden;
-  }
-
-  /* ── Sections ────────────────────────────────────────────────────────── */
-  .snap-section {
-    height: 100dvh;
-    scroll-snap-align: start;
-    position: relative;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-  }
-
-  /* Room for padded distort canvas — desktop fine-pointer only (avoids mobile bleed) */
-  @media (hover: hover) and (pointer: fine) {
-    #section-intro,
-    #section-kontakt {
-      overflow: visible;
-    }
-  }
-
-  .snap-content {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    position: relative;
-  }
-
-  /* ── Section 01: Intro ───────────────────────────────────────────────── */
-  .intro-content {
-    justify-content: flex-end;
-    padding-bottom: 5rem;
-  }
-
-  .intro-eyebrow {
-    position: absolute;
-    top: 7rem;
-    left: var(--grid-pad);
-  }
-
-  .intro-statement {
-    max-width: 90vw;
-  }
-
-  /* Fluid text distort overlay (Three.js) — canvas size/offset set in JS (padding) */
-  .pixel-text {
-    position: relative;
-    display: block;
-    width: fit-content;
-    max-width: 100%;
+  .kopfzeile {
+    align-self: start;
+    margin: 0;
+    padding: var(--global-size-40) var(--layout-margin) 0;
+    color: var(--theme-text-default);
     z-index: 1;
   }
-
-  .pixel-text :global(.pixel-text-canvas) {
-    pointer-events: none;
-    display: block;
-  }
-
-  .pixel-text.is-active .intro-heading,
-  .pixel-text.is-active .kontakt-heading {
-    color: transparent;
-    animation: none;
-  }
-
-  /* Desktop: skip weight-reveal — canvas takes over after fonts load */
-  @media (hover: hover) and (pointer: fine) {
-    @media (prefers-reduced-motion: no-preference) {
-      .pixel-text .intro-heading {
-        animation: none;
-      }
-    }
-  }
-
-  .intro-heading {
-    line-height: 0.92;
-    animation: weight-reveal 900ms cubic-bezier(0.16, 1, 0.3, 1) both;
-    animation-delay: 80ms;
-  }
-
-  @keyframes weight-reveal {
-    from {
-      opacity: 0;
-    }
-    to {
-      opacity: 1;
-    }
-  }
-
-  .intro-line {
-    display: block;
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .intro-heading {
-      animation: none;
-    }
-  }
-
-  /* ── Scroll-Hint ─────────────────────────────────────────────────────── */
-  .scroll-hint {
+  .aussage {
+    align-self: end;
     display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    margin-top: 2.5rem;
-    font-size: var(--text-xs);
-    letter-spacing: var(--tracking-wide);
-    text-transform: uppercase;
-    color: var(--muted-foreground);
-    opacity: 0.55;
+    flex-direction: column;
+    gap: var(--global-size-20);
+    padding: 0 var(--layout-margin) var(--global-size-64);
+    z-index: 1;
   }
-
-  .scroll-hint-arrow {
-    display: inline-block;
-    animation: bounce-down 2.5s ease-in-out infinite;
-  }
-
-  @keyframes bounce-down {
-    0%,
-    100% {
-      transform: translateY(0);
-    }
-    50% {
-      transform: translateY(5px);
-    }
-  }
-
-  /* ── Sections 02–05 ──────────────────────────────────────────────────── */
-  .ueber-content,
-  .arbeit-content,
-  .gedanken-content,
-  .kontakt-content {
-    justify-content: flex-end;
-    padding-bottom: 5rem;
-  }
-
-  /* ── Section 02: Über ────────────────────────────────────────────────── */
-  .ueber-eyebrow {
-    position: absolute;
-    top: 7rem;
-    left: var(--grid-pad);
-  }
-
-  .ueber-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: clamp(2rem, 5vw, 5rem);
-    align-items: end;
-    max-width: var(--text-max);
-  }
-
-  @media (max-width: 767px) {
-    .ueber-grid {
-      grid-template-columns: 1fr;
-      gap: 2rem;
-    }
-  }
-
-  .ueber-statement {
-    line-height: var(--leading-snug);
-    margin-bottom: 1.5rem;
-  }
-
-  .ueber-keywords {
-    line-height: var(--leading-loose);
-    opacity: 0.6;
-  }
-
-  .ueber-para {
-    color: var(--muted-foreground);
-    line-height: var(--leading-loose);
-    margin-bottom: 1rem;
-  }
-
-  .ueber-para:last-of-type {
-    margin-bottom: 1.5rem;
-  }
-
-  .ueber-link {
-    color: var(--foreground);
-    text-decoration: none;
-    border-bottom: 1px solid
-      color-mix(in oklch, var(--foreground) 25%, transparent);
-    padding-bottom: 0.125rem;
-    transition: border-color 200ms ease;
-  }
-
-  .ueber-link:hover {
-    border-color: var(--foreground);
-  }
-
-  .section-label-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 2.5rem;
-    border-bottom: 1px solid
-      color-mix(in oklch, var(--foreground) 12%, transparent);
-    padding-bottom: 1rem;
-  }
-
-  .section-all-link {
-    color: var(--muted-foreground);
-    text-decoration: none;
-    transition: color 200ms ease;
-  }
-  .section-all-link:hover {
-    color: var(--foreground);
-  }
-
-  /* ── Textliste ───────────────────────────────────────────────────────── */
-  .home-list {
-    list-style: none;
-    padding: 0;
+  .titel,
+  .scrollen {
     margin: 0;
-    max-width: var(--text-max);
   }
-
-  .home-list-item {
-    display: grid;
-    grid-template-columns: 2.5rem 1fr auto;
-    align-items: baseline;
-    gap: 1.5rem;
-    padding: 1.125rem 0;
-    border-bottom: 1px solid
-      color-mix(in oklch, var(--foreground) 12%, transparent);
-    text-decoration: none;
-    color: var(--foreground);
-    transition: opacity 250ms ease;
+  .titel {
+    color: var(--theme-text-strong);
   }
-
-  .home-list li:first-child .home-list-item {
-    border-top: 1px solid
-      color-mix(in oklch, var(--foreground) 12%, transparent);
-  }
-
-  .home-list:has(.home-list-item:hover) .home-list-item:not(:hover) {
-    opacity: 0.25;
-  }
-
-  .home-list-item:focus-visible {
-    outline: 2px solid var(--foreground);
-    outline-offset: 2px;
-  }
-
-  .home-list-num {
-    font-size: var(--text-xs);
-    letter-spacing: var(--tracking-wide);
-    color: var(--muted-foreground);
-    font-variant-numeric: tabular-nums;
-  }
-
-  .home-list-title {
-    font-size: var(--text-base);
-    font-weight: 500;
-    letter-spacing: var(--tracking-snug);
-  }
-
-  .home-list-year {
-    font-size: var(--text-xs);
-    letter-spacing: var(--tracking-wide);
-    color: var(--muted-foreground);
-    white-space: nowrap;
-  }
-
-  /* ── Hover-Preview (Section 02, nur Desktop) ─────────────────────────── */
-  .home-preview {
-    position: fixed;
-    right: 10%;
-    top: 50%;
-    transform: translateY(-50%);
-    width: clamp(200px, 22vw, 380px);
-    aspect-ratio: 4 / 3;
-    z-index: 50;
-    pointer-events: none;
-    opacity: 0;
-    overflow: hidden;
-    transition: opacity 300ms cubic-bezier(0.16, 1, 0.3, 1);
-  }
-  .home-preview.is-visible {
-    opacity: 1;
-  }
-  .home-preview img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
+  .zeile {
     display: block;
   }
-
-  @media (hover: none), (max-width: 900px) {
-    .home-preview {
-      display: none;
-    }
-    .home-list-item:hover,
-    .home-list:has(.home-list-item:hover) .home-list-item:not(:hover) {
-      opacity: 1;
-    }
+  .scrollen {
+    color: var(--theme-text-default);
   }
 
-  /* ── Section 04: Kontakt ─────────────────────────────────────────────── */
-  .kontakt-label {
-    margin-bottom: 2rem;
+  /* Über mich: Signatur über 7 Spalten, Text über 5; Stichworte darunter */
+  .ueber {
+    display: grid;
+    grid-template-columns: subgrid;
+    row-gap: var(--global-size-40);
+    align-items: start;
   }
-
-  .kontakt-heading {
-    line-height: 0.92;
-    margin-bottom: 2.5rem;
+  .ueber > * {
+    grid-column: 1 / -1;
   }
-
-  .kontakt-email {
-    display: inline-block;
-    font-size: clamp(1.25rem, 2.5vw, 2rem);
-    font-weight: 500;
-    letter-spacing: var(--tracking-snug);
-    color: var(--foreground);
-    text-decoration: none;
-    border-bottom: 1px solid
-      color-mix(in oklch, var(--foreground) 25%, transparent);
-    padding-bottom: 0.25rem;
-    transition:
-      border-color 200ms ease,
-      opacity 200ms ease;
-    margin-bottom: 2rem;
+  .signatur,
+  .stichworte {
+    margin: 0;
   }
-  .kontakt-email:hover {
-    border-color: var(--foreground);
-    opacity: 0.7;
+  .signatur {
+    color: var(--theme-text-strong);
   }
-
-  .kontakt-secondary {
+  .text {
     display: flex;
-    align-items: center;
-    gap: 0.75rem;
+    flex-direction: column;
+    gap: var(--space-stack-paragraph);
+    color: var(--theme-text-default);
   }
-  .kontakt-secondary a {
-    color: var(--muted-foreground);
-    text-decoration: none;
-    transition: color 200ms ease;
+  .text p {
+    margin: 0;
   }
-  .kontakt-secondary a:hover {
-    color: var(--foreground);
+  .stichworte {
+    color: var(--theme-text-default);
   }
 
-  /* DSGVO-Links unten in der Kontakt-Section */
-  .kontakt-footer-links {
+  /* Bento: Karten und „Außerdem“-Liste im 12er-Raster (Figma 268:533) */
+  .bento {
+    display: grid;
+    grid-template-columns: subgrid;
+    row-gap: var(--layout-gutter);
+    align-items: start;
+  }
+  .bento > * {
+    grid-column: 1 / -1;
+    min-width: 0;
+  }
+  .weitere {
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 0.75rem;
-    margin-top: 3rem;
-    padding-top: 1.5rem;
-    border-top: 1px solid color-mix(in oklch, var(--foreground) 8%, transparent);
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--global-size-12);
   }
-
-  .kontakt-footer-legal {
+  .weitere .meta {
+    margin: 0;
+    color: var(--theme-text-default);
+  }
+  .liste {
     display: flex;
-    align-items: center;
-    gap: 0.75rem;
-  }
-
-  .kontakt-footer-link {
-    text-decoration: none;
-    transition: color 200ms ease;
-    background: none;
-    border: none;
+    flex-direction: column;
+    gap: var(--global-size-20);
+    margin: 0;
     padding: 0;
-    cursor: pointer;
-    font: inherit;
-    color: inherit;
+    list-style: none;
   }
-  .kontakt-footer-link:hover {
-    color: var(--foreground);
+  .liste a {
+    color: var(--theme-text-strong);
+    text-decoration: none;
+    overflow-wrap: anywhere;
   }
-
-  /* ── prefers-reduced-motion ──────────────────────────────────────────── */
-  @media (prefers-reduced-motion: reduce) {
-    .scroll-container {
-      scroll-snap-type: none;
-      height: auto;
-      overflow-y: visible;
-    }
-    :global(body:has(.scroll-container)) {
-      overflow: visible;
-    }
-    .snap-section {
-      height: auto;
-      min-height: 80vh;
-      scroll-snap-align: none;
-    }
-    .scroll-hint-arrow {
-      animation: none;
-    }
-    .home-list-item,
-    .home-preview {
-      transition: none;
-    }
+  .liste a:hover {
+    text-decoration: underline;
   }
 
-  /* ── Mobile ──────────────────────────────────────────────────────────── */
-  @media (max-width: 640px) {
-    .intro-eyebrow {
-      top: 5rem;
+  /* Gedanken: 40 Abstand zwischen den Zeilen, Knopf darunter */
+  .gedanken {
+    display: flex;
+    flex-direction: column;
+    gap: var(--global-size-40);
+  }
+  .gedanken > * {
+    min-width: 0;
+  }
+
+  /* Kontakt: 80 Abstand zum Fuß (die Hauptfläche bringt schon den Abschnittsabstand mit) */
+  .kontakt {
+    margin-block-end: calc(var(--global-size-80) - var(--layout-section-gap));
+  }
+
+  @media (min-width: 768px) {
+    .ueber .text {
+      grid-column: 1 / span 6;
     }
-    .intro-content {
-      padding-bottom: calc(3.5rem + env(safe-area-inset-bottom, 0px));
+    .bento > * {
+      grid-column: span 4;
     }
-    .ueber-content,
-    .arbeit-content,
-    .gedanken-content,
-    .kontakt-content {
-      padding-bottom: calc(3.5rem + env(safe-area-inset-bottom, 0px));
+    .bento > .karte:first-child {
+      grid-column: 1 / -1;
     }
-    .kontakt-email {
-      font-size: 1.25rem;
+  }
+
+  @media (min-width: 1024px) {
+    .signatur {
+      grid-column: 1 / span 7;
+      grid-row: 1;
     }
-    .scroll-hint {
-      margin-top: 1.75rem;
+    .ueber .text {
+      grid-column: 8 / span 5;
+      grid-row: 1;
+    }
+    .stichworte {
+      grid-column: 1 / span 7;
+      grid-row: 2;
+    }
+    .bento > .karte:first-child {
+      grid-column: span 8;
     }
   }
 </style>
-
-<script>
-  import {
-    destroyPixelTextHover,
-    initPixelTextHover,
-  } from "@/scripts/pixelTextHover"
-
-  function initHomePage() {
-    const preview = document.getElementById(
-      "home-project-preview"
-    ) as HTMLElement | null
-    const previewImg = document.getElementById(
-      "home-preview-img"
-    ) as HTMLImageElement | null
-
-    if (
-      preview &&
-      previewImg &&
-      window.matchMedia("(hover: hover)").matches &&
-      window.matchMedia("(min-width: 901px)").matches
-    ) {
-      let switchTimer: ReturnType<typeof setTimeout> | null = null
-      const lines =
-        document.querySelectorAll<HTMLAnchorElement>("[data-preview]")
-
-      lines.forEach((line) => {
-        if (line.dataset.previewInit) return
-        line.dataset.previewInit = "1"
-
-        line.addEventListener("mouseenter", () => {
-          const src = line.dataset.preview
-          if (!src) return
-          clearTimeout(switchTimer ?? undefined)
-          if (previewImg.getAttribute("src") !== src) {
-            preview.classList.remove("is-visible")
-            switchTimer = setTimeout(() => {
-              previewImg.src = src
-              preview.classList.add("is-visible")
-              switchTimer = null
-            }, 80)
-          } else {
-            preview.classList.add("is-visible")
-          }
-        })
-
-        line.addEventListener("mouseleave", () => {
-          clearTimeout(switchTimer ?? undefined)
-          switchTimer = null
-          preview.classList.remove("is-visible")
-        })
-      })
-    }
-  }
-
-  function initHomeTracking() {
-    document
-      .querySelectorAll<HTMLAnchorElement>("#section-arbeit .home-list-item")
-      .forEach((el) => {
-        if (el.dataset.phProjectInit) return
-        el.dataset.phProjectInit = "1"
-        el.addEventListener("click", () => {
-          const title =
-            el.querySelector(".home-list-title")?.textContent?.trim() ?? ""
-          window.posthog?.capture("project_clicked", {
-            project_title: title,
-            url: el.href,
-          })
-        })
-      })
-
-    document
-      .querySelectorAll<HTMLAnchorElement>("#section-gedanken .home-list-item")
-      .forEach((el) => {
-        if (el.dataset.phBlogInit) return
-        el.dataset.phBlogInit = "1"
-        el.addEventListener("click", () => {
-          const title =
-            el.querySelector(".home-list-title")?.textContent?.trim() ?? ""
-          window.posthog?.capture("blog_post_clicked", {
-            post_title: title,
-            url: el.href,
-          })
-        })
-      })
-
-    document
-      .querySelectorAll<HTMLAnchorElement>('a[href="/cv.pdf"]')
-      .forEach((el) => {
-        if (el.dataset.phCvInit) return
-        el.dataset.phCvInit = "1"
-        el.addEventListener("click", () => {
-          window.posthog?.capture("cv_downloaded")
-        })
-      })
-  }
-
-  document.addEventListener("astro:before-swap", () => {
-    destroyPixelTextHover()
-  })
-
-  document.addEventListener("astro:page-load", () => {
-    initHomePage()
-    initHomeTracking()
-    void initPixelTextHover()
-  })
-</script>
