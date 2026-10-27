@@ -255,6 +255,11 @@ test('doppelte Property-Namen: erste gewinnt, Widerspruch als Warnung', () => {
   assert.doesNotMatch(css, /#333333/);
   assert.equal(warnings.length >= 1, true);
   assert.match(warnings[0], /--theme-text-on-danger/);
+  // sichtbar in der Ausgabe, direkt unter dem Header, vor den Blöcken
+  const comment = '/* WARNUNG: Variable "text/primary" ausgelassen, Code-Syntax --theme-text-on-danger doppelt vergeben */';
+  assert.equal(css.split(comment).length - 1, 1);
+  assert.ok(css.indexOf(comment) < css.indexOf('/* Theme'));
+  assert.ok(css.indexOf(comment) > css.indexOf('*/'));
 });
 
 test('identische Duplikate (Icon/Component) sind keine Warnung', () => {
@@ -266,6 +271,7 @@ test('identische Duplikate (Icon/Component) sind keine Warnung', () => {
   );
   assert.equal(css.match(/--icon-color:/g).length, 1);
   assert.deepEqual(warnings, []);
+  assert.doesNotMatch(css, /WARNUNG/);
 });
 
 test('Icon: nur Modus Default wird exportiert', () => {
@@ -349,4 +355,8 @@ test('Real: keine Slides/Docs-Tokens, bekannte Figma-Duplikate werden gemeldet',
   const { css, warnings } = buildTokens(real);
   assert.doesNotMatch(css, /--slides-|--docs-/);
   assert.ok(warnings.some((w) => w.includes('--theme-text-on-danger')));
+  for (const n of ['text/primary', 'text/secondary']) {
+    assert.ok(css.includes(`/* WARNUNG: Variable "${n}" ausgelassen, Code-Syntax --theme-text-on-danger doppelt vergeben */`), n);
+  }
+  assert.equal((css.match(/\/\* WARNUNG/g) ?? []).length, 2);
 });

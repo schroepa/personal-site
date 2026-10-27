@@ -12,7 +12,8 @@
  *   (Ausnahme: die feste Ausschlussliste EXCLUDED_COLLECTIONS: Slides, Docs).
  * - Aliase werden zu `var(--ziel)`, nie zum aufgelösten Wert.
  * - Doppelte Property-Namen (Figma-Copy-Paste in codeSyntaxWeb): die erste Variable gewinnt, weitere mit
- *   abweichendem Wert werden als Warnung gemeldet (identische Duplikate, z. B. icon/color in Icon und
+ *   abweichendem Wert werden als Warnung gemeldet (stderr) und als /* WARNUNG ... *\/-Kommentar unter dem
+ *   Header in die Ausgabe geschrieben (identische Duplikate, z. B. icon/color in Icon und
  *   Component, werden still übersprungen).
  * - Modus -> CSS (siehe PLANS):
  *   Theme       Light = :root; Dark = :root[data-theme="dark"] und
@@ -175,6 +176,7 @@ function orderIndex(name) {
  */
 export function buildTokens(dump) {
   const warnings = new Set();
+  const omitted = new Map(); // `${Figma-Name}|${prop}` -> Kommentarzeile
   const seen = new Map(); // `${contextKey}|${prop}` -> Wert
   const out = [HEADER];
 
@@ -203,6 +205,10 @@ export function buildTokens(dump) {
         const key = `${contextKey}|${prop}`;
         if (seen.has(key)) {
           if (seen.get(key) !== value) {
+            omitted.set(
+              `${variable.name}|${prop}`,
+              `/* WARNUNG: Variable "${variable.name}" ausgelassen, Code-Syntax ${prop} doppelt vergeben */`,
+            );
             warnings.add(
               `${prop}: doppelt vergeben (Variable "${variable.name}", Collection "${collection.name}", Modus "${mode.name}"); behalte ${seen.get(key)}, verwerfe ${value}`,
             );
@@ -231,6 +237,7 @@ export function buildTokens(dump) {
     }
   }
 
+  if (omitted.size > 0) out.splice(1, 0, [...omitted.values()].join('\n'));
   return { css: `${out.join('\n')}\n`, warnings: [...warnings] };
 }
 

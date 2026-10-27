@@ -3,6 +3,8 @@
  * Neu erzeugen mit: npm run tokens
  * Regeln für Modi, Breakpoints und Einheiten: scripts/export-tokens.mjs */
 
+/* WARNUNG: Variable "text/primary" ausgelassen, Code-Syntax --theme-text-on-danger doppelt vergeben */
+/* WARNUNG: Variable "text/secondary" ausgelassen, Code-Syntax --theme-text-on-danger doppelt vergeben */
 
 /* Global */
 :root {
