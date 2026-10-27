@@ -1,0 +1,78 @@
+---
+// Kontakt im neuen Design (Figma 270:2, Screens 270:516 / 270:778 / 270:946). Neue Route /kontakt, indexierbar, kein Formular.
+// Seitenkopf mit E-Mail, „Adresse kopieren“ (src/scripts/kopieren.ts, Meldung per aria-live) und LinkedIn · Wofür · Ablauf · Daten.
+// Alle Texte (Vorschläge, von Patrick freizugeben): src/data/kontakt.ts.
+import SiteLayout from "@/layouts/SiteLayout.astro"
+import Abschnitt from "@/components/site/Abschnitt.astro"
+import Knopf from "@/components/site/Knopf.astro"
+import NummernListe from "@/components/site/NummernListe.astro"
+import Seitenkopf from "@/components/site/Seitenkopf.astro"
+import { ABLAUF, DATEN, KONTAKT_EMAIL, KONTAKT_SEITE, LINKEDIN_URL, WOFUER } from "@/data/kontakt"
+---
+
+<SiteLayout
+  title="Kontakt — Patrick Schröder"
+  description="Schreib mir ein paar Zeilen zu deinem Vorhaben. Ich antworte in der Regel innerhalb von zwei Werktagen."
+  blatt="Kontakt"
+>
+  <div data-kontakt>
+    <Seitenkopf art="seite" label={KONTAKT_SEITE.label} titel={KONTAKT_SEITE.titel} einleitung={KONTAKT_SEITE.einleitung}>
+      <div slot="zusatz" class="zusatz">
+        <div class="aktionen">
+          <Knopf art="primary" href={`mailto:${KONTAKT_EMAIL}`}>E-Mail schreiben</Knopf>
+          <Knopf art="ghost" data-kopieren pfeil="→">Adresse kopieren</Knopf>
+          <Knopf art="ghost" href={LINKEDIN_URL} target="_blank" rel="noopener noreferrer" pfeil="↗" aria-label="LinkedIn (öffnet in neuem Tab)">LinkedIn</Knopf>
+        </div>
+        <p class="text-small meldung" aria-live="polite" data-meldung></p>
+      </div>
+    </Seitenkopf>
+
+    <Abschnitt id="wofuer" label="Wofür">
+      <NummernListe eintraege={WOFUER} />
+    </Abschnitt>
+
+    <Abschnitt id="ablauf" label="Ablauf">
+      <NummernListe eintraege={ABLAUF} />
+    </Abschnitt>
+
+    <Abschnitt id="daten" label="Daten">
+      <div class="daten text-body">
+        <p>{DATEN.name}</p>
+        <p><a href={`mailto:${DATEN.email}`} data-email>{DATEN.email}</a></p>
+        <p><a href={DATEN.linkedin.url} target="_blank" rel="noopener noreferrer">{DATEN.linkedin.anzeige}</a></p>
+      </div>
+    </Abschnitt>
+  </div>
+</SiteLayout>
+
+<style>
+  .zusatz {
+    display: flex;
+    flex-direction: column;
+    gap: var(--global-size-8);
+  }
+  .aktionen {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--global-size-8);
+  }
+  .meldung {
+    margin: 0;
+    color: var(--theme-text-default);
+  }
+  .meldung:empty {
+    display: none;
+  }
+  .daten {
+    display: flex;
+    flex-direction: column;
+    color: var(--theme-text-default);
+  }
+  .daten p {
+    margin: 0;
+    overflow-wrap: anywhere;
+  }
+  .daten a {
+    color: inherit;
+  }
+</style>
