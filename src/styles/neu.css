@@ -1,0 +1,113 @@
+@import "./tokens.css";
+@import "./neu-fonts.css";
+
+/* Basis der neuen Seiten: nur Figma-Tokens (tokens.css), kein Tailwind. */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--theme-surface-page);
+  color: var(--theme-text-default);
+  font-family: var(--global-font-family-sans), sans-serif;
+}
+
+img,
+picture,
+video,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+:focus-visible {
+  outline: var(--global-border-2) solid var(--theme-border-focus);
+  outline-offset: var(--global-size-4);
+}
+
+.text-signatur,
+.text-hero,
+.text-h1,
+.text-h2,
+.text-h3,
+.text-lead,
+.text-body,
+.text-prose,
+.text-small,
+.text-label,
+.text-mono {
+  font-family: var(--global-font-family-sans), sans-serif;
+}
+
+.text-signatur {
+  font-size: var(--text-signatur-size);
+  line-height: var(--text-signatur-line-height);
+  letter-spacing: var(--text-signatur-letter-spacing);
+  font-weight: var(--text-signatur-weight);
+}
+.text-hero {
+  font-size: var(--text-hero-size);
+  line-height: var(--text-hero-line-height);
+  letter-spacing: var(--text-hero-letter-spacing);
+  font-weight: var(--text-hero-weight);
+}
+.text-h1 {
+  font-size: var(--text-h1-size);
+  line-height: var(--text-h1-line-height);
+  letter-spacing: var(--text-h1-letter-spacing);
+  font-weight: var(--text-h1-weight);
+}
+.text-h2 {
+  font-size: var(--text-h2-size);
+  line-height: var(--text-h2-line-height);
+  letter-spacing: var(--text-h2-letter-spacing);
+  font-weight: var(--text-h2-weight);
+}
+.text-h3 {
+  font-size: var(--text-h3-size);
+  line-height: var(--text-h3-line-height);
+  letter-spacing: var(--text-h3-letter-spacing);
+  font-weight: var(--text-h3-weight);
+}
+.text-lead {
+  font-size: var(--text-lead-size);
+  line-height: var(--text-lead-line-height);
+  letter-spacing: var(--text-lead-letter-spacing);
+  font-weight: var(--text-lead-weight);
+}
+.text-body,
+.text-prose {
+  font-size: var(--text-body-size);
+  line-height: var(--text-body-line-height);
+  letter-spacing: var(--text-body-letter-spacing);
+  font-weight: var(--text-body-weight);
+}
+.text-small {
+  font-size: var(--text-small-size);
+  line-height: var(--text-small-line-height);
+  letter-spacing: var(--text-small-letter-spacing);
+  font-weight: var(--text-small-weight);
+}
+.text-label {
+  font-size: var(--text-label-size);
+  line-height: var(--text-label-line-height);
+  letter-spacing: var(--text-label-letter-spacing);
+  font-weight: var(--text-label-weight);
+  text-transform: uppercase;
+}
+.text-mono {
+  font-family: var(--global-font-family-mono), monospace;
+  font-size: var(--text-mono-size);
+  line-height: var(--text-mono-line-height);
+  letter-spacing: var(--text-mono-letter-spacing);
+  font-weight: var(--text-code-weight); /* Figma kennt für Mono nur den Code-Text-Stil, kein --text-mono-weight */
+  font-variant-numeric: tabular-nums;
+}

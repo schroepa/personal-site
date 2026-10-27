@@ -1,7 +1,7 @@
 /**
  * Kopiert Fonts nach public/fonts/ für stabile URLs (Preload + CSS).
  * - Geist aus @fontsource
- * - PP Editorial New aus src/fonts: LEGACY, entfällt in Task 15 (alte Seite)
+ * - PP Editorial New aus src/fonts (Überschriften)
  */
 import { copyFile, mkdir } from 'node:fs/promises'
 import { dirname, join } from 'node:path'

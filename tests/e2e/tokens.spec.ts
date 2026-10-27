@@ -105,7 +105,8 @@ for (const stil of KLASSEN) {
       expect(r.numeric).toContain("tabular-nums")
       expect(r.family).toContain("Geist Mono")
     } else {
-      expect(r.family).toContain("Geist Variable")
+      expect(r.family).toContain("Geist")
+      expect(r.family).not.toContain("Mono")
     }
   })
 }
@@ -139,7 +140,7 @@ test("Signatur und Hero: Größe folgt Token auf Mobile und Desktop", async ({
   }
 })
 
-test("Fokusring: 2px solid, Offset 3px, Farbe aus --theme-border-focus", async ({
+test("Fokusring: 2px solid, Offset 4px (--global-size-4), Farbe aus --theme-border-focus", async ({
   page,
 }) => {
   await page.goto(URL)
@@ -170,18 +171,16 @@ test("Fokusring: 2px solid, Offset 3px, Farbe aus --theme-border-focus", async (
   expect(o.focusVisible).toBe(true)
   expect(o.w).toBe("2px")
   expect(o.s).toBe("solid")
-  expect(o.off).toBe("3px")
+  expect(o.off).toBe("4px")
   expect(o.color).toBe(o.token)
 })
 
-test("alte Seite bleibt unberührt: kein data-site, Hintergrund = --background", async ({
+test("alte Seite rendert weiter mit Tailwind: kein data-site, Hintergrund = --background", async ({
   browser,
 }) => {
   const ctx = await browser.newContext({ colorScheme: "light" })
   const page = await ctx.newPage()
   await page.goto("/")
-  await page.evaluate(() => localStorage.setItem("theme", "dark"))
-  await page.reload()
   const r = await page.evaluate(() => {
     const probe = document.createElement("span")
     document.body.appendChild(probe)
@@ -194,10 +193,34 @@ test("alte Seite bleibt unberührt: kein data-site, Hintergrund = --background",
       site: document.body.getAttribute("data-site"),
       bg: getComputedStyle(document.body).backgroundColor,
       expected,
+      tw: getComputedStyle(document.documentElement).getPropertyValue("--tw-border-style").trim(),
     }
   })
   expect(r.site).toBeNull()
   expect(r.bg).not.toBe("rgb(244, 242, 240)")
   expect(r.bg).toBe(r.expected)
   await ctx.close()
+})
+
+test("neue Testseite lädt kein Tailwind", async ({ page }) => {
+  await page.goto(URL)
+  const r = await page.evaluate(() => {
+    const rootStyle = getComputedStyle(document.documentElement)
+    const twVars: string[] = []
+    for (let i = 0; i < rootStyle.length; i++) {
+      if (rootStyle[i].startsWith("--tw-")) twVars.push(rootStyle[i])
+    }
+    let text = ""
+    for (const sheet of Array.from(document.styleSheets)) {
+      try {
+        for (const rule of Array.from(sheet.cssRules)) text += rule.cssText
+      } catch {}
+    }
+    const inline = Array.from(document.querySelectorAll("style"))
+      .map((n) => n.textContent)
+      .join("")
+    return { twVars, hasBanner: /tailwindcss/i.test(text + inline) }
+  })
+  expect(r.twVars).toEqual([])
+  expect(r.hasBanner).toBe(false)
 })

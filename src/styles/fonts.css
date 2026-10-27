@@ -24,8 +24,7 @@
     U+2212, U+2215, U+FEFF, U+FFFD;
 }
 
-/* LEGACY – entfällt in Task 15: PP Editorial New wird nur noch von der alten Seite
- * (BaseLayout-Preload, pixelTextHover.ts) genutzt. Neue Seiten: ausschließlich Geist. */
+/* PP Editorial New — Überschriften (Heavy / Bold), Ligaturen aktivierbar */
 
 @font-face {
   font-family: 'PP Editorial New';
