@@ -1,6 +1,7 @@
 ---
 // Kontakt-Panel (Figma 262:2): Abschluss der Seite auf der Farbfläche. Label, Titel, Text, E-Mail (text/h1),
 // Aktionen und optional das Handschrift-Tag (Slot „tag“, ohne Inhalt wird nichts gerendert).
+// data-abschnitt füttert das Blatt im Schriftfeld, data-objekt das Raster („Spalte a–b“, Hervorhebung).
 // Slot „aktionen“ nimmt weitere Knöpfe auf (z. B. Lebenslauf). Kopieren: src/scripts/kopieren.ts.
 import Knopf from "./Knopf.astro"
 
@@ -19,7 +20,7 @@ const {
 const hatTag = Astro.slots.has("tag")
 ---
 
-<section class="kontakt-panel" aria-labelledby="kontakt-titel" data-kontakt>
+<section class="kontakt-panel" aria-labelledby="kontakt-titel" data-kontakt data-abschnitt="Kontakt" data-objekt>
   <p class="text-label label"><span aria-hidden="true">→ </span>{label}</p>
   <div class="inhalt">
     <h2 id="kontakt-titel" class="text-hero titel">{titel}</h2>

@@ -18,7 +18,7 @@ const { groesse, meta, titel, auszug, href, bild, ebene = 3, auszugAnzeigen = gr
 const Titel = `h${ebene}` as "h2" | "h3" | "h4"
 ---
 
-<article class:list={["artikel-zeile", `artikel-zeile-${groesse}`]}>
+<article class:list={["artikel-zeile", `artikel-zeile-${groesse}`]} data-objekt>
   <div class="bild" data-bild>
     {bild && <img src={bild} alt="" loading="lazy" decoding="async" />}
   </div>

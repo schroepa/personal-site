@@ -15,7 +15,7 @@ const { fakten, aktionen = [] } = Astro.props
 const istExtern = (href: string) => /^https?:\/\//.test(href)
 ---
 
-<div class="faktenzeile">
+<div class="faktenzeile" data-objekt>
   <dl class="fakten">
   {
     fakten.map((fakt) => (

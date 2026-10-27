@@ -6,12 +6,14 @@ interface Props {
   label: string
   titel: string
   einleitung?: string
+  /** Name für das Blatt im Schriftfeld; Standard: das Label (Seite) bzw. „Einstieg“ (Artikel, dort ist das Label eine Meta-Zeile) */
+  abschnitt?: string
 }
-const { art, label, titel, einleitung } = Astro.props
+const { art, label, titel, einleitung, abschnitt = art === "seite" ? label : "Einstieg" } = Astro.props
 const hatZusatz = Astro.slots.has("zusatz")
 ---
 
-<div class:list={["seitenkopf", `seitenkopf-${art}`]}>
+<div class:list={["seitenkopf", `seitenkopf-${art}`]} data-abschnitt={abschnitt} data-objekt>
   <p class="text-label label" data-label><span aria-hidden="true">→ </span>{label}</p>
   <div class="aussage" data-aussage>
     <h1 class:list={["titel", art === "seite" ? "text-hero" : "text-h1"]}>{titel}</h1>

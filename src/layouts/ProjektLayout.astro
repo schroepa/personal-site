@@ -128,7 +128,7 @@ const bildName = `view-transition-name: projekt-bild-${slug}`
   {
     coverImage && (
       <div class="titelbild" data-titelbild>
-        <div class="bild" style={bildName}>
+        <div class="bild" style={bildName} data-objekt>
           <img src={coverImage} alt="" loading="eager" fetchpriority="high" decoding="async" />
         </div>
       </div>
@@ -155,7 +155,7 @@ const bildName = `view-transition-name: projekt-bild-${slug}`
               </div>
             ) : (
               <div class="spalte">
-                <div class="prose" data-prose set:html={a.html} />
+                <div class="prose" data-prose data-objekt set:html={a.html} />
               </div>
             )}
             {a.titel === "Ergebnis" && kennzahlen.length > 0 && (

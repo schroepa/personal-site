@@ -1,6 +1,7 @@
 ---
 // Abschnitt (Figma 189:313): Linie, Label als h2 „→ 03 Arbeit“, Inhalt im 12er-Raster.
 // Der Pfeil ist dekorativ (aria-hidden), der Name der Überschrift bleibt „03 Arbeit“.
+// data-abschnitt (Wert = Label) füttert das Blatt im Schriftfeld („03/06 Arbeit“, src/scripts/schriftfeld.ts).
 // Horizontaler Rand und Seitenbreite liefert <main> in SiteLayout, daher hier ohne --abschnitt-rand/-breite.
 interface Props {
   id: string
@@ -12,7 +13,7 @@ const { id, label, nummer, layout = "links" } = Astro.props
 const titelId = `${id}-titel`
 ---
 
-<section {id} class:list={["abschnitt", `abschnitt-${layout}`]} aria-labelledby={titelId}>
+<section {id} class:list={["abschnitt", `abschnitt-${layout}`]} aria-labelledby={titelId} data-abschnitt={label}>
   <div class="linie" data-linie data-anim="linie" aria-hidden="true"></div>
   <h2 id={titelId} class="text-label label">
     <span aria-hidden="true">→ </span>{nummer ? `${nummer} ` : ""}{label}

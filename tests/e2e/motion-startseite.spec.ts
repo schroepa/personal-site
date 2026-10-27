@@ -212,9 +212,9 @@ test.describe("mit Bewegung", () => {
 
   test("Hover über ein Objekt hebt dessen Spalten hervor (gleiche Spalten wie das Schriftfeld)", async ({ page }) => {
     await laden(page)
-    // Auf der Seite trägt noch kein Element data-objekt (das Schriftfeld-Skript wertet es aus): für den Test setzen
-    const karte = page.locator("#arbeit .karte").first()
-    await karte.evaluate((e) => e.setAttribute("data-objekt", ""))
+    // Die Karte trägt data-objekt im echten Markup (ProjektKarte)
+    const karte = page.locator("#arbeit .projekt-karte").first()
+    await expect(karte).toHaveAttribute("data-objekt", "")
     const spannweite = await karte.evaluate((e) => {
       const r = e.getBoundingClientRect()
       return [...document.querySelectorAll<HTMLElement>("[data-raster] .spalte")].filter((s) => {

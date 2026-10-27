@@ -16,7 +16,7 @@ const { format, meta, titel, wirkung, bild, href, slug, ebene = 3 } = Astro.prop
 const Titel = `h${ebene}` as "h2" | "h3" | "h4"
 ---
 
-<article class:list={["projekt-karte", `format-${format}`]}>
+<article class:list={["projekt-karte", `format-${format}`]} data-objekt>
   <div class="bild" data-bild style={`view-transition-name: projekt-bild-${slug}`}>
     {bild && <img src={bild} alt="" loading="lazy" decoding="async" />}
   </div>

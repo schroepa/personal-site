@@ -85,7 +85,7 @@ const mitInhalt = eintraege.length >= 3
   </div>
 
   <div class="titelbild" data-titelbild>
-    <div class="bild">
+    <div class="bild" data-objekt>
       {
         coverImage && (
           <img
@@ -104,7 +104,7 @@ const mitInhalt = eintraege.length >= 3
 
   <Abschnitt id="artikel" label="Artikel" layout="links">
     <div class="artikel-inhalt" data-artikel-inhalt>
-      <div class="prose" data-prose><slot /></div>
+      <div class="prose" data-prose data-objekt><slot /></div>
       {
         mitInhalt && (
           <div class="verzeichnis">
