@@ -1,4 +1,4 @@
-> ARCHIV – beschreibt den Stand vor dem Redesign; die genannten Ereignisse und Dateien existieren nicht mehr.
+> ARCHIV – beschreibt den Stand vor dem Redesign; die genannten Ereignisse (`project_clicked` usw.) und Seiten existieren nicht mehr. `src/components/posthog.astro` ist weiterhin Teil des Redesigns (nur Seitenaufrufe, erst nach Statistik-Einwilligung).
 
 <wizard-report>
 # PostHog post-wizard report

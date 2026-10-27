@@ -21,7 +21,9 @@ const ERLAUBT = [
 
 /** Alle Fundstellen „Schröder“/„Schroeder“ in versionierten Dateien, ohne erlaubte Pfade. */
 export function unerlaubteTreffer(ausgabe, erlaubt = ERLAUBT) {
+  // NFC: zerlegtes „ö“ (o + U+0308) soll nicht an der Erlaubnisliste oder dem Muster vorbeirutschen
   return ausgabe
+    .normalize("NFC")
     .split("\n")
     .filter(Boolean)
     .filter((zeile) => !erlaubt.some((e) => zeile.startsWith(e.pfad)))
@@ -32,13 +34,22 @@ test("unerlaubteTreffer: Präfixe aus der Erlaubnisliste werden ausgenommen", ()
   assert.deepEqual(unerlaubteTreffer(text), ["src/a.ts:1:Schröder"])
 })
 
+/** Das Suchmuster kennt „ö“ als ein Zeichen (NFC) und zerlegt (o + U+0308, NFD). */
+const MUSTER = /[Ss][Cc][Hh][Rr](ö|Ö|oe|OE|Oe|o\u0308|O\u0308)[Dd][Ee][Rr]/
+
+test("das Muster erkennt auch zerlegtes (NFD) „Schröder“", () => {
+  assert.ok(MUSTER.test("Schro\u0308der".normalize("NFD")))
+  assert.ok(MUSTER.test("Schröder"))
+  assert.ok(!MUSTER.test("Schrödter"))
+})
+
 test("die Erlaubnisliste ist klein und begründet", () => {
   assert.ok(ERLAUBT.length <= 5)
   for (const e of ERLAUBT) assert.ok(e.grund.length > 10, e.pfad)
 })
 
 test("„Schröder“ kommt in versionierten Dateien nur in der Erlaubnisliste vor (richtig: Schrödter)", () => {
-  const r = spawnSync("git", ["grep", "-n", "-I", "-E", "[Ss][Cc][Hh][Rr](ö|Ö|oe|OE|Oe)[Dd][Ee][Rr]", "--", ".", ":!package-lock.json"], {
+  const r = spawnSync("git", ["grep", "-n", "-I", "-E", "[Ss][Cc][Hh][Rr](ö|Ö|oe|OE|Oe|o\u0308|O\u0308)[Dd][Ee][Rr]", "--", ".", ":!package-lock.json"], {
     cwd: root,
     encoding: "utf8",
     maxBuffer: 64 * 1024 * 1024,
