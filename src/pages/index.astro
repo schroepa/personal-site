@@ -13,6 +13,7 @@ import Lichtband from "@/components/site/Lichtband.astro"
 import ProjektKarte from "@/components/site/ProjektKarte.astro"
 import { KONTAKT_EMAIL } from "@/data/kontakt"
 import { coverMittel, coverThumbSrc } from "@/lib/cover-image"
+import { slugVon } from "@/lib/blog"
 import { readingTime } from "@/lib/reading-time"
 import {
   artikelMeta,
@@ -23,7 +24,6 @@ import {
   wirkungAusBeschreibung,
 } from "@/lib/startseite"
 
-const slugVon = (id: string) => id.replace(/\.md$/, "")
 
 // Bento (Figma: 4 Karten + „Außerdem“-Liste): featured-Projekte, jüngste zuerst.
 // Das Format folgt der Position im Bento (Figma), nicht dem Inhalt; das Schema bekommt `format`/`wirkung` in Task 8.

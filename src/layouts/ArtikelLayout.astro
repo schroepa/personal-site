@@ -11,6 +11,7 @@ import KontaktPanel from "@/components/site/KontaktPanel.astro"
 import Seitenkopf from "@/components/site/Seitenkopf.astro"
 import { KONTAKT_EMAIL } from "@/data/kontakt"
 import { zeilenMeta } from "@/lib/blog"
+import { jsonLd } from "@/lib/jsonld"
 import { blogCoverSrcset, coverThumbSrc, COVER_SIZES, isBlogCover } from "@/lib/cover-image"
 import { artikelMeta } from "@/lib/startseite"
 import "@/styles/neu-prose.css"
@@ -77,7 +78,7 @@ const mitInhalt = eintraege.length >= 3
   articleAuthor="Patrick Schröder"
   articleTags={tags}
 >
-  <script slot="head" is:inline type="application/ld+json" set:html={JSON.stringify(artikelSchema)} />
+  <script slot="head" is:inline type="application/ld+json" set:html={jsonLd(artikelSchema)} />
 
   <div class="kopf">
     <Seitenkopf art="artikel" label={artikelMeta(tags, minuten, date)} titel={title} einleitung={description} />
@@ -126,6 +127,7 @@ const mitInhalt = eintraege.length >= 3
                   meta={zeilenMeta(b.tags, b.date)}
                   titel={b.title}
                   auszug={b.description}
+                  auszugAnzeigen
                   bild={coverThumbSrc(b.coverImage)}
                   href={`/blog/${b.slug}`}
                 />

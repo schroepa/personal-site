@@ -110,7 +110,8 @@ test.describe("Blog-Übersicht", () => {
         expect(g.sichtbar, `${tag}: ${g.id}`).toBe(g.eintraege > 0)
         expect(g.ueberschrift, `${tag}: Überschrift ${g.id}`).toBe(g.eintraege > 0)
       }
-      await expect(page.locator("[data-filter-leer]")).toHaveText("")
+      // Höfliche Ansage der Trefferzahl (role=status)
+      await expect(page.getByRole("status").filter({ hasText: /Beitr/ })).toHaveText(erwartet.length === 1 ? "1 Beitrag" : `${erwartet.length} Beiträge`)
     }
     await chip(page, "Alle").click()
     expect((await sichtbareSlugs(page)).length).toBe(beitraege.length)
@@ -271,10 +272,7 @@ test.describe("Artikel", () => {
     expect(new Set(h2.map((h) => h.id)).size).toBe(h2.length)
     const nav = page.locator("nav[aria-label='Inhalt']")
     const breit = (page.viewportSize()?.width ?? 0) >= 768
-    if (!breit) {
-      await expect(nav).toBeHidden() // Mobil ohne Inhaltsverzeichnis (Figma 266:24481)
-      return
-    }
+    test.skip(!breit, "Mobil ohne Inhaltsverzeichnis (Figma 266:24481), siehe eigenen Test")
     // Das Verzeichnis steht rechts neben dem Text, nicht darüber
     const nb = (await nav.boundingBox())!
     const pb = (await page.locator("[data-prose]").boundingBox())!
@@ -287,14 +285,26 @@ test.describe("Artikel", () => {
     await expect(page).toHaveURL(new RegExp(`#${ziel.id}$`))
     const heading = page.locator(`[data-prose] h2#${ziel.id}`)
     await expect.poll(async () => (await heading.boundingBox())!.y, { message: "scrollt zur Überschrift" }).toBeGreaterThanOrEqual(0)
-    const { y, margin, innen } = await heading.evaluate((el) => ({
-      y: el.getBoundingClientRect().top,
-      margin: parseFloat(getComputedStyle(el).scrollMarginTop),
-      innen: innerHeight,
-    }))
-    expect(margin).toBeGreaterThan(0)
-    expect(y).toBeLessThan(innen)
+    const m = await heading.evaluate((el) => {
+      const r = el.getBoundingClientRect()
+      const feld = document.querySelector("[data-schriftfeld]")!.getBoundingClientRect()
+      return { top: r.top, bottom: r.bottom, margin: parseFloat(getComputedStyle(el).scrollMarginTop), feldTop: feld.top, innen: innerHeight }
+    })
+    expect(m.margin).toBeGreaterThan(0)
+    // Versatz: die Überschrift liegt um den scroll-margin unter dem oberen Rand, nie bündig oder darüber
+    expect(m.top).toBeGreaterThanOrEqual(m.margin - 1)
+    expect(m.top).toBeLessThan(m.innen)
+    // und sie liegt vollständig über dem festen Schriftfeld
+    expect(m.bottom).toBeLessThan(m.feldTop)
+    expect(m.bottom).toBeGreaterThan(0)
     await expect(nav.locator("a[aria-current='true']")).toHaveCount(1)
+  })
+
+  test("Mobil: kein Inhaltsverzeichnis, Zwischentitel bleiben mit Anker", async ({ page }) => {
+    test.skip((page.viewportSize()?.width ?? 0) >= 768, "nur Mobil")
+    await laden(page, url)
+    await expect(page.locator("nav[aria-label='Inhalt']")).toBeHidden()
+    await expect(page.locator("[data-prose] h2").first()).toHaveAttribute("id", /.+/)
   })
 
   test("Textspalte ist höchstens 7 von 9 Spalten breit (tatsächlich 7, Tablet 6 von 8)", async ({ page }) => {
@@ -333,6 +343,29 @@ test.describe("Artikel", () => {
     const s2 = await page.locator("[data-weiterlesen] [data-eintrag]").evaluateAll((els) => els.map((e) => e.getAttribute("data-slug")))
     expect(s2).toHaveLength(2)
     expect(s2).not.toContain(aeltester)
+  })
+
+  test("Keine Silbentrennung in Titeln (Seitenkopf, Zeilen, Prosa), lange Wörter laufen trotzdem nicht über", async ({ page }) => {
+    await laden(page, url)
+    for (const sel of ["main h1", "[data-weiterlesen] h3", "[data-prose] h2", "[data-prose] p"]) {
+      expect(await page.locator(sel).first().evaluate((el) => getComputedStyle(el).hyphens), sel).not.toBe("auto")
+    }
+    await laden(page, BLOG)
+    for (const sel of ["main h1", "#neu h3", ".artikel-zeile-klein h3"]) {
+      expect(await page.locator(sel).first().evaluate((el) => getComputedStyle(el).hyphens), sel).not.toBe("auto")
+    }
+    await page.locator(".artikel-zeile-klein h3 a").first().evaluate((el, t) => (el.textContent = t), LANGES_WORT)
+    await expectNoHorizontalOverflow(page)
+  })
+
+  test("Startseite: Zeilen, Karten und Galerie trennen nicht, langer Titel läuft nicht über", async ({ page }) => {
+    await laden(page, "/")
+    for (const sel of ["#gedanken h3", "#arbeit h3", "#digital-art [data-galerie-akkordeon]"]) {
+      expect(await page.locator(sel).first().evaluate((el) => getComputedStyle(el).hyphens), sel).not.toBe("auto")
+    }
+    await page.locator("#gedanken h3 a").first().evaluate((el, t) => (el.textContent = t), LANGES_WORT)
+    await page.locator("#arbeit h3 a").first().evaluate((el, t) => (el.textContent = t), LANGES_WORT)
+    await expectNoHorizontalOverflow(page)
   })
 
   test("Lange Titel laufen im Artikelkopf nicht über", async ({ page }) => {

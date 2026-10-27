@@ -3,12 +3,10 @@
 import { getCollection, render } from "astro:content"
 import type { InferGetStaticPropsType } from "astro"
 import ArtikelLayout from "@/layouts/ArtikelLayout.astro"
-import { ueberschriftenFuerInhalt, veroeffentlichte, weiterlesen } from "@/lib/blog"
+import { slugVon, ueberschriftenFuerInhalt, veroeffentlichte, weiterlesen } from "@/lib/blog"
 import { readingTime } from "@/lib/reading-time"
 
 export async function getStaticPaths() {
-  // getStaticPaths wird aus dem Modul herausgehoben: Hilfsfunktionen müssen darin stehen
-  const slugVon = (id: string) => id.replace(/\.md$/, "")
   const sortiert = veroeffentlichte(await getCollection("blog"))
   return sortiert.map((post) => ({
     params: { slug: slugVon(post.id) },

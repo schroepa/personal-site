@@ -38,3 +38,11 @@ test("filterByTag: Eingabe bleibt unverändert, Ergebnis ist eine neue Liste", (
   filterByTag(eintraege, "CSS")
   assert.equal(JSON.stringify(eintraege), kopie)
 })
+
+test("filterStatus: leer ohne Filter, Hinweis bei 0, sonst Anzahl (Einzahl/Mehrzahl)", async () => {
+  const { filterStatus } = await import("./filter.ts")
+  assert.equal(filterStatus(15, false), "")
+  assert.equal(filterStatus(0, true), "Keine Beiträge zu diesem Thema.")
+  assert.equal(filterStatus(1, true), "1 Beitrag")
+  assert.equal(filterStatus(6, true), "6 Beiträge")
+})

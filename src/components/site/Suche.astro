@@ -4,6 +4,7 @@
 // deshalb zwei Teile: <Suche teil="ausloeser" /> im Kopf, <Suche teil="dialog" /> im Layout.
 // Index und Treffer wie bisher (Seiten, Projekte, Blog); Logik in src/scripts/suche.ts.
 import { getCollection } from "astro:content"
+import { jsonLd } from "@/lib/jsonld"
 import { icons } from "./icons"
 import { navigation } from "./navigation"
 
@@ -33,7 +34,7 @@ if (teil === "dialog") {
     projects: projekte,
     posts: blog,
   }
-  daten = JSON.stringify(index).replace(/</g, "\\u003c")
+  daten = jsonLd(index)
 }
 ---
 

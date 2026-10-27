@@ -6,6 +6,9 @@ interface Beitrag {
   data: { date: Date; draft: boolean; tags?: string[] }
 }
 
+/** Kennung der Content-Collection ohne Endung: „mein-beitrag.md“ wird „mein-beitrag“. */
+export const slugVon = (id: string): string => id.replace(/\.md$/, "")
+
 /** Veröffentlichte Beiträge, jüngste zuerst (Gleichstand: Kennung absteigend, wie auf der Startseite). */
 export function veroeffentlichte<T extends Beitrag>(beitraege: readonly T[]): T[] {
   return neuesteZuerst(beitraege.filter((b) => !b.data.draft))

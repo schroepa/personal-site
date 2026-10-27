@@ -10,6 +10,7 @@ import Schriftfeld from "@/components/site/Schriftfeld.astro"
 import SiteHead from "@/components/site/SiteHead.astro"
 import SiteFooter from "@/components/site/SiteFooter.astro"
 import Suche from "@/components/site/Suche.astro"
+import { jsonLd } from "@/lib/jsonld"
 import { applyStoredTheme } from "@/scripts/theme"
 import "@/styles/neu.css"
 
@@ -119,7 +120,7 @@ const themeInline = `(${applyStoredTheme.toString()})();document.documentElement
     <meta name="twitter:image" content={ogImageURL} />
     <meta name="twitter:image:alt" content={metaTitle} />
 
-    <script is:inline type="application/ld+json" set:html={JSON.stringify(personSchema)} />
+    <script is:inline type="application/ld+json" set:html={jsonLd(personSchema)} />
 
     <slot name="head" />
 

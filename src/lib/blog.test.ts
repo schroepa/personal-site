@@ -59,3 +59,10 @@ test("ueberschriftenFuerInhalt: nur h2, mit Anker und Text", () => {
     { id: "zwei", text: "Zwei" },
   ])
 })
+
+test("slugVon: entfernt nur die Endung .md am Ende", async () => {
+  const { slugVon } = await import("./blog.ts")
+  assert.equal(slugVon("mein-beitrag.md"), "mein-beitrag")
+  assert.equal(slugVon("a.md.md"), "a.md")
+  assert.equal(slugVon("ohne-endung"), "ohne-endung")
+})

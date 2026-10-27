@@ -1,15 +1,13 @@
-import { filterByTag } from "@/lib/filter"
+import { filterByTag, filterStatus } from "@/lib/filter"
 
 /**
  * Themenfilter der Blog-Übersicht. Das Markup liefert die Seite (alles sichtbar, Chips erst mit JS):
  * - [data-filter-chips]: Gruppe mit Buttons; Button[data-tag] filtert, Button ohne data-tag zeigt alle
  * - [data-eintrag][data-tags]: ein Beitrag mit seinen Schlagwörtern als JSON-Liste
  * - [data-gruppe]: Abschnitt (Neu, Jahr); ohne sichtbaren Eintrag wird er samt Überschrift ausgeblendet
- * - [data-filter-leer]: Statusmeldung (role="status", Geschwister der Liste), nur bei 0 Treffern befüllt
+ * - [data-filter-leer]: Statusmeldung (role="status", Geschwister der Liste): „N Beiträge“ bei aktivem Filter, Hinweis bei 0
  * Ein zweiter Klick auf den gewählten Chip hebt den Filter auf. Gibt eine Funktion zum Abmelden zurück.
  */
-const KEIN_TREFFER = "Keine Beiträge zu diesem Thema."
-
 function tagsVon(el: HTMLElement): string[] {
   try {
     const wert = JSON.parse(el.dataset.tags ?? "[]")
@@ -31,7 +29,7 @@ export function initFilter(root: HTMLElement): () => void {
     for (const gruppe of root.querySelectorAll<HTMLElement>("[data-gruppe]")) {
       gruppe.hidden = !gruppe.querySelector("[data-eintrag]:not([hidden])")
     }
-    if (status) status.textContent = sichtbar.size === 0 ? KEIN_TREFFER : ""
+    if (status) status.textContent = filterStatus(sichtbar.size, tag !== null)
     for (const knopf of chips.querySelectorAll<HTMLButtonElement>("button")) {
       const gewaehlt = knopf.dataset.tag === undefined ? tag === null : knopf.dataset.tag === tag
       knopf.setAttribute("aria-pressed", String(gewaehlt))
