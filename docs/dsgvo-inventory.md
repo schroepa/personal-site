@@ -68,7 +68,7 @@
 
 | | |
 |---|---|
-| **Quelle** | `src/components/posthog.astro` |
+| **Quelle** | `src/scripts/posthog-skript.ts` (ausgeliefert als `/js/posthog.js`, eingebunden über `src/components/posthog.astro`) |
 | **Env-Variablen** | `PUBLIC_POSTHOG_PROJECT_TOKEN`, `PUBLIC_POSTHOG_HOST` |
 | **Consent** | Lädt nur bei `Cookiebot.consent.statistics` |
 | **Events** | nur Seitenaufrufe (`capture_pageview: "history_change"`); keine eigenen `posthog.capture(`-Aufrufe im Code (Test `tests/e2e/rechtliches.spec.ts`) |

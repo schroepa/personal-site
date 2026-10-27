@@ -25,8 +25,9 @@ npm run dev
 | `npm run build` | Produktions-Build nach `dist/` (siehe unten: `prebuild`, `postbuild`) |
 | `npm run preview` | Lokale Vorschau des Builds |
 | `npm run tokens` | Figma → `src/styles/tokens.css` (liest `design/figma-variables.json`; Herkunft und Aktualisierung in `design/README.md`) |
+| `npm run headers` | `src/data/externe-ressourcen.json` → `vercel.json` (Sicherheits-Header, CSP); `-- --check` prüft nur |
 | `npm run test:scripts` | `node:test`: Skripte, `src/lib/**`, `tests/*.test.mjs` (Token-Export, Daten, Rechtstexte, CSS-Hygiene, Namens-Test, Typecheck der neuen Dateien) |
-| `npm run test:e2e` / `npx playwright test` | E2E und axe-Prüfungen in drei Breiten (1440, 768, 390) |
+| `npm run test:e2e` / `npx playwright test` | E2E und axe-Prüfungen in drei Breiten (1440, 768, 390), dazu das Projekt `csp` gegen `dist/` |
 | `npm test` | beides nacheinander |
 | `npm run typecheck` | `astro check` |
 | `npm run lint` | ESLint |
@@ -34,7 +35,7 @@ npm run dev
 
 ### Playwright
 
-Der Dev-Server der Tests läuft auf **Port 4322** (`playwright.config.ts`) und wird wiederverwendet, wenn dort schon einer läuft. Läuft auf 4322 etwas anderes, schlagen die Tests mit irreführenden Fehlern fehl: vorher `lsof -nP -iTCP:4322 -sTCP:LISTEN` prüfen. Die Tests, die `dist/` brauchen (`tests/build-hosts.test.mjs`, Fremdhost-Prüfung in `rechtliches.spec.ts`), laufen erst nach `npm run build`; in CI ist ein fehlendes `dist/` ein Fehler, lokal werden sie übersprungen.
+Der Dev-Server der Tests läuft auf **Port 4322** (`playwright.config.ts`) und wird wiederverwendet, wenn dort schon einer läuft. Läuft auf 4322 etwas anderes, schlagen die Tests mit irreführenden Fehlern fehl: vorher `lsof -nP -iTCP:4322 -sTCP:LISTEN` prüfen. Die Tests, die `dist/` brauchen (`tests/build-hosts.test.mjs`, `tests/build-csp.test.mjs`, Fremdhost-Prüfung in `rechtliches.spec.ts`, Projekt `csp`), laufen erst nach `npm run build`; in CI ist ein fehlendes `dist/` ein Fehler, lokal werden sie übersprungen. Sie schützen nur, wenn CI vorher baut. Das Projekt `csp` startet zusätzlich `tests/helpers/serve-dist.mjs` auf **Port 4323** (siehe „Sicherheits-Header & CSP“).
 
 Axe-Prüfungen auf animierten Seiten rufen vorher `warteAufRuhe(page)` (`tests/helpers.ts`) auf: sie warten, bis keine Animation mehr läuft und alle Einstiegs-Elemente im Auslösebereich `data-anim-fertig` tragen. Elemente werden nie vom Scan ausgenommen.
 
@@ -112,4 +113,29 @@ Bevor die Seite auf `main` geht, gilt die Checkliste in `docs/superpowers/specs/
 
 ## Deployment
 
-Statischer Export (`output: 'static'` in `astro.config.mjs`), kanonische Domain als `site` gesetzt. Externe Hosts nur Cookiebot und PostHog; PostHog lädt erst nach Einwilligung in die Kategorie Statistik (`src/components/posthog.astro`). Das technische Datenschutz-Inventar steht in `docs/dsgvo-inventory.md`.
+Statischer Export (`output: 'static'` in `astro.config.mjs`), kanonische Domain als `site` gesetzt. Externe Hosts nur Cookiebot und PostHog; PostHog lädt erst nach Einwilligung in die Kategorie Statistik (`src/scripts/posthog-skript.ts`, ausgeliefert als `/js/posthog.js`). Das technische Datenschutz-Inventar steht in `docs/dsgvo-inventory.md`.
+
+## Sicherheits-Header & CSP
+
+**Wo:** `vercel.json` (eingecheckt, **generiert**, nicht von Hand ändern). Quelle der externen Hosts ist allein `src/data/externe-ressourcen.json`: je Host Name, Zweck, Einwilligung und das Feld `csp` (welche Direktiven er braucht). Daraus entstehen der Abschnitt „Externe Ressourcen“ der Datenschutzerklärung (`src/data/rechtliches.ts`) und die CSP (`scripts/build-vercel-headers.mjs`). Neuer Host oder neue Direktive: JSON ändern, `npm run headers`, committen. `scripts/build-vercel-headers.test.mjs` schlägt fehl, wenn `vercel.json` nicht zur Ausgabe des Generators passt.
+
+**Header für alle Pfade:** `Content-Security-Policy` (erzwingend), `Strict-Transport-Security: max-age=63072000; includeSubDomains`, `Referrer-Policy: strict-origin-when-cross-origin`, `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Cross-Origin-Opener-Policy: same-origin`, `Permissions-Policy` (Kamera, Mikrofon, Standort, Zahlung, USB und weitere ungenutzte Funktionen aus). `Cache-Control: public, max-age=31536000, immutable` nur für `/_astro/*` (Dateinamen mit Inhalts-Hash); `/fonts/*` hat feste Namen und bekommt deshalb nur `max-age=86400, stale-while-revalidate=604800`. HTML und `/js/*` behalten Vercels Standard (immer neu prüfen). URL-Verhalten bleibt Vercel-Standard (kein `cleanUrls`, kein `trailingSlash`): `/blog` und `/blog/` liefern dieselbe Seite wie bisher.
+
+**Keine Inline-Skripte:** `script-src` erlaubt nur `'self'` und die Cookiebot- und PostHog-Hosts, ohne `'unsafe-inline'`, `'unsafe-eval'`, Hash oder Nonce. Deshalb liegen das Kopf-Skript (Theme vor dem ersten Paint, `data-js`, Bewegungs-Gate mit Watchdog; `src/scripts/kopf-skript.ts` → `/js/kopf.js`, blockierend im `<head>`) und das PostHog-Snippet (`src/scripts/posthog-skript.ts` → `/js/posthog.js`) als Dateien vor, und der Gradient-Generator wird ohne Astro-Insel hydriert (`src/scripts/gradient-generator-start.ts`), weil Inseln Inline-Skripte mitbringen. Also kein `client:*`, keine `onclick`-Attribute und kein ausführbares `<script is:inline>` (auch nicht per `set:html`): `tests/build-csp.test.mjs` prüft das im Build. JSON in `<script type="application/json">` bzw. `application/ld+json` ist erlaubt (wird nicht ausgeführt).
+
+**Styles:** `style-src 'self' 'unsafe-inline'`. Cookiebot fügt `<style>`-Elemente ohne Nonce ein (die Cookiebot-CSP-Doku verlangt genau das), die Seite selbst nutzt `style`-Attribute (z. B. `view-transition-name`, Papierkorn, Generator) und Astro bettet kleine CSS-Dateien inline ein.
+
+**Prüfen:**
+
+```sh
+npm run build                              # dist/ muss frisch sein
+npx playwright test --project=csp          # startet tests/helpers/serve-dist.mjs (Port 4323) mit den Headern aus vercel.json
+node tests/helpers/serve-dist.mjs          # dasselbe von Hand: http://127.0.0.1:4323
+```
+
+`tests/e2e/csp.spec.ts` lädt jede Route in hell und dunkel und verlangt null CSP-Verletzungen und null Konsolenfehler, prüft PostHog mit und ohne Einwilligung, Lichtband, PNG-Export, Suche, Gate und Watchdog sowie Gegenproben (Inline-Skript, Handler, `eval`, fremdes Skript, Einbetten in einen Rahmen werden blockiert). Cookiebot und PostHog werden dabei **nie** echt geladen: `uc.js` ist ein Nachbau, alle PostHog-Endpunkte sind gestubbt, unbekannte Hosts werden abgebrochen.
+
+**Vor dem Livegang auf der Vercel-Preview von Hand prüfen** `[[PRÜFEN]]` (offline nicht belegbar): echtes Cookiebot-Banner erscheint, Akzeptieren und Ablehnen funktionieren, „Cookie-Einstellungen“ öffnet es wieder; nach Zustimmung lädt PostHog (Netzwerk-Tab: nur `eu.i.posthog.com` und `eu-assets.i.posthog.com`); in der Konsole keine Meldung „Refused to …“ bzw. „Content Security Policy“; Antwort-Header per `curl -sI https://<preview>/` und auf `/_astro/…`, `/cv.pdf`, einer 404. Lädt Cookiebot Dateien von einem weiteren Host (z. B. Zusatzfunktionen aus dem Cookiebot-Konto), ihn mit Beleg in die JSON eintragen. `imgsct.cookiebot.com` steht nur laut Cookiebot-Doku drin; taucht er auf der Preview nie auf, kann er wieder raus. PostHog-Sitzungsaufzeichnung und Toolbar sind durch die CSP ausgeschlossen (bräuchten `blob:`-Worker bzw. `eu.posthog.com`).
+
+**HSTS-Preload:** bewusst **nicht** gesetzt. `preload` plus Eintrag auf hstspreload.org bindet die Domain samt aller Subdomains dauerhaft an HTTPS (Rücknahme dauert Monate). Wer das will: in `scripts/build-vercel-headers.mjs` (`HSTS`) `; preload` ergänzen, `npm run headers`, dann eintragen.
+
