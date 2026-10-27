@@ -22,7 +22,11 @@ export const PLATZHALTER = {
  * Alle externen Hosts, von denen die Website Ressourcen lädt oder an die sie Daten sendet.
  * Quelle für den Abschnitt „Externe Ressourcen“ der Datenschutzerklärung und (Task 16) für die CSP.
  * Belege: Cookiebot-Skript in src/layouts/SiteLayout.astro (`https://consent.cookiebot.com/uc.js`),
- * PostHog-Host in .env (`PUBLIC_POSTHOG_HOST`) und src/components/posthog.astro (`api_host`, Bibliothek von `<host>/static/array.js`).
+ * PostHog-Host in .env (`PUBLIC_POSTHOG_HOST`) und src/components/posthog.astro (`api_host`, Bibliothek von `<host>/static/array.js`, Zeile 33).
+ * eu-assets.i.posthog.com: node_modules/posthog-js/lib/src/utils/request-router.js (Zeilen 64-70: Region EU aus api_host `eu.i.posthog.com`;
+ * Zeilen 99-111: Ziel „assets“ ergibt `https://eu-assets.i.posthog.com`), genutzt von remote-config.js:38 und
+ * entrypoints/external-scripts-loader.js:89-109 für Konfiguration und Erweiterungen. Gilt für die installierte Version (posthog-js 1.373.4);
+ * das Snippet lädt array.js vom PostHog-Server, dessen Version kann abweichen, daher Netzwerk-Trace nach Einwilligung (siehe PRÜFEN im Text).
  */
 export interface ExterneRessource {
   name: string
@@ -48,7 +52,13 @@ export const EXTERNE_RESSOURCEN: ExterneRessource[] = [
   {
     name: "PostHog",
     host: "eu.i.posthog.com",
-    zweck: "Reichweitenmessung (Seitenaufrufe), EU-Endpunkt",
+    zweck: "Reichweitenmessung (Seitenaufrufe), EU-Endpunkt für Bibliothek und Datenübertragung",
+    einwilligung: true,
+  },
+  {
+    name: "PostHog",
+    host: "eu-assets.i.posthog.com",
+    zweck: "Reichweitenmessung: vom PostHog-Skript nachgeladene Erweiterungen und Konfiguration, EU-Endpunkt",
     einwilligung: true,
   },
 ]
@@ -131,7 +141,8 @@ export const IMPRESSUM: RechtsSeite = {
 }
 
 const cookiebot = EXTERNE_RESSOURCEN.filter((r) => r.name === "Cookiebot").map((r) => r.host)
-const posthog = EXTERNE_RESSOURCEN.find((r) => r.name === "PostHog")!.host
+const posthog = EXTERNE_RESSOURCEN.find((r) => r.host === "eu.i.posthog.com")!.host
+const posthogAssets = EXTERNE_RESSOURCEN.find((r) => r.host === "eu-assets.i.posthog.com")!.host
 
 export const DATENSCHUTZ: RechtsSeite = {
   label: "Rechtliches",
@@ -153,13 +164,15 @@ export const DATENSCHUTZ: RechtsSeite = {
       nummer: "2",
       bloecke: [
         absatz(
-          "Diese Website wird bei Vercel Inc., 440 N Barranca Ave #4133, Covina, CA 91723, USA gehostet. Vercel ist der technische Betreiber der Server, auf denen diese Website läuft."
+          "Diese Website wird bei Vercel Inc. gehostet. [[PRÜFEN: Anschrift und Sitz des Anbieters (laut altem Text 440 N Barranca Ave #4133, Covina, CA 91723, USA), nicht aus dem Code belegbar]] Vercel ist der technische Betreiber der Server, auf denen diese Website läuft."
         ),
-        absatz("Beim Abruf werden serverseitig automatisch gespeichert:"),
+        absatz(
+          "Beim Abruf werden serverseitig automatisch gespeichert: [[PRÜFEN: Umfang der Logdaten und Speicherdauer bei Vercel (Liste stammt aus dem alten Text), nicht aus dem Code belegbar]]"
+        ),
         {
           typ: "liste",
           eintraege: [
-            "IP-Adresse des anfragenden Geräts (anonymisiert)",
+            "IP-Adresse des anfragenden Geräts [[PRÜFEN: „anonymisiert“ laut altem Text, nicht belegt]]",
             "Datum und Uhrzeit des Zugriffs",
             "Name und URL der abgerufenen Datei",
             "Übertragene Datenmenge",
@@ -169,7 +182,7 @@ export const DATENSCHUTZ: RechtsSeite = {
           ],
         },
         absatz(
-          "Die Verarbeitung ist technisch notwendig und erfolgt auf Grundlage von Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse am stabilen und sicheren Betrieb). Vercel hat sich dem EU-US Data Privacy Framework angeschlossen. Weitere Informationen: ",
+          "Die Verarbeitung ist technisch notwendig und erfolgt auf Grundlage von Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse am stabilen und sicheren Betrieb). [[PRÜFEN: Aussage „Vercel hat sich dem EU-US Data Privacy Framework angeschlossen“ aus dem alten Text, Zertifizierung nicht belegt]] Weitere Informationen: ",
           { text: "vercel.com/legal/privacy-policy", href: "https://vercel.com/legal/privacy-policy" }
         ),
       ],
@@ -180,7 +193,7 @@ export const DATENSCHUTZ: RechtsSeite = {
       nummer: "3",
       bloecke: [
         absatz(
-          "Diese Website fragt per Einwilligungsbanner, ob Cookies und ähnliche Techniken für die Reichweitenmessung eingesetzt werden dürfen. Ohne deine Einwilligung in die Kategorie Statistik wird die Reichweitenmessung nicht gestartet."
+          "Diese Website fragt per Einwilligungsbanner, ob Cookies und ähnliche Techniken für die Reichweitenmessung eingesetzt werden dürfen. Ohne deine Einwilligung in die Kategorie Statistik wird die Reichweitenmessung nicht gestartet. [[PRÜFEN: § 25 TDDDG (Speichern von und Zugriff auf Informationen in der Endeinrichtung) für die Speicherung durch Cookiebot und PostHog im Browser berücksichtigen]]"
         ),
         {
           typ: "absatz",
@@ -193,7 +206,7 @@ export const DATENSCHUTZ: RechtsSeite = {
           typ: "absatz",
           kopf: "PostHog (Reichweitenmessung).",
           teile: [
-            `Zweck: Ich messe, welche Seiten aufgerufen werden. PostHog wird erst geladen, nachdem du in die Kategorie Statistik eingewilligt hast; ohne Einwilligung wird die Bibliothek nicht von ${posthog} geladen und es werden keine Daten an PostHog gesendet. Verwendet wird der EU-Endpunkt ${posthog}. Erfasst werden Seitenaufrufe, beim Laden einer Seite und bei jedem Seitenwechsel innerhalb der Website, mit den technisch üblichen Angaben wie aufgerufener Adresse, Referrer, Browser und Gerät sowie deiner IP-Adresse beim Übertragen. Eigene, selbst definierte Ereignisse sendet die Website nicht. [[PRÜFEN: genaue Datenfelder und ob die IP-Adresse gespeichert wird (PostHog-Dokumentation, Projekteinstellungen)]] Die Bibliothek ist nicht auf Seitenaufrufe beschränkt, die automatische Erfassung von Klicks (Autocapture) ist im Code nicht abgeschaltet. [[PRÜFEN: ob Autocapture und Sitzungsaufzeichnung im PostHog-Projekt aktiv sind und welche Daten sie erfassen]] [[PRÜFEN: Speicherung im Browser (Cookie oder localStorage) mit Name und Laufzeit laut PostHog-Dokumentation für die verwendete Version]] Rechtsgrundlage ist deine Einwilligung nach Art. 6 Abs. 1 lit. a DSGVO. [[PRÜFEN: Empfänger und Sitz des Anbieters, Auftragsverarbeitungsvertrag, Drittlandübermittlung trotz EU-Region]] [[PRÜFEN: Aufbewahrungsdauer der Ereignisdaten im PostHog-Projekt]]`,
+            `Zweck: Ich messe, welche Seiten aufgerufen werden. PostHog wird erst geladen, nachdem du in die Kategorie Statistik eingewilligt hast; ohne Einwilligung wird die Bibliothek nicht von ${posthog} geladen und es werden keine Daten an PostHog gesendet. Verwendet werden die EU-Endpunkte ${posthog} (Bibliothek und Datenübertragung) und ${posthogAssets} (vom Skript nachgeladene Erweiterungen und Konfiguration). Erfasst werden Seitenaufrufe, beim Laden einer Seite und bei jedem Seitenwechsel innerhalb der Website, nach den Standardeinstellungen der Bibliothek auch das Verlassen einer Seite, mit den technisch üblichen Angaben wie aufgerufener Adresse, Referrer, Browser und Gerät sowie deiner IP-Adresse beim Übertragen. Eigene, selbst definierte Ereignisse sendet die Website nicht. [[PRÜFEN: gilt erst nach Task 15 (Legacy-Seiten entfernen) – Aussage vor Livegang gegen den Code prüfen]] [[PRÜFEN: Hosts per Netzwerk-Trace nach Einwilligung bestätigen]] [[PRÜFEN: genaue Datenfelder und ob die IP-Adresse gespeichert wird (PostHog-Dokumentation, Projekteinstellungen)]] Die Bibliothek ist nicht auf Seitenaufrufe beschränkt, die automatische Erfassung von Klicks (Autocapture) ist im Code nicht abgeschaltet. [[PRÜFEN: ob Autocapture und Sitzungsaufzeichnung im PostHog-Projekt aktiv sind und welche Daten sie erfassen]] [[PRÜFEN: Speicherung im Browser (Cookie oder localStorage) mit Name und Laufzeit laut PostHog-Dokumentation für die verwendete Version]] Rechtsgrundlage ist deine Einwilligung nach Art. 6 Abs. 1 lit. a DSGVO. [[PRÜFEN: Empfänger und Sitz des Anbieters, Auftragsverarbeitungsvertrag, Drittlandübermittlung trotz EU-Region]] [[PRÜFEN: Aufbewahrungsdauer der Ereignisdaten im PostHog-Projekt]]`,
           ],
         },
         {
@@ -211,7 +224,7 @@ export const DATENSCHUTZ: RechtsSeite = {
       nummer: "4",
       bloecke: [
         absatz(
-          "Schriften (Geist und Geist Mono) und alle Skripte dieser Website werden von der eigenen Domain ausgeliefert, nicht von Google Fonts oder einem anderen CDN. Externe Hosts sind nur diese:"
+          "Schriften (Geist und Geist Mono) und alle Skripte dieser Website werden von der eigenen Domain ausgeliefert, nicht von Google Fonts oder einem anderen CDN. Externe Hosts sind nur diese: [[PRÜFEN: gilt erst nach Task 15 (Legacy-Seiten entfernen) – Aussage vor Livegang gegen den Code prüfen]] [[PRÜFEN: Hosts per Netzwerk-Trace nach Einwilligung bestätigen]]"
         ),
         {
           typ: "liste",

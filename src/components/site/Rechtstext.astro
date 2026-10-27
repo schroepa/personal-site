@@ -20,7 +20,12 @@ const extern = (href: string) => /^https?:/.test(href)
             {b.kopf && <strong>{b.kopf} </strong>}
             {b.teile.map((t) =>
               istLink(t) ? (
-                <a href={t.href} {...(extern(t.href) ? { target: "_blank", rel: "noopener noreferrer" } : {})}>
+                <a
+                  href={t.href}
+                  {...(extern(t.href)
+                    ? { target: "_blank", rel: "noopener noreferrer", "aria-label": `${t.text} (öffnet in neuem Tab)` }
+                    : {})}
+                >
                   {t.text}
                 </a>
               ) : (

@@ -2,6 +2,9 @@ import AxeBuilder from "@axe-core/playwright"
 import { expect, test, type Page } from "@playwright/test"
 import { expectNoHorizontalOverflow, expectSingleH1, setTheme } from "../helpers"
 import { veroeffentlichteBeitraege } from "../content"
+import { existsSync, readdirSync, readFileSync, statSync } from "node:fs"
+import { join } from "node:path"
+import { fremdeHosts, htmlDateien } from "../fremde-hosts.ts"
 import { KONTAKT_EMAIL } from "../../src/data/kontakt.ts"
 import { EXTERNE_RESSOURCEN, offeneStellen } from "../../src/data/rechtliches.ts"
 
@@ -15,9 +18,21 @@ const FIGMA_FOOTER_HOEHE = { desktop: 213, tablet: 213, mobile: 405 } as const
 /**
  * Figma zeigt unter „Rechtliches“ nur Impressum und Datenschutz. Der Knopf „Cookie-Einstellungen“ (Widerruf, Pflicht durch Cookiebot)
  * kommt hinzu: Auf Desktop und Tablet passt er in die Zeile, auf Mobil (390) bricht er in eine eigene Zeile
- * (Zeilenhöhe text/body 26 + Abstand site-footer/gap-links 16). Diese Abweichung ist gewollt und mit Patrick abzustimmen (Figma ergänzen).
+ * (Zeilenhöhe text/body + Abstand site-footer/gap-links, aus den CSS-Variablen gelesen). Diese Abweichung ist gewollt und mit Patrick abzustimmen (Figma ergänzen).
  */
-const COOKIE_ZEILE_MOBIL = 26 + 16
+async function cookieZeileMobil(page: Page): Promise<number> {
+  return page.evaluate(() => {
+    const maß = (variable: string) => {
+      const probe = document.createElement("div")
+      probe.style.cssText = `position:absolute;visibility:hidden;height:var(${variable})`
+      document.body.appendChild(probe)
+      const h = probe.getBoundingClientRect().height
+      probe.remove()
+      return h
+    }
+    return maß("--text-body-line-height") + maß("--site-footer-gap-links")
+  })
+}
 
 async function laden(page: Page, url: string) {
   await page.goto(url)
@@ -114,6 +129,61 @@ test.describe("Datenschutz", () => {
   })
 })
 
+test.describe("Cookie-Einstellungen", () => {
+  test("Klick und Tastatur rufen Cookiebot.renew() auf, kein Inline-Handler", async ({ page }) => {
+    await laden(page, IMPRESSUM)
+    await page.evaluate(() => {
+      const w = window as unknown as { Cookiebot?: { renew: () => void }; __renew: number }
+      w.__renew = 0
+      w.Cookiebot = { renew: () => void (w.__renew += 1) }
+    })
+    const knopf = page.getByRole("contentinfo").getByRole("button", { name: "Cookie-Einstellungen" })
+    expect(await knopf.getAttribute("onclick")).toBeNull()
+    await knopf.click()
+    await knopf.focus()
+    await page.keyboard.press("Enter")
+    expect(await page.evaluate(() => (window as unknown as { __renew: number }).__renew)).toBe(2)
+  })
+
+  test("ohne Cookiebot passiert beim Klick nichts (kein Fehler)", async ({ page }) => {
+    const fehler: string[] = []
+    page.on("pageerror", (e) => fehler.push(e.message))
+    await laden(page, IMPRESSUM)
+    await page.evaluate(() => delete (window as unknown as { Cookiebot?: unknown }).Cookiebot)
+    await page.getByRole("contentinfo").getByRole("button", { name: "Cookie-Einstellungen" }).click()
+    expect(fehler).toEqual([])
+  })
+
+  test("nach Client-Navigation löst ein Klick renew() genau einmal aus (Teardown)", async ({ page }) => {
+    await laden(page, IMPRESSUM)
+    await page.getByRole("contentinfo").getByRole("link", { name: "Datenschutz" }).click()
+    await page.waitForURL(/datenschutz/)
+    await page.waitForSelector("body[data-bereit]")
+    await page.evaluate(() => {
+      const w = window as unknown as { Cookiebot?: { renew: () => void }; __renew: number }
+      w.__renew = 0
+      w.Cookiebot = { renew: () => void (w.__renew += 1) }
+    })
+    await page.getByRole("contentinfo").getByRole("button", { name: "Cookie-Einstellungen" }).click()
+    expect(await page.evaluate(() => (window as unknown as { __renew: number }).__renew)).toBe(1)
+  })
+})
+
+test.describe("Externe Links im Rechtstext", () => {
+  test("öffnen in neuem Tab, mit Hinweis im zugänglichen Namen und noopener", async ({ page }) => {
+    for (const url of [IMPRESSUM, DATENSCHUTZ]) {
+      await laden(page, url)
+      for (const a of await page.locator("main a[href^='http']").all()) {
+        await expect(a).toHaveAttribute("target", "_blank")
+        await expect(a).toHaveAttribute("rel", /noopener/)
+        await expect(a).toHaveAttribute("aria-label", /\(öffnet in neuem Tab\)$/)
+      }
+    }
+    await laden(page, DATENSCHUTZ)
+    expect(await page.locator("main a[href^='http']").count()).toBeGreaterThanOrEqual(2)
+  })
+})
+
 test.describe("Platzhalter vor dem Livegang", () => {
   // Wird in Task 17 scharf (test.fixme -> test): bis Patrick Anschrift, Stand und die [[PRÜFEN: …]]-Stellen ersetzt hat, ist dieser Test erwartet rot.
   test.fixme("kein [[…]] mehr auf /impressum und /datenschutz", async ({ page }) => {
@@ -121,6 +191,28 @@ test.describe("Platzhalter vor dem Livegang", () => {
       await laden(page, url)
       expect(await mainText(page), url).not.toContain("[[")
     }
+  })
+
+  // Wird in Task 15/17 scharf (test.fixme -> test): Die Aussagen „keine eigenen Ereignisse“ und „Externe Hosts sind nur diese“ im Datenschutztext
+  // stimmen erst, wenn die Legacy-Seiten entfernt sind. Der Test prüft die echte Bedingung und läuft dann ohne Änderung.
+  test.fixme("keine eigenen PostHog-Ereignisse im Code und keine Fremdhosts auf gebauten Seiten außer EXTERNE_RESSOURCEN", async () => {
+    const quellen = (dir: string): string[] =>
+      readdirSync(dir).flatMap((n) => {
+        const p = join(dir, n)
+        if (statSync(p).isDirectory()) return quellen(p)
+        return /\.(astro|ts|tsx|js|mjs)$/.test(n) ? [p] : []
+      })
+    const mitCapture = quellen(join(process.cwd(), "src")).filter((p) => /posthog\??\.capture\(/.test(readFileSync(p, "utf8")))
+    expect(mitCapture, "posthog.capture( im Code").toEqual([])
+
+    const dist = join(process.cwd(), "dist")
+    expect(existsSync(dist), "dist/ fehlt: erst `npm run build`").toBe(true)
+    const erlaubt = new Set([...EXTERNE_RESSOURCEN.map((r) => r.host), "www.ptrckschrdtr.de", "ptrckschrdtr.de", "www.w3.org"])
+    const probleme: string[] = []
+    for (const datei of htmlDateien(dist)) {
+      for (const h of fremdeHosts(readFileSync(datei, "utf8"))) if (!erlaubt.has(h)) probleme.push(`${datei.slice(dist.length)}: ${h}`)
+    }
+    expect(probleme).toEqual([])
   })
 
   test("die Stellen aus den Daten stehen sichtbar auf den Seiten (Erinnerung, bis ersetzt)", async ({ page }) => {
@@ -167,6 +259,17 @@ test.describe("404", () => {
     await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", "noindex")
   })
 
+  test("genau ein veröffentlichter Artikel: eine Zeile; keiner: kein Block (gemeinsame Komponente, Prüfseite)", async ({ page }) => {
+    await laden(page, "/prototypes/zuletzt-geschrieben")
+    const eins = page.locator("#pz-eins article")
+    await expect(eins).toHaveCount(1)
+    await expect(eins.locator("h3 a")).toHaveText(neueste[0].title)
+    await expect(eins.locator("h3 a")).toHaveAttribute("href", `/blog/${neueste[0].slug}`)
+    await expect(page.locator("#pz-keiner")).toHaveCount(0)
+    await expect(page.locator("[data-fall='keiner'] h2")).toHaveCount(0)
+    await expectNoHorizontalOverflow(page)
+  })
+
   test("Kopf und Fuß sind da", async ({ page }) => {
     await laden(page, FEHLER)
     await expect(page.getByRole("banner")).toBeVisible()
@@ -180,7 +283,7 @@ test.describe("Fußzeile (Figma Site-Footer)", () => {
       await laden(page, url)
       const h = await page.getByRole("contentinfo").evaluate((el) => el.getBoundingClientRect().height)
       const name = testInfo.project.name as keyof typeof FIGMA_FOOTER_HOEHE
-      const soll = FIGMA_FOOTER_HOEHE[name] + (name === "mobile" ? COOKIE_ZEILE_MOBIL : 0)
+      const soll = FIGMA_FOOTER_HOEHE[name] + (name === "mobile" ? await cookieZeileMobil(page) : 0)
       expect(Math.abs(h - soll), `${testInfo.project.name}: ${h} statt ${soll}`).toBeLessThanOrEqual(2)
     })
   }

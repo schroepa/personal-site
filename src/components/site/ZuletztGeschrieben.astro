@@ -1,0 +1,47 @@
+---
+// Block „Zuletzt geschrieben“ der 404 (Figma 270:1491): Abschnitt mit kleinen Artikelzeilen. Ohne Beiträge entfällt der ganze Block.
+import Abschnitt from "./Abschnitt.astro"
+import ArtikelZeile from "./ArtikelZeile.astro"
+import { slugVon, zeilenMeta } from "@/lib/blog"
+import { coverThumbSrc } from "@/lib/cover-image"
+
+interface Beitrag {
+  id: string
+  data: { title: string; date: Date; tags?: string[]; coverImage?: string }
+}
+interface Props {
+  beitraege: Beitrag[]
+  id?: string
+}
+const { beitraege, id = "zuletzt-geschrieben" } = Astro.props
+---
+
+{
+  beitraege.length > 0 && (
+    <Abschnitt {id} label="Zuletzt geschrieben">
+      <div class="zeilen">
+        {beitraege.map((b) => (
+          <ArtikelZeile
+            groesse="klein"
+            auszugAnzeigen={false}
+            meta={zeilenMeta(b.data.tags, b.data.date)}
+            titel={b.data.title}
+            bild={coverThumbSrc(b.data.coverImage)}
+            href={`/blog/${slugVon(b.id)}`}
+          />
+        ))}
+      </div>
+    </Abschnitt>
+  )
+}
+
+<style>
+  .zeilen {
+    display: flex;
+    flex-direction: column;
+    gap: var(--global-size-40);
+  }
+  .zeilen > :global(*) {
+    min-width: 0;
+  }
+</style>

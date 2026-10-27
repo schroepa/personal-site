@@ -1,0 +1,20 @@
+---
+// Prüfseite für den 404-Block „Zuletzt geschrieben“ mit genau einem und mit keinem Beitrag — noindex, nicht in der Sitemap.
+import { getCollection } from "astro:content"
+import SiteLayout from "@/layouts/SiteLayout.astro"
+import ZuletztGeschrieben from "@/components/site/ZuletztGeschrieben.astro"
+import { zuletztGeschrieben } from "@/lib/fehlerseite"
+
+const [einer] = zuletztGeschrieben(await getCollection("blog"), 1)
+---
+
+<SiteLayout
+  title="Prüfseite Zuletzt geschrieben"
+  description="Interne Prüfseite für den Block Zuletzt geschrieben der 404."
+  blatt="Prüfblatt"
+  noindex
+>
+  <h1 class="text-h1">Prüfseite: Zuletzt geschrieben</h1>
+  <div data-fall="eins"><ZuletztGeschrieben id="pz-eins" beitraege={einer ? [einer] : []} /></div>
+  <div data-fall="keiner"><ZuletztGeschrieben id="pz-keiner" beitraege={[]} /></div>
+</SiteLayout>

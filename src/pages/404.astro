@@ -3,13 +3,10 @@
 // darunter „Zuletzt geschrieben“ mit den zwei neuesten Artikeln (weniger Artikel: zeigen, was da ist; keiner: Block entfällt). noindex.
 import { getCollection } from "astro:content"
 import SiteLayout from "@/layouts/SiteLayout.astro"
-import Abschnitt from "@/components/site/Abschnitt.astro"
-import ArtikelZeile from "@/components/site/ArtikelZeile.astro"
 import Knopf from "@/components/site/Knopf.astro"
 import Seitenkopf from "@/components/site/Seitenkopf.astro"
+import ZuletztGeschrieben from "@/components/site/ZuletztGeschrieben.astro"
 import { NAME } from "@/data/rechtliches"
-import { slugVon, zeilenMeta } from "@/lib/blog"
-import { coverThumbSrc } from "@/lib/cover-image"
 import { zuletztGeschrieben } from "@/lib/fehlerseite"
 
 const beitraege = zuletztGeschrieben(await getCollection("blog"))
@@ -34,24 +31,7 @@ const beitraege = zuletztGeschrieben(await getCollection("blog"))
     </div>
   </Seitenkopf>
 
-  {
-    beitraege.length > 0 && (
-      <Abschnitt id="zuletzt-geschrieben" label="Zuletzt geschrieben">
-        <div class="zeilen">
-          {beitraege.map((b) => (
-            <ArtikelZeile
-              groesse="klein"
-              auszugAnzeigen={false}
-              meta={zeilenMeta(b.data.tags, b.data.date)}
-              titel={b.data.title}
-              bild={coverThumbSrc(b.data.coverImage)}
-              href={`/blog/${slugVon(b.id)}`}
-            />
-          ))}
-        </div>
-      </Abschnitt>
-    )
-  }
+  <ZuletztGeschrieben {beitraege} />
 </SiteLayout>
 
 <style>
@@ -59,13 +39,5 @@ const beitraege = zuletztGeschrieben(await getCollection("blog"))
     display: flex;
     flex-wrap: wrap;
     gap: var(--global-size-8);
-  }
-  .zeilen {
-    display: flex;
-    flex-direction: column;
-    gap: var(--global-size-40);
-  }
-  .zeilen > :global(*) {
-    min-width: 0;
   }
 </style>
