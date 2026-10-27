@@ -9,11 +9,12 @@ export const MODULES: Array<() => () => void> = [initLenis]
 
 export function initMotion(): () => void {
   const abmelden: Array<() => void> = []
+  // Die Meldung nennt das Modul (der äußere sicher()-Schutz in SiteLayout kennt es nicht)
   for (const modul of MODULES) {
     try {
       abmelden.push(modul())
     } catch (fehler) {
-      console.error(fehler)
+      console.error(`Bewegungsmodul „${modul.name || "anonym"}“ fehlgeschlagen:`, fehler)
     }
   }
   return () => {
@@ -21,7 +22,7 @@ export function initMotion(): () => void {
       try {
         fn()
       } catch (fehler) {
-        console.error(fehler)
+        console.error("Bewegungsmodul-Teardown fehlgeschlagen:", fehler)
       }
     }
   }

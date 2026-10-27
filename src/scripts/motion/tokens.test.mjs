@@ -32,6 +32,12 @@ test("parseToken: Vorzeichen: + ist erlaubt, negative Zahlen bleiben negativ", (
   assert.equal(parseToken("-0.5s"), -500)
 })
 
+test("parseToken: wörtliche Sonderfälle", () => {
+  assert.throws(() => parseToken("1e3"), /1e3/)
+  assert.equal(parseToken("0.0"), 0)
+  assert.equal(parseToken("-5ms"), -5)
+})
+
 test("parseToken: Einheit ohne Groß-/Kleinschreibung", () => {
   assert.equal(parseToken("300MS"), 300)
   assert.equal(parseToken("1S"), 1000)

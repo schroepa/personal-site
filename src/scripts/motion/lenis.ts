@@ -52,15 +52,23 @@ export function initLenis(): () => void {
     if (soll && !lenis) erzeugen()
     else if (!soll && lenis) zerstoeren()
   }
+  // Aus einem Listener heraus nie werfen: fehlendes oder ungültiges Token wird gemeldet, die Seite scrollt nativ weiter
+  const beiAenderung = () => {
+    try {
+      abgleichen()
+    } catch (fehler) {
+      console.error("Lenis konnte nicht gestartet werden:", fehler)
+    }
+  }
 
   if (import.meta.env.DEV && window.__lenisCount === undefined) window.__lenisCount = lebend
   abgleichen()
-  reduziert.addEventListener("change", abgleichen)
-  touch.addEventListener("change", abgleichen)
+  reduziert.addEventListener("change", beiAenderung)
+  touch.addEventListener("change", beiAenderung)
 
   return () => {
-    reduziert.removeEventListener("change", abgleichen)
-    touch.removeEventListener("change", abgleichen)
+    reduziert.removeEventListener("change", beiAenderung)
+    touch.removeEventListener("change", beiAenderung)
     zerstoeren()
   }
 }

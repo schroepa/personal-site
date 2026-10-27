@@ -42,26 +42,23 @@ test.describe("Bewegungs-Infrastruktur", () => {
     expect(await htmlHatLenis(page)).toBe(true)
   })
 
-  test("nach 5 Client-Router-Navigationen und Zurück/Vor existiert genau eine Lenis-Instanz", async ({ page }) => {
+  test("nach 5 Navigationen über die echte Navigation und Zurück/Vor existiert genau eine Lenis-Instanz", async ({ page }) => {
     await page.emulateMedia({ reducedMotion: "no-preference" })
     await laden(page, "/")
+    await page.evaluate(() => ((window as unknown as { __marker: string }).__marker = "start"))
     for (const pfad of ["/blog", "/projects", "/about", "/kontakt", "/"]) {
-      await page.evaluate((p) => (window as unknown as { __marker: string }).__marker = p, pfad)
-      // Ein Klick auf einen Link im Dokument: der Router fängt ihn ab (die Kopfleiste ist mobil eingeklappt)
-      await page.evaluate((p) => {
-        const a = document.createElement("a")
-        a.href = p
-        document.body.append(a)
-        a.click()
-        a.remove()
-      }, pfad)
+      // Schmal liegt die Navigation hinter dem Menü-Knopf: wie ein Besucher öffnen und den echten Link wählen
+      const knopf = page.getByRole("button", { name: "Menü" })
+      if (await knopf.isVisible()) await knopf.click()
+      const link = pfad === "/" ? page.locator("header a.logo") : page.getByRole("navigation", { name: "Hauptnavigation" }).locator(`a[href="${pfad}"]`)
+      await link.click()
       await page.waitForURL(`**${pfad}`)
       await page.waitForSelector("body[data-bereit]")
       expect(await lenisAnzahl(page)).toBe(1)
       await expect(page.locator("html.lenis")).toHaveCount(1)
     }
-    // Der Router hat die Seite nie neu geladen (Marker aus der ersten Navigation blieb erhalten)
-    expect(await page.evaluate(() => (window as unknown as { __marker?: string }).__marker)).toBeTruthy()
+    // Der Router hat nie neu geladen: der Marker aus dem ersten Dokument lebt noch
+    expect(await page.evaluate(() => (window as unknown as { __marker?: string }).__marker)).toBe("start")
     await page.goBack()
     await page.waitForSelector("body[data-bereit]")
     expect(await lenisAnzahl(page)).toBe(1)
@@ -69,6 +66,21 @@ test.describe("Bewegungs-Infrastruktur", () => {
     await page.waitForSelector("body[data-bereit]")
     expect(await lenisAnzahl(page)).toBe(1)
     await expect(page.locator("html.lenis")).toHaveCount(1)
+  })
+
+  test("Sekundär: ein im Dokument erzeugter Link (kein Ersatz für die echte Navigation) lässt die Instanz bei 1", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "no-preference" })
+    await laden(page, "/")
+    await page.evaluate(() => {
+      const a = document.createElement("a")
+      a.href = "/blog"
+      document.body.append(a)
+      a.click()
+      a.remove()
+    })
+    await page.waitForURL("**/blog")
+    await page.waitForSelector("body[data-bereit]")
+    expect(await lenisAnzahl(page)).toBe(1)
   })
 
   test("Token-Leser: Dauern sind unter reduced motion 0, sonst 750", async ({ page }) => {
@@ -119,25 +131,25 @@ test.describe("Bewegungs-Infrastruktur", () => {
     expect(reduziert.reduziert).toBe(true)
   })
 
-  test("Anker im Inhaltsverzeichnis scrollt zum Ziel und beachtet scroll-margin-top", async ({ page }) => {
+  test("Anker scrollt zum Ziel und beachtet scroll-margin-top (breit: Inhaltsverzeichnis, schmal: Link „Zum Inhalt springen“)", async ({ page }) => {
     await page.emulateMedia({ reducedMotion: "no-preference" })
     await laden(page, "/blog/single-source-of-truth-ist-eine-luege")
     expect(await lenisAnzahl(page)).toBe(1)
-    const link = page.locator("[data-inhaltsverzeichnis] a[href^='#']").nth(3)
-    const id = decodeURIComponent((await link.getAttribute("href"))!.slice(1))
-    if (await link.isVisible()) {
-      await link.click()
+    const toc = page.locator("[data-inhaltsverzeichnis] a[href^='#']").nth(3)
+    let id: string
+    if (await toc.isVisible()) {
+      id = decodeURIComponent((await toc.getAttribute("href"))!.slice(1))
+      await toc.click()
     } else {
-      // Mobil ist das Inhaltsverzeichnis ausgeblendet: gleicher Anker als Link im Dokument
-      await page.evaluate((i) => {
-        const a = document.createElement("a")
-        a.href = `#${i}`
-        document.body.append(a)
-        a.click()
-        a.remove()
-      }, id)
+      // Das Inhaltsverzeichnis ist unterhalb des Breakpoints bewusst ausgeblendet: der echte Anker ist dort
+      // der Sprunglink #inhalt (per Tastatur erreicht), von weiter unten auf der Seite aus
+      id = "inhalt"
+      await page.evaluate(() => window.scrollTo(0, 1500))
+      await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(1000)
+      await page.keyboard.press("Tab")
+      await page.locator(".skip-link").focus()
+      await page.keyboard.press("Enter")
     }
-    await expect.poll(() => page.evaluate(() => window.scrollY), { timeout: 8000 }).toBeGreaterThan(100)
     const ergebnis = () =>
       page.evaluate((i) => {
         const el = document.getElementById(i)!
@@ -154,6 +166,8 @@ test.describe("Bewegungs-Infrastruktur", () => {
       }, { timeout: 8000 })
       .toBe(true)
     const e = await ergebnis()
+    if (id !== "inhalt") expect(e.y).toBeGreaterThan(100)
+    else expect(e.y).toBeLessThan(500)
     expect(Math.abs(e.top - e.rand)).toBeLessThan(2)
     expect(await page.evaluate(() => location.hash)).toBe(`#${encodeURIComponent(id)}`.replace(/%2F/g, "/"))
   })
@@ -182,8 +196,33 @@ test.describe("Bewegungs-Infrastruktur", () => {
     await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
     await page.mouse.wheel(0, 150)
     await expect.poll(() => liste.evaluate((el) => el.scrollTop)).toBeGreaterThan(0)
-    await page.waitForTimeout(600)
-    expect(await page.evaluate(() => window.scrollY)).toBe(vorher)
+    // Die Seite dahinter bleibt stehen: scrollY ist stabil (mehrere Messungen) und unverändert
+    let zuletzt = -1
+    let stabil = 0
+    await expect
+      .poll(async () => {
+        const y = await page.evaluate(() => window.scrollY)
+        stabil = y === zuletzt ? stabil + 1 : 0
+        zuletzt = y
+        return stabil >= 5
+      })
+      .toBe(true)
+    expect(zuletzt).toBe(vorher)
+  })
+
+  test("Fehlendes Glättungs-Token beim Wechsel der Systemeinstellung: Konsolenfehler mit Token-Namen, Seite bleibt benutzbar", async ({ page }) => {
+    const fehler: string[] = []
+    const seitenfehler: string[] = []
+    page.on("console", (m) => m.type() === "error" && fehler.push(m.text()))
+    page.on("pageerror", (e) => seitenfehler.push(e.message))
+    await page.emulateMedia({ reducedMotion: "reduce" })
+    await laden(page)
+    await page.addStyleTag({ content: ":root { --motion-scroll-glaettung: kaputt; }" })
+    await page.emulateMedia({ reducedMotion: "no-preference" })
+    await expect.poll(() => fehler.join("\n")).toContain("--motion-scroll-glaettung")
+    expect(seitenfehler).toEqual([])
+    expect(await lenisAnzahl(page)).toBe(0)
+    await expect(page.locator("h1")).toBeVisible()
   })
 
   test("Axe, keine Konsolenfehler", async ({ page }) => {
