@@ -1,0 +1,345 @@
+---
+// Projektseite im neuen Design (Figma 267:22189 Fallstudie, 267:21878 Übersicht; löst PostLayout.astro ab).
+// Mit `fakten`: Fallstudie · Seitenkopf mit Faktenzeile · Titelbild · fünf Abschnitte (Ergebnis mit Kennzahlen) · Nächstes Projekt · Kontakt.
+// Ohne `fakten`: einfache Seite · Seitenkopf · Titelbild · Text im Slot · Kontakt.
+import SiteLayout from "@/layouts/SiteLayout.astro"
+import Abschnitt from "@/components/site/Abschnitt.astro"
+import Faktenzeile from "@/components/site/Faktenzeile.astro"
+import Knopf from "@/components/site/Knopf.astro"
+import KontaktPanel from "@/components/site/KontaktPanel.astro"
+import Seitenkopf from "@/components/site/Seitenkopf.astro"
+import { KONTAKT_EMAIL } from "@/data/kontakt"
+import { trenneBild } from "@/lib/fallstudie"
+import { jsonLd } from "@/lib/jsonld"
+import { kurzTitel, projektMeta } from "@/lib/startseite"
+import "@/styles/neu-prose.css"
+
+interface Fakt {
+  label: string
+  wert: string
+}
+export interface FallstudieAbschnitt {
+  id: string
+  titel: string
+  html: string
+}
+export interface NaechstesProjekt {
+  slug: string
+  meta: string
+  titel: string
+  text: string
+  bild?: string
+}
+
+interface Props {
+  title: string
+  description: string
+  date: Date
+  tags: string[]
+  coverImage?: string
+  slug: string
+  url?: string
+  repo?: string
+  fakten?: { label: string; wert: string }[]
+  kennzahlen?: { wert: string; label: string }[]
+  /** Gerenderte Abschnitte der Fallstudie (nur mit `fakten`) */
+  abschnitte?: FallstudieAbschnitt[]
+  naechstes?: NaechstesProjekt | null
+}
+
+const { title, description, date, tags, coverImage, slug, url, repo, fakten, kennzahlen = [], abschnitte = [], naechstes = null } =
+  Astro.props
+
+const istFallstudie = fakten !== undefined
+const siteUrl = "https://www.ptrckschrdtr.de"
+const pageUrl = `${siteUrl}/projects/${slug}`
+const ogImage = coverImage ? `/images/og/projects-${slug}.png` : undefined
+const ogImageAbsolute = ogImage ? new URL(ogImage, siteUrl).toString() : `${siteUrl}/og-default.png`
+
+const projektSchema = {
+  "@context": "https://schema.org",
+  "@type": "Article",
+  headline: title,
+  description,
+  datePublished: date.toISOString(),
+  dateModified: date.toISOString(),
+  author: { "@type": "Person", name: "Patrick Schröder", url: siteUrl },
+  publisher: { "@type": "Person", name: "Patrick Schröder", url: siteUrl },
+  image: ogImageAbsolute,
+  url: pageUrl,
+  inLanguage: "de-DE",
+  ...(tags.length > 0 && { keywords: tags.join(", ") }),
+}
+
+const aktionen = [
+  ...(url ? [{ label: "Live ansehen", href: url }] : []),
+  ...(repo ? [{ label: "Code", href: repo }] : []),
+]
+const meta = projektMeta(tags, date)
+const bildName = `view-transition-name: projekt-bild-${slug}`
+---
+
+<SiteLayout
+  title={title}
+  description={description}
+  canonical={pageUrl}
+  ogImage={ogImage}
+  blatt={istFallstudie ? "Fallstudie" : "Projekt"}
+  ogType="article"
+  articleDate={date}
+  articleAuthor="Patrick Schröder"
+  articleTags={tags}
+>
+  <script slot="head" is:inline type="application/ld+json" set:html={jsonLd(projektSchema)} />
+
+  <div class="kopf">
+    <Seitenkopf
+      art={istFallstudie ? "seite" : "artikel"}
+      label={meta}
+      titel={istFallstudie ? kurzTitel(title) : title}
+      einleitung={description}
+    >
+      {
+        istFallstudie && fakten && (
+          <Faktenzeile slot="zusatz" fakten={fakten as [Fakt, Fakt, Fakt]} {aktionen} />
+        )
+      }
+      {
+        !istFallstudie && aktionen.length > 0 && (
+          <div slot="zusatz" class="aktionen">
+            {aktionen.map((a, i) => (
+              <Knopf
+                art={i === 0 ? "primary" : "ghost"}
+                href={a.href}
+                target="_blank"
+                rel="noopener"
+                pfeil="↗"
+                aria-label={`${a.label} (öffnet in neuem Tab)`}
+              >
+                {a.label}
+              </Knopf>
+            ))}
+          </div>
+        )
+      }
+    </Seitenkopf>
+  </div>
+
+  <div class="titelbild" data-titelbild>
+    <div class="bild" style={bildName}>
+      {coverImage && <img src={coverImage} alt="" loading="eager" fetchpriority="high" decoding="async" />}
+    </div>
+  </div>
+
+  {
+    istFallstudie ? (
+      abschnitte.map((a) => {
+        const einblick = a.titel === "Einblicke" ? trenneBild(a.html) : null
+        return (
+          <Abschnitt id={a.id} label={a.titel} layout={einblick ? "oben" : "links"}>
+            {einblick ? (
+              <div class="bild-text" data-bild-text>
+                {einblick.bild && (
+                  <div class="bild-flaeche">
+                    <img src={einblick.bild.src} alt={einblick.bild.alt} loading="lazy" decoding="async" />
+                  </div>
+                )}
+                <div class="text">
+                  {einblick.bild?.meta && <p class="text-label meta">{einblick.bild.meta}</p>}
+                  <div class="prose" set:html={einblick.rest} />
+                </div>
+              </div>
+            ) : (
+              <div class="spalte">
+                <div class="prose" set:html={a.html} />
+              </div>
+            )}
+            {a.titel === "Ergebnis" && kennzahlen.length > 0 && (
+              <ul class="kennzahlen" data-kennzahlen>
+                {kennzahlen.map((k) => (
+                  <li class="kennzahl">
+                    <span class="text-h1 zahl">{k.wert}</span>
+                    <span class="text-label bezeichnung">{k.label}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </Abschnitt>
+        )
+      })
+    ) : (
+      <Abschnitt id="projekt" label="Projekt" layout="links">
+        <div class="spalte">
+          <div class="prose" data-prose><slot /></div>
+        </div>
+      </Abschnitt>
+    )
+  }
+
+  {
+    istFallstudie && naechstes && (
+      <Abschnitt id="naechstes-projekt" label="Nächstes Projekt" layout="oben">
+        <div class="bild-text" data-naechstes>
+          <div class="bild-flaeche" style={`view-transition-name: projekt-bild-${naechstes.slug}`}>
+            {naechstes.bild && <img src={naechstes.bild} alt="" loading="lazy" decoding="async" />}
+          </div>
+          <div class="text">
+            <p class="text-label meta">{naechstes.meta}</p>
+            <h3 class="text-h2 titel">{naechstes.titel}</h3>
+            <p class="text-body beschreibung">{naechstes.text}</p>
+            <div class="aktion">
+              <Knopf art="primary" href={`/projects/${naechstes.slug}`} aria-label={`Fallstudie ansehen: ${naechstes.titel}`}>
+                Fallstudie ansehen
+              </Knopf>
+            </div>
+          </div>
+        </div>
+      </Abschnitt>
+    )
+  }
+
+  <div class="kontakt">
+    <KontaktPanel label="Kontakt" email={KONTAKT_EMAIL} />
+  </div>
+</SiteLayout>
+
+<style>
+  /* Der Seitenkopf sitzt bündig unter dem Kopf: Abschnittsabstand oben von <main> aufheben */
+  .kopf {
+    margin-block-start: calc(-1 * var(--layout-section-gap));
+  }
+
+  .aktionen {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--global-size-8);
+  }
+
+  /* Titelbild (Figma 267:22275): Höhe 240 / 480 / 720, großer Objektradius, 96 Abstand darunter */
+  .titelbild {
+    padding-bottom: var(--global-size-96);
+  }
+  .bild,
+  .bild-flaeche {
+    overflow: hidden;
+    border-radius: var(--objekt-radius-gross);
+    corner-shape: squircle;
+    background: var(--image-background);
+  }
+  .bild {
+    height: var(--size-240);
+  }
+  .bild-flaeche {
+    height: var(--size-240);
+  }
+  .bild img,
+  .bild-flaeche img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* Fließtext im Raster des Abschnitts; ab Desktop höchstens 7 der 9 Spalten (Figma 267:22288) */
+  .spalte {
+    display: grid;
+    grid-template-columns: subgrid;
+  }
+  .spalte > .prose {
+    grid-column: 1 / -1;
+  }
+
+  /* Bild und Text (Einblicke, Nächstes Projekt; Figma 267:22314): mobil und Tablet untereinander, ab Desktop 8 + 4 Spalten */
+  .bild-text {
+    display: grid;
+    grid-template-columns: subgrid;
+    row-gap: var(--global-size-24);
+    align-items: start;
+  }
+  .bild-text > * {
+    grid-column: 1 / -1;
+    min-width: 0;
+  }
+  .text {
+    display: flex;
+    flex-direction: column;
+    gap: var(--global-size-12);
+    overflow-wrap: anywhere;
+  }
+  .text > * {
+    margin: 0;
+  }
+  .meta,
+  .beschreibung {
+    color: var(--theme-text-default);
+  }
+  .titel {
+    color: var(--theme-text-strong);
+  }
+  .aktion {
+    padding-top: var(--global-size-12);
+  }
+
+  /* Kennzahlen (Figma 267:22360): drei gleich breite Spalten, Zahl in text/h1 */
+  .kennzahlen {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(0, 1fr);
+    gap: var(--layout-gutter);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .kennzahl {
+    display: flex;
+    flex-direction: column;
+    gap: var(--global-size-4);
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+  .zahl {
+    color: var(--theme-text-strong);
+  }
+  .bezeichnung {
+    color: var(--theme-text-default);
+  }
+
+  /* Kontakt: 80 Abstand zum Fuß (die Hauptfläche bringt schon den Abschnittsabstand mit) */
+  .kontakt {
+    margin-block-end: calc(var(--global-size-80) - var(--layout-section-gap));
+  }
+
+  @media (min-width: 768px) {
+    .bild,
+    .bild-flaeche {
+      height: var(--size-360);
+    }
+    .bild {
+      height: var(--global-size-480);
+    }
+    .text {
+      max-width: 75%;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .spalte > .prose {
+      grid-column: 1 / span 7;
+    }
+    .bild {
+      height: var(--global-size-720);
+    }
+    .bild-flaeche {
+      height: var(--global-size-480);
+    }
+    .bild-text > .bild-flaeche {
+      grid-column: 1 / span 8;
+      grid-row: 1;
+    }
+    .bild-text > .text {
+      grid-column: 9 / span 4;
+      grid-row: 1;
+      max-width: none;
+    }
+  }
+</style>

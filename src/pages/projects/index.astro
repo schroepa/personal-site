@@ -1,241 +1,241 @@
 ---
-import BaseLayout from '@/layouts/BaseLayout.astro';
-import { getCollection } from 'astro:content';
+// Projekt-Übersicht „Arbeit“ (Figma 267:21878 / 267:22494 / 267:23020): Seitenkopf mit Themenfiltern ·
+// Ausgewählt (Bento mit Projektkarten) · Weitere Projekte (Liste) · Digital Art (Akkordeon) · Kontakt-Panel.
+// Ohne JavaScript sind alle Projekte sichtbar und die Filter versteckt (html[data-js]); src/scripts/filter.ts blendet aus.
+import { getCollection } from "astro:content"
+import SiteLayout from "@/layouts/SiteLayout.astro"
+import Abschnitt from "@/components/site/Abschnitt.astro"
+import GalerieAkkordeon from "@/components/site/GalerieAkkordeon.astro"
+import Knopf from "@/components/site/Knopf.astro"
+import KontaktPanel from "@/components/site/KontaktPanel.astro"
+import ProjektKarte from "@/components/site/ProjektKarte.astro"
+import Seitenkopf from "@/components/site/Seitenkopf.astro"
+import { DIGITAL_ART_KAPITEL } from "@/data/digital-art"
+import { KONTAKT_EMAIL } from "@/data/kontakt"
+import { slugVon } from "@/lib/blog"
+import { ausgewaehlte, haeufigeThemen, weitereProjekte } from "@/lib/projekte"
+import { kurzTitel, projektMeta, wirkungAusBeschreibung } from "@/lib/startseite"
 
-const allProjects = await getCollection('projects');
-const sorted = allProjects.sort((a, b) => {
-  if (a.data.featured && !b.data.featured) return -1;
-  if (!a.data.featured && b.data.featured) return 1;
-  return b.data.date.getTime() - a.data.date.getTime();
-});
-
-const getYear = (date: Date) =>
-  new Intl.DateTimeFormat('de-DE', { year: 'numeric' }).format(date);
+// Figma: 4 Karten im Bento; alles Übrige steht in der Liste. Filter: Schlagwörter, die mindestens zwei Projekte tragen.
+const BENTO_ANZAHL = 4
+const FILTER_MINDESTENS = 2
+const alle = await getCollection("projects")
+const karten = ausgewaehlte(alle, BENTO_ANZAHL)
+const weitere = weitereProjekte(alle, BENTO_ANZAHL)
+const themen = haeufigeThemen(alle, FILTER_MINDESTENS)
+const tagsAttr = (tags: string[]) => JSON.stringify(tags)
 ---
 
-<BaseLayout
+<SiteLayout
   title="Projekte — Patrick Schröder"
-  description="Ausgewählte Arbeiten aus Design und Entwicklung."
+  description="Werkzeuge, Systeme und Produkte: was ich gestalte und selbst baue."
+  blatt="Übersicht"
 >
-  <!-- Hero: Header linksbündig am unteren Viewport-Rand -->
-  <div class="page-grid page-hero">
-    <header class="projects-header">
-      <h1 class="t-h1 mb-4" data-reveal="lines">Projekte</h1>
-      <p class="t-lead text-muted-foreground max-w-2xl">
-        Ausgewählte Arbeiten aus den Bereichen Interface Design,
-        Frontend-Entwicklung und Design-Systems.
-      </p>
-    </header>
+  <div data-filter-root data-filter-einheit="Projekt|Projekte">
+    <Seitenkopf
+      art="seite"
+      label="Arbeit"
+      titel="Werkzeuge, Systeme und Produkte."
+      einleitung="Was ich gestalte und selbst baue: Tools für Designer, Apps für den Alltag und Systeme, die Teams schneller machen."
+    >
+      {
+        themen.length > 0 && (
+          <div slot="zusatz" class="filter" data-filter-chips role="group" aria-label="Nach Thema filtern">
+            <Knopf art="ghost" aria-pressed="true">Alle</Knopf>
+            {themen.map((t) => (
+              <Knopf art="ghost" aria-pressed="false" data-tag={t}>
+                {t}
+              </Knopf>
+            ))}
+          </div>
+        )
+      }
+    </Seitenkopf>
+
+    <div data-filter-liste>
+      {
+        karten.length > 0 && (
+          <div data-gruppe>
+            <Abschnitt id="ausgewaehlt" label="Ausgewählt" layout="oben">
+              <div class="bento">
+                {karten.map((p) => (
+                  <div class="karte" data-eintrag data-slug={slugVon(p.id)} data-tags={tagsAttr(p.data.tags)}>
+                    <ProjektKarte
+                      format={p.data.format}
+                      meta={projektMeta(p.data.tags, p.data.date)}
+                      titel={kurzTitel(p.data.title)}
+                      wirkung={p.data.wirkung ?? wirkungAusBeschreibung(p.data.description)}
+                      bild={p.data.coverImage}
+                      href={`/projects/${slugVon(p.id)}`}
+                      slug={slugVon(p.id)}
+                    />
+                  </div>
+                ))}
+              </div>
+            </Abschnitt>
+          </div>
+        )
+      }
+      {
+        weitere.length > 0 && (
+          <div data-gruppe>
+            <Abschnitt id="weitere-projekte" label="Weitere Projekte" layout="links">
+              <ul class="liste">
+                {weitere.map((p) => (
+                  <li class="eintrag" data-eintrag data-slug={slugVon(p.id)} data-tags={tagsAttr(p.data.tags)}>
+                    <p class="text-label meta">{projektMeta(p.data.tags, p.data.date)}</p>
+                    <h3 class="text-h3 titel">
+                      <a href={`/projects/${slugVon(p.id)}`}>{kurzTitel(p.data.title)}</a>
+                    </h3>
+                    <p class="text-body beschreibung">{p.data.description}</p>
+                  </li>
+                ))}
+              </ul>
+            </Abschnitt>
+          </div>
+        )
+      }
+    </div>
+    <p class="text-body leer" role="status" data-filter-leer></p>
   </div>
 
-  <!-- Textverzeichnis scrollt darunter weiter -->
-  <div class="page-grid pb-32">
-      <ol class="project-index" aria-label="Projektliste">
-        {sorted.map((project, i) => {
-          const slug = project.id.replace(/\.md$/, '')
-          const href = `/projects/${slug}`
-          const coverSrc = project.data.coverImage ?? undefined
-          const num = String(i + 1).padStart(2, '0')
-          const year = getYear(project.data.date)
+  <Abschnitt id="digital-art" label="Digital Art" layout="oben">
+    <GalerieAkkordeon kapitel={DIGITAL_ART_KAPITEL} label="Digital Art" />
+  </Abschnitt>
 
-          return (
-            <li class="project-item">
-              <a
-                href={href}
-                class="project-line"
-                data-cursor="link"
-                data-preview={coverSrc}
-              >
-                <span class="project-num" aria-hidden="true">{num}</span>
-                <span class="project-name">{project.data.title}</span>
-                <time class="project-year" datetime={project.data.date.toISOString()}>
-                  {year}
-                </time>
-              </a>
-            </li>
-          )
-        })}
-      </ol>
-
+  <div class="kontakt">
+    <KontaktPanel label="Kontakt" email={KONTAKT_EMAIL}>
+      <Knopf slot="aktionen" art="ghost" href="/cv">Lebenslauf</Knopf>
+    </KontaktPanel>
   </div>
-
-  <!-- ── Hover-Preview: fest positioniert, rechte Seite ────────── -->
-  <div id="project-preview" class="project-preview" aria-hidden="true">
-    <img id="project-preview-img" src="" alt="" loading="lazy" decoding="async" />
-  </div>
-</BaseLayout>
+</SiteLayout>
 
 <style>
-  /* ── Header ──────────────────────────────────────────────────────── */
-  /* ── Hero: volle Viewporthöhe, Header unten links ───────────────────── */
-  .page-hero {
-    min-height: 100dvh;
+  /* Themenfilter: Knöpfe in einer umbrechenden Reihe (Abstand 8); ohne JavaScript ausgeblendet */
+  .filter {
     display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
-    padding-bottom: 5rem;
+    flex-wrap: wrap;
+    gap: var(--global-size-8);
+  }
+  :global(html:not([data-js])) .filter {
+    display: none;
   }
 
-  .projects-header {
-    margin-bottom: 0;
+  /* Der Seitenkopf sitzt bündig unter dem Kopf (Figma 267:21925): Abschnittsabstand oben von <main> aufheben */
+  [data-filter-root] {
+    margin-block-start: calc(-1 * var(--layout-section-gap));
   }
 
-  /* ── Index-Liste ─────────────────────────────────────────────────── */
-  .project-index {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    border-top: 1px solid color-mix(in oklch, var(--foreground) 12%, transparent);
+  /* Eintrag und Gruppe werden per hidden ausgeblendet; Karte, Zeile und Gruppe sind Raster und brauchen die Regel ausdrücklich */
+  [data-eintrag][hidden],
+  [data-gruppe][hidden] {
+    display: none;
   }
 
-  .project-item {
-    /* Link übernimmt die gesamte Klickfläche */
-  }
-
-  /* ── Zeile: Nummer | Titel | Jahr ────────────────────────────────── */
-  .project-line {
+  /* Bento (Figma 267:21984): Karten im 12er-Raster der Seite, mobil untereinander, Tablet zwei Spalten */
+  .bento {
     display: grid;
-    grid-template-columns: 2.5rem 1fr auto;
-    align-items: baseline;
-    gap: 1.5rem;
-    padding: 1.25rem 0;
+    grid-template-columns: subgrid;
+    row-gap: var(--layout-gutter);
+    align-items: start;
+  }
+  .bento > * {
+    grid-column: 1 / -1;
+    min-width: 0;
+  }
+
+  /* Weitere Projekte (Figma 267:22020): Zeilen aus Meta, Titel und Beschreibung; mobil untereinander */
+  .liste {
+    display: grid;
+    grid-template-columns: subgrid;
+    row-gap: var(--global-size-32);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .eintrag {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: subgrid;
+    row-gap: var(--global-size-4);
+    align-items: start;
+    min-width: 0;
+  }
+  .meta,
+  .titel,
+  .beschreibung {
+    grid-column: 1 / -1;
+    margin: 0;
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+  .meta,
+  .beschreibung {
+    color: var(--theme-text-default);
+  }
+  .titel a {
+    color: var(--theme-text-strong);
     text-decoration: none;
-    color: var(--foreground);
-    border-bottom: 1px solid color-mix(in oklch, var(--foreground) 12%, transparent);
-    transition: opacity 250ms ease;
+  }
+  .titel a:hover {
+    text-decoration: underline;
   }
 
-  /* Alle anderen Zeilen zurückdrängen wenn eine gehovered wird */
-  .project-index:has(.project-line:hover) .project-line:not(:hover) {
-    opacity: 0.25;
+  /* Statusmeldung bei 0 Treffern (leer, solange Projekte sichtbar sind; bleibt im Dokument für die Ansage) */
+  .leer {
+    margin: 0;
+    color: var(--theme-text-default);
   }
 
-  /* ── Nummer ──────────────────────────────────────────────────────── */
-  .project-num {
-    font-size: var(--text-xs);
-    letter-spacing: var(--tracking-wide);
-    color: var(--muted-foreground);
-    font-variant-numeric: tabular-nums;
-    padding-top: 0.1em;
+  /* Kontakt: 80 Abstand zum Fuß (die Hauptfläche bringt schon den Abschnittsabstand mit) */
+  .kontakt {
+    margin-block-end: calc(var(--global-size-80) - var(--layout-section-gap));
   }
 
-  /* ── Titel ───────────────────────────────────────────────────────── */
-  .project-name {
-    font-size: var(--text-base);
-    font-weight: 500;
-    letter-spacing: var(--tracking-snug);
-    line-height: var(--leading-snug);
-  }
-
-  /* ── Jahr ────────────────────────────────────────────────────────── */
-  .project-year {
-    font-size: var(--text-xs);
-    letter-spacing: var(--tracking-wide);
-    color: var(--muted-foreground);
-    text-transform: uppercase;
-    white-space: nowrap;
-  }
-
-  /* ── Hover-Preview: fixed, rechte Viewport-Hälfte ────────────────── */
-  .project-preview {
-    position: fixed;
-    right: 7%;
-    top: 50%;
-    transform: translateY(-50%);
-    width: clamp(240px, 26vw, 420px);
-    aspect-ratio: 4 / 3;
-    z-index: 50;
-    pointer-events: none;
-    opacity: 0;
-    transition: opacity 300ms cubic-bezier(0.16, 1, 0.3, 1);
-    overflow: hidden;
-  }
-
-  .project-preview.is-visible {
-    opacity: 1;
-  }
-
-  .project-preview img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-  }
-
-  /* Touch-Geräte: kein Hover-Preview */
-  @media (hover: none) {
-    .project-preview {
-      display: none;
+  @media (min-width: 768px) {
+    /* Tablet: zwei Spalten mit 16 Abstand (Figma 267:22573), erste Karte über die volle Breite */
+    .bento {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: var(--global-size-16);
     }
-
-    .project-line:hover,
-    .project-index:has(.project-line:hover) .project-line:not(:hover) {
-      opacity: 1;
+    .bento > * {
+      grid-column: auto;
+    }
+    .bento > :first-child {
+      grid-column: 1 / -1;
+    }
+    .meta {
+      grid-column: 1 / span 2;
+      grid-row: 1;
+    }
+    .titel {
+      grid-column: 3 / span 3;
+      grid-row: 1;
+    }
+    .beschreibung {
+      grid-column: 6 / span 3;
+      grid-row: 1;
+    }
+    .eintrag {
+      column-gap: var(--layout-gutter);
     }
   }
 
-  /* Schmale Viewports: Preview nimmt zu viel Platz weg */
-  @media (max-width: 900px) {
-    .project-preview {
-      display: none;
+  @media (min-width: 1024px) {
+    /* Desktop: wieder im 12er-Raster (Karte 1: 8 Spalten, übrige 4); Liste in den 9 Spalten rechts: 2 + 3 + 4 */
+    .bento {
+      grid-template-columns: subgrid;
+      column-gap: normal;
+      row-gap: var(--layout-gutter);
     }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .project-line,
-    .project-preview {
-      transition: none;
+    .bento > * {
+      grid-column: span 4;
     }
-  }
-
-  /* ── Fokus-Stil ──────────────────────────────────────────────────── */
-  .project-line:focus-visible {
-    outline: 2px solid var(--foreground);
-    outline-offset: 2px;
-    border-radius: 1px;
+    .bento > :first-child {
+      grid-column: span 8;
+    }
+    .beschreibung {
+      grid-column: 6 / span 4;
+    }
   }
 </style>
-
-<script>
-  function initProjectPreview() {
-    const preview = document.getElementById('project-preview') as HTMLElement | null
-    const previewImg = document.getElementById('project-preview-img') as HTMLImageElement | null
-
-    if (!preview || !previewImg) return
-    if (!window.matchMedia('(hover: hover)').matches) return
-    if (!window.matchMedia('(min-width: 901px)').matches) return
-
-    const lines = document.querySelectorAll<HTMLAnchorElement>('[data-preview]')
-    let switchTimer: ReturnType<typeof setTimeout> | null = null
-
-    lines.forEach((line) => {
-      if (line.dataset.previewInit) return   // bereits initialisiert
-      line.dataset.previewInit = '1'
-
-      line.addEventListener('mouseenter', () => {
-        const src = line.dataset.preview
-        if (!src) return
-
-        if (previewImg.getAttribute('src') !== src) {
-          clearTimeout(switchTimer ?? undefined)
-          preview.classList.remove('is-visible')
-          switchTimer = setTimeout(() => {
-            previewImg.src = src
-            preview.classList.add('is-visible')
-            switchTimer = null
-          }, 80)
-        } else {
-          preview.classList.add('is-visible')
-        }
-      })
-
-      line.addEventListener('mouseleave', () => {
-        clearTimeout(switchTimer ?? undefined)
-        switchTimer = null
-        preview.classList.remove('is-visible')
-      })
-    })
-  }
-
-  document.addEventListener('astro:page-load', initProjectPreview)
-</script>

@@ -13,7 +13,6 @@ const LEGACY = new Set([
   "src/components/astro/ArticleFooter.astro",
   "src/layouts/BaseLayout.astro",
   "src/pages/og-render/[kind]/[slug].astro",
-  "src/pages/projects/[slug].astro",
 ])
 
 /** Dateien mit Fehlern aus der Ausgabe von `astro check` (ohne Farbcodes). */

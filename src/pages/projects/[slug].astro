@@ -1,60 +1,68 @@
 ---
-import PostLayout from '@/layouts/PostLayout.astro'
-import { getCollection, render } from 'astro:content'
-import type { GetStaticPaths } from 'astro'
+// Projektseite: Fallstudie (Projekte mit `fakten`, fünf Abschnitte) oder einfache Seite (alle übrigen).
+// Der Text einer Fallstudie wird an den h2 geteilt und je Abschnitt als Markdown gesetzt (src/lib/fallstudie.ts, markdown.ts).
+import { getCollection, render } from "astro:content"
+import type { InferGetStaticPropsType } from "astro"
+import ProjektLayout, { type FallstudieAbschnitt, type NaechstesProjekt } from "@/layouts/ProjektLayout.astro"
+import { slugVon } from "@/lib/blog"
+import { assertFallstudie, teileAbschnitte } from "@/lib/fallstudie"
+import { markdownZuHtml } from "@/lib/markdown"
+import { naechstesProjekt } from "@/lib/projekte"
+import { kurzTitel, projektMeta, wirkungAusBeschreibung } from "@/lib/startseite"
 
-export const getStaticPaths: GetStaticPaths = async () => {
-  const projects = await getCollection('projects')
-  const sorted = projects.sort((a, b) => b.data.date.getTime() - a.data.date.getTime())
-
-  return sorted.map((project, index) => {
-    const prev = sorted[index + 1]
-    const next = sorted[index - 1]
-
-    return {
-      params: { slug: project.id.replace(/\.md$/, '') },
-      props: {
-        project,
-        prev: prev ? {
-          slug: prev.id.replace(/\.md$/, ''),
-          kind: 'projects' as const,
-          title: prev.data.title,
-          description: prev.data.description,
-          tags: prev.data.tags ?? [],
-          coverImage: prev.data.coverImage,
-        } : undefined,
-        next: next ? {
-          slug: next.id.replace(/\.md$/, ''),
-          kind: 'projects' as const,
-          title: next.data.title,
-          description: next.data.description,
-          tags: next.data.tags ?? [],
-          coverImage: next.data.coverImage,
-        } : undefined,
-      },
-    }
+export async function getStaticPaths() {
+  const projekte = await getCollection("projects")
+  return projekte.map((project) => {
+    const n = naechstesProjekt(projekte, slugVon(project.id))
+    const naechstes: NaechstesProjekt | null = n
+      ? {
+          slug: slugVon(n.id),
+          meta: projektMeta(n.data.tags, n.data.date),
+          titel: kurzTitel(n.data.title),
+          text: wirkungAusBeschreibung(n.data.description),
+          bild: n.data.coverImage,
+        }
+      : null
+    return { params: { slug: slugVon(project.id) }, props: { project, naechstes } }
   })
 }
 
-const { project, prev, next } = Astro.props
-const { Content } = await render(project)
-const slug = project.id.replace(/\.md$/, '')
+type Props = InferGetStaticPropsType<typeof getStaticPaths>
+const { project, naechstes } = Astro.props as Props
+const slug = slugVon(project.id)
+const d = project.data
+
+let abschnitte: FallstudieAbschnitt[] | undefined
+let Content: Awaited<ReturnType<typeof render>>["Content"] | undefined
+if (d.fakten) {
+  const { einleitung, abschnitte: teile } = teileAbschnitte(project.body ?? "")
+  try {
+    assertFallstudie(teile.map((t) => t.titel))
+    if (einleitung.trim()) throw new Error("Text vor dem ersten Abschnitt (h2) würde nicht angezeigt")
+  } catch (e) {
+    throw new Error(`projects/${slug}.md: ${(e as Error).message}`)
+  }
+  abschnitte = await Promise.all(
+    teile.map(async (t) => ({ id: t.titel.toLowerCase().replace(/[^a-z0-9]+/g, "-"), titel: t.titel, html: await markdownZuHtml(t.markdown) }))
+  )
+} else {
+  ;({ Content } = await render(project))
+}
 ---
 
-<PostLayout
-  title={project.data.title}
-  description={project.data.description}
-  date={project.data.date}
-  tags={project.data.tags}
-  coverImage={project.data.coverImage}
-  body={project.body ?? ''}
-  pageUrl={`https://www.ptrckschrdtr.de/projects/${slug}`}
-  slug={slug}
-  kind="projects"
-  projectUrl={project.data.url}
-  projectRepo={project.data.repo}
-  prev={prev}
-  next={next}
+<ProjektLayout
+  title={d.title}
+  description={d.description}
+  date={d.date}
+  tags={d.tags}
+  coverImage={d.coverImage}
+  {slug}
+  url={d.url}
+  repo={d.repo}
+  fakten={d.fakten}
+  kennzahlen={d.kennzahlen}
+  {abschnitte}
+  {naechstes}
 >
-  <Content />
-</PostLayout>
+  {Content && <Content />}
+</ProjektLayout>

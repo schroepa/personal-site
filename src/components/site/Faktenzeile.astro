@@ -99,10 +99,16 @@ const istExtern = (href: string) => /^https?:\/\//.test(href)
     align-items: flex-start;
   }
 
-  /* Tablet (8 Spalten): zwei Fakten pro Reihe */
+  /* Tablet (8 Spalten, Figma 267:22816): drei Fakten und Aktionen je 2 Spalten in einer Reihe */
   @media (min-width: 768px) {
+    .fakten {
+      grid-column: 1 / span 6;
+    }
     .fakt {
-      grid-column: span 4;
+      grid-column: span 2;
+    }
+    .aktionen {
+      grid-column: span 2;
     }
   }
 
