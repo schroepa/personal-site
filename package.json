@@ -15,6 +15,7 @@
     "format": "prettier --write \"**/*.{ts,tsx,astro}\"",
     "typecheck": "astro check",
     "test:e2e": "playwright test",
+    "tokens": "node scripts/export-tokens.mjs design/figma-variables.json src/styles/tokens.css",
     "test:scripts": "node --test \"scripts/**/*.test.mjs\" \"src/lib/**/*.test.ts\"",
     "test": "npm run test:scripts && npm run test:e2e"
   },
