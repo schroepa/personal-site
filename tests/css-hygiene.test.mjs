@@ -139,6 +139,8 @@ test("neue Styles (neu*.css, components/site) enthalten keine Literalwerte", () 
     join(root, "src/layouts/ArtikelLayout.astro"),
     join(root, "src/layouts/ProjektLayout.astro"),
     join(root, "src/pages/index.astro"),
+    join(root, "src/pages/about.astro"),
+    join(root, "src/pages/kontakt.astro"),
     ...collect(join(root, "src/pages/blog"), (n) => n.endsWith(".astro")),
     ...collect(join(root, "src/pages/projects"), (n) => n.endsWith(".astro")),
   ]
@@ -171,6 +173,8 @@ test("@media-Bedingungen der Komponenten stammen alle aus tokens.css", () => {
     join(root, "src/layouts/ArtikelLayout.astro"),
     join(root, "src/layouts/ProjektLayout.astro"),
     join(root, "src/pages/index.astro"),
+    join(root, "src/pages/about.astro"),
+    join(root, "src/pages/kontakt.astro"),
     ...collect(join(root, "src/pages/blog"), (n) => n.endsWith(".astro")),
     ...collect(join(root, "src/pages/projects"), (n) => n.endsWith(".astro")),
   ]

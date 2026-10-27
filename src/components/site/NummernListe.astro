@@ -1,0 +1,92 @@
+---
+// Nummern-Liste (Figma „liste“ in Kompetenzen, Stationen, Werkzeuge, Wofür, Ablauf): Meta (Nummer, Zeitraum oder
+// Kategorie), Titel, Beschreibung. Eine <ol>; Titel optional als Überschrift (ebene 3 oder 4), sonst als Absatz.
+// Desktop: 9 Spalten (Meta 2, Titel 3, Beschreibung 4); darunter Raster der Seite, mobil gestapelt.
+import type { ListenEintrag } from "../../data/liste.ts"
+
+interface Props {
+  eintraege: ListenEintrag[]
+  ebene?: 3 | 4
+}
+const { eintraege, ebene } = Astro.props
+const Titel = (ebene ? `h${ebene}` : "p") as "h3" | "h4" | "p"
+---
+
+<ol class="nummern-liste" role="list">
+  {
+    eintraege.map((e) => (
+      <li class="eintrag">
+        {e.nummer && <p class="text-label nummer">{e.nummer}</p>}
+        <Titel class="text-h3 titel">{e.titel}</Titel>
+        {e.beschreibung && <p class="text-small beschreibung">{e.beschreibung}</p>}
+      </li>
+    ))
+  }
+</ol>
+
+<style>
+  .nummern-liste {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--global-size-32);
+  }
+
+  .eintrag {
+    display: grid;
+    grid-template-columns: repeat(var(--layout-columns), minmax(0, 1fr));
+    column-gap: var(--layout-gutter);
+    row-gap: var(--space-stack-label-value);
+    min-width: 0;
+  }
+
+  .nummer,
+  .titel,
+  .beschreibung {
+    grid-column: 1 / -1;
+    margin: 0;
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .nummer {
+    color: var(--theme-text-default);
+  }
+  .titel {
+    color: var(--theme-text-strong);
+  }
+  .beschreibung {
+    color: var(--theme-text-default);
+  }
+
+  /* Tablet: Meta 2 von 8 Spalten, Titel 3, Beschreibung 3 */
+  @media (min-width: 768px) {
+    .eintrag {
+      row-gap: 0;
+    }
+    .nummer {
+      grid-column: 1 / span 2;
+      grid-row: 1;
+    }
+    .titel {
+      grid-column: 3 / span 3;
+      grid-row: 1;
+    }
+    .beschreibung {
+      grid-column: 6 / span 3;
+      grid-row: 1;
+    }
+  }
+
+  /* Desktop: die Liste füllt die 9 Spalten des Inhalts */
+  @media (min-width: 1024px) {
+    .eintrag {
+      grid-template-columns: repeat(9, minmax(0, 1fr));
+    }
+    .beschreibung {
+      grid-column: 6 / span 4;
+    }
+  }
+</style>

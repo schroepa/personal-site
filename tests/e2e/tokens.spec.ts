@@ -180,7 +180,7 @@ test("alte Seite rendert weiter mit Tailwind: kein data-site, Hintergrund = --ba
 }) => {
   const ctx = await browser.newContext({ colorScheme: "light" })
   const page = await ctx.newPage()
-  await page.goto("/about")
+  await page.goto("/impressum")
   const r = await page.evaluate(() => {
     const probe = document.createElement("span")
     document.body.appendChild(probe)
