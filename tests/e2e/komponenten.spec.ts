@@ -236,7 +236,8 @@ test.describe("ProjektKarte", () => {
     expect(anzahl).toBeGreaterThanOrEqual(3)
     for (let i = 0; i < anzahl; i++) {
       await expect(karten.nth(i).locator("a")).toHaveCount(1)
-      await expect(karten.nth(i).locator("h3 > a")).toHaveCount(1)
+      // Ebene 3 ist die Vorgabe; die Varianten mit `ebene` (h2, h4) haben ebenfalls genau einen Überschrift-Link
+      await expect(karten.nth(i).locator("h2 > a, h3 > a, h4 > a")).toHaveCount(1)
     }
     const name = await stil(page, ".projekt-karte [data-bild]", "view-transition-name")
     expect(name).toMatch(/^projekt-bild-[a-z0-9-]+$/)
@@ -354,6 +355,37 @@ test.describe("Faktenzeile", () => {
     const dreiSpalten = raster.spuren.slice(0, 3).reduce((a, b) => a + b, 0) + 2 * raster.abstand
     expect(fakt.width).toBeCloseTo(dreiSpalten, 0)
     expect(fakt.left).toBeCloseTo(raster.links + dreiSpalten + raster.abstand, 0)
+  })
+})
+
+test.describe("Bild- und Ebenen-Varianten", () => {
+  test("ProjektKarte mit und ohne Bild; ebene steuert die Überschrift", async ({ page }) => {
+    await laden(page)
+    const mit = page.locator("[data-bild-varianten] .projekt-karte").nth(0)
+    const ohne = page.locator("[data-bild-varianten] .projekt-karte").nth(1)
+    await expect(mit.locator("[data-bild] img")).toHaveCount(1)
+    expect(await mit.locator("[data-bild] img").getAttribute("alt")).toBe("")
+    await expect(ohne.locator("[data-bild] img")).toHaveCount(0)
+    await expect(mit.locator("h2 > a")).toHaveCount(1)
+    await expect(ohne.locator("h3 > a")).toHaveCount(1)
+    await expect(page.locator("[data-bild-varianten] .projekt-karte").nth(2).locator("h4 > a")).toHaveCount(1)
+    // Bildfläche behält ihre Höhe auch ohne Bild
+    const b = await ohne.locator("[data-bild]").boundingBox()
+    expect(b!.height).toBeGreaterThan(0)
+  })
+
+  test("ArtikelZeile mit und ohne Bild: dekoratives Bild, gleiche Bildhöhe", async ({ page }) => {
+    await laden(page)
+    const zeilen = page.locator("[data-bild-varianten] .artikel-zeile")
+    for (const i of [0, 2]) {
+      await expect(zeilen.nth(i).locator("[data-bild] img")).toHaveCount(1)
+      expect(await zeilen.nth(i).locator("[data-bild] img").getAttribute("alt")).toBe("")
+    }
+    for (const i of [1, 3]) await expect(zeilen.nth(i).locator("[data-bild] img")).toHaveCount(0)
+    const h = async (i: number) => (await zeilen.nth(i).locator("[data-bild]").boundingBox())!.height
+    expect(await h(0)).toBeCloseTo(await h(1), 0)
+    expect(await h(2)).toBeCloseTo(await h(3), 0)
+    await expect(zeilen.nth(0).locator("h3 > a")).toHaveCount(1)
   })
 })
 

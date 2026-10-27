@@ -104,6 +104,49 @@ const eintraege = [
     </div>
   </Abschnitt>
 
+  <Abschnitt id="bild-varianten" nummer="03a" label="Bild-Varianten" layout="oben">
+    <div class="karten" data-bild-varianten>
+      <ProjektKarte
+        format="16x10"
+        meta="Tool · 2026"
+        titel="Karte mit Bild"
+        wirkung="Mit Titelbild."
+        bild="/images/gallery/tintfield/tintfield-hero.jpg"
+        href="/projects/tintfield"
+        slug="mit-bild"
+        ebene={2}
+      />
+      <ProjektKarte
+        format="16x10"
+        meta="Tool · 2026"
+        titel="Karte ohne Bild"
+        wirkung="Nur die Bildfläche."
+        href="/projects/ohne-bild"
+        slug="ohne-bild"
+      />
+      <ProjektKarte
+        format="1x1"
+        meta="Tool · 2026"
+        titel="Karte mit Ebene vier"
+        wirkung="Überschrift h4."
+        href="/projects/ebene-vier"
+        slug="ebene-vier"
+        ebene={4}
+      />
+      <ArtikelZeile
+        groesse="gross"
+        meta="Design Systems · 13. Juli 2026"
+        titel="Große Zeile mit Bild"
+        auszug="Mit Titelbild."
+        bild="/images/blog/blog-014-480.webp"
+        href="/blog/mit-bild"
+      />
+      <ArtikelZeile groesse="gross" meta="Design Systems" titel="Große Zeile ohne Bild" auszug="Nur die Bildfläche." href="/blog/ohne-bild" />
+      <ArtikelZeile groesse="klein" meta="Tech" titel="Kleine Zeile mit Bild" bild="/images/blog/blog-013-480.webp" href="/blog/klein-mit-bild" />
+      <ArtikelZeile groesse="klein" meta="Tech" titel="Kleine Zeile ohne Bild" href="/blog/klein-ohne-bild" />
+    </div>
+  </Abschnitt>
+
   <Abschnitt id="artikel" nummer="04" label="Gedanken" layout="links">
     <ArtikelZeile
       groesse="gross"

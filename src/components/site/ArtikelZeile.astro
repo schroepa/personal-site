@@ -1,5 +1,5 @@
 ---
-// Artikel-Zeile (Figma 260:352): Titel ist der Link (h3 > a), die ganze Zeile per ::after klickbar, Bild dekorativ.
+// Artikel-Zeile (Figma 260:352): Titel ist der Link (h3 > a, Prop `ebene`), die ganze Zeile per ::after klickbar, Bild dekorativ.
 // gross: Bild links (5 von 9 Spalten), Text rechts; klein: schmales Bild, Meta und Titel.
 interface Props {
   groesse: "gross" | "klein"
@@ -7,15 +7,22 @@ interface Props {
   titel: string
   auszug?: string
   href: string
+  /** Titelbild (dekorativ, alt leer); ohne Bild bleibt die Fläche mit der Bildfarbe */
+  bild?: string
+  /** Überschriftebene des Titels (Standard 3, unter einem Abschnitts-h2) */
+  ebene?: 2 | 3 | 4
 }
-const { groesse, meta, titel, auszug, href } = Astro.props
+const { groesse, meta, titel, auszug, href, bild, ebene = 3 } = Astro.props
+const Titel = `h${ebene}` as "h2" | "h3" | "h4"
 ---
 
 <article class:list={["artikel-zeile", `artikel-zeile-${groesse}`]}>
-  <div class="bild" data-bild></div>
+  <div class="bild" data-bild>
+    {bild && <img src={bild} alt="" loading="lazy" decoding="async" />}
+  </div>
   <div class="text" data-text>
     <p class="text-label meta">{meta}</p>
-    <h3 class="text-h3 titel"><a {href}>{titel}</a></h3>
+    <Titel class="text-h3 titel"><a {href}>{titel}</a></Titel>
     {groesse === "gross" && auszug && <p class="text-body auszug">{auszug}</p>}
     {groesse === "gross" && <p class="text-body mehr" aria-hidden="true">Artikel lesen →</p>}
   </div>
@@ -32,6 +39,14 @@ const { groesse, meta, titel, auszug, href } = Astro.props
   .bild {
     background: var(--artikel-zeile-bild-flaeche);
     corner-shape: squircle;
+  }
+  .bild {
+    overflow: hidden;
+  }
+  .bild img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
   }
   .artikel-zeile-gross .bild {
     height: var(--artikel-zeile-bild-hoehe-mobil);

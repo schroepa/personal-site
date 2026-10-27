@@ -1,5 +1,5 @@
 ---
-// Projekt-Karte (Figma 260:2): randlos, ganze Karte ein Linkziel (Titel-Link mit ::after), Titel als h3.
+// Projekt-Karte (Figma 260:2): randlos, ganze Karte ein Linkziel (Titel-Link mit ::after), Titel als h3 (Prop `ebene`: 2, 3 oder 4).
 // Bild mit leerem alt; view-transition-name am Bild (nur ein Name, kein Wert) für die Fallstudien-Transition.
 interface Props {
   format: "16x10" | "4x5" | "1x1"
@@ -9,8 +9,11 @@ interface Props {
   bild?: string
   href: string
   slug: string
+  /** Überschriftebene des Titels (Standard 3, unter einem Abschnitts-h2) */
+  ebene?: 2 | 3 | 4
 }
-const { format, meta, titel, wirkung, bild, href, slug } = Astro.props
+const { format, meta, titel, wirkung, bild, href, slug, ebene = 3 } = Astro.props
+const Titel = `h${ebene}` as "h2" | "h3" | "h4"
 ---
 
 <article class:list={["projekt-karte", `format-${format}`]}>
@@ -19,7 +22,7 @@ const { format, meta, titel, wirkung, bild, href, slug } = Astro.props
   </div>
   <div class="text">
     <p class="text-label meta">{meta}</p>
-    <h3 class="text-h3 titel"><a {href}>{titel}</a></h3>
+    <Titel class="text-h3 titel"><a {href}>{titel}</a></Titel>
     <p class="text-small wirkung">{wirkung}</p>
   </div>
 </article>
