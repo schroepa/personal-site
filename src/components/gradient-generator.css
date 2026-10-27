@@ -14,6 +14,8 @@ html:not([data-js]) [data-gradient-generator] {
 }
 
 .gg {
+  --gg-spur: var(--global-size-4); /* Dicke der Reglerspur; Spur und Griffposition leiten sich daraus ab */
+  --gg-fokus-platz: var(--global-size-8); /* Fokusring (2 + Abstand 4 = 6) braucht Luft im scrollenden Streifen */
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   gap: var(--layout-block-gap);
@@ -100,7 +102,10 @@ html:not([data-js]) [data-gradient-generator] {
 .gg-presets {
   display: flex;
   gap: var(--global-size-12);
-  padding-bottom: var(--global-size-4);
+  /* Der Streifen scrollt (overflow-x) und würde den Fokusring der Presets abschneiden:
+     innen Luft lassen, außen mit negativem Rand ausgleichen, damit das Layout gleich bleibt */
+  padding: var(--gg-fokus-platz);
+  margin: calc(var(--gg-fokus-platz) * -1);
   overflow-x: auto;
 }
 .gg-preset {
@@ -234,17 +239,17 @@ html:not([data-js]) [data-gradient-generator] {
   cursor: pointer;
 }
 .gg-regler::-webkit-slider-runnable-track {
-  block-size: var(--global-size-4);
+  block-size: var(--gg-spur);
   border-radius: var(--global-radius-full);
   background: linear-gradient(to right, var(--theme-surface-primary) var(--fuellung), var(--theme-surface-muted) var(--fuellung));
 }
 .gg-regler::-moz-range-track {
-  block-size: var(--global-size-4);
+  block-size: var(--gg-spur);
   border-radius: var(--global-radius-full);
   background: var(--theme-surface-muted);
 }
 .gg-regler::-moz-range-progress {
-  block-size: var(--global-size-4);
+  block-size: var(--gg-spur);
   border-radius: var(--global-radius-full);
   background: var(--theme-surface-primary);
 }
@@ -252,8 +257,8 @@ html:not([data-js]) [data-gradient-generator] {
   appearance: none;
   inline-size: var(--switch-knob-size);
   block-size: var(--switch-knob-size);
-  /* Griff (20) auf der Spur (4) zentrieren: (4 - 20) / 2 = -8 */
-  margin-top: calc(var(--global-size-8) * -1);
+  /* Griff auf der Spur zentrieren: (Spur - Griff) / 2 */
+  margin-top: calc((var(--gg-spur) - var(--switch-knob-size)) / 2);
   border: var(--global-border-2) solid var(--theme-surface-container);
   border-radius: var(--global-radius-full);
   background: var(--theme-surface-primary);
@@ -322,6 +327,9 @@ html:not([data-js]) [data-gradient-generator] {
   color: var(--theme-text-muted);
   overflow-wrap: anywhere;
 }
+/* Leer bleibt die Live-Region gerendert (Accessibility-Tree, sonst bleibt die erste Meldung stumm), nur ohne Höhe */
 .gg-meldung:empty {
-  display: none;
+  block-size: 0;
+  overflow: hidden;
+  margin-block-start: calc(var(--global-size-8) * -1); /* hebt den Flex-Abstand der leeren Zeile auf */
 }

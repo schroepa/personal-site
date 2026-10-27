@@ -52,7 +52,8 @@ export function scanCss(text) {
     }
     // calc(): jeder Operand außer var() und 0/1 ist verboten
     for (const m of lineText.matchAll(/calc\(([^;]*)\)/g)) {
-      const inner = m[1].replace(/var\([^)]*\)/g, "")
+      // Halbieren ("/ 2") ist strukturell (Mitte aus Token-Differenzen), kein Designwert
+      const inner = m[1].replace(/var\([^)]*\)/g, "").replace(/\/\s*2\b/g, "")
       if (/\d*\.?\d+%?/.test(inner.replace(/\b[01]\b/g, ""))) {
         findings.push({ line: i + 1, rule: "calc-literal", snippet: lineText.trim() })
       }
@@ -97,6 +98,8 @@ test("scanCss: findet verbotene Literale", () => {
   assert.deepEqual(rules("a { @apply p-4; }"), ["apply"])
   assert.deepEqual(rules('@import "tailwindcss";'), ["tailwind"])
   assert.deepEqual(rules("a { width: calc(var(--a) * 2); }"), ["calc-literal"])
+  assert.deepEqual(rules("a { margin: calc((var(--a) - var(--b)) / 2); }"), [])
+  assert.deepEqual(rules("a { margin: calc((var(--a) - var(--b)) / 3); }"), ["calc-literal"])
 })
 
 test("scanCss: erlaubt Tokens und strukturelle Werte", () => {

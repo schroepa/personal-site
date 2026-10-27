@@ -140,6 +140,7 @@ function SliderRow({ label, value, min, max, unit, onChange }: SliderRowProps) {
         max={max}
         step={1}
         value={value}
+        aria-valuetext={`${value} ${unit}`}
         style={{ '--fuellung': fuellung } as React.CSSProperties}
         onChange={(e) => onChange(Number(e.target.value))}
       />

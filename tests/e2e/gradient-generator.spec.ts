@@ -2,7 +2,7 @@ import AxeBuilder from "@axe-core/playwright"
 import { expect, test, type Download, type Locator, type Page } from "@playwright/test"
 
 // Verhalten des Grainy Gradient Generators (Task 15b). Diese Tests wurden VOR dem Umbau gegen die alte
-// Seite (shadcn/Radix) geschrieben und nur über Rollen, Texte und Computed Styles formuliert,
+// Fassung (mit fertigen UI-Bausteinen statt nativer Regler) geschrieben und nur über Rollen, Texte und Computed Styles formuliert,
 // damit sie nach der Umstellung auf native Regler unverändert gelten.
 
 import { expectNoHorizontalOverflow, expectSingleH1, setTheme, warteAufRuhe } from "../helpers"
@@ -215,12 +215,53 @@ test.describe("Gradient-Generator: Seite", () => {
     await expect(page.locator("details[open]")).toHaveCount(1)
   })
 
-  test("Export gibt eine Rückmeldung (ohne Aufblitzen)", async ({ page }) => {
+  test("Export gibt eine Rückmeldung (ohne Aufblitzen); die leere Statusmeldung bleibt vorher im Accessibility-Baum", async ({ page }) => {
     await laden(page)
+    // Vor dem Export: Live-Region ist gerendert (nicht display:none/visibility:hidden), nur ohne Höhe, sonst bliebe die erste Meldung stumm
+    const status = page.locator('.gg-meldung[role="status"]')
+    await expect(status).toHaveCount(1)
+    const vorher = await status.evaluate((e) => ({ display: getComputedStyle(e).display, visibility: getComputedStyle(e).visibility, text: e.textContent }))
+    expect(vorher.display).not.toBe("none")
+    expect(vorher.visibility).not.toBe("hidden")
+    expect(vorher.text).toBe("")
     const d = page.waitForEvent("download")
     await page.getByRole("button", { name: /PNG/ }).click()
     await d
     await expect(page.locator(".gg-meldung")).toContainText("gradient-rosé-dawn-2100x900.png")
+    await expect(page.locator(".gg-meldung")).toBeVisible()
+  })
+
+  test("Regler haben einen aria-valuetext mit Einheit", async ({ page }) => {
+    await laden(page)
+    const korn = page.getByRole("slider").last()
+    await expect(korn).toHaveAttribute("aria-valuetext", "10 %")
+    await korn.focus()
+    await page.keyboard.press("ArrowRight")
+    await expect(korn).toHaveAttribute("aria-valuetext", "11 %")
+    await page.getByText("Orb 1", { exact: true }).click()
+    await expect(page.getByRole("slider").nth(1)).toHaveAttribute("aria-valuetext", "90 px")
+  })
+
+  test("Fokusring der Presets (erstes und letztes) wird vom scrollenden Streifen nicht abgeschnitten", async ({ page }) => {
+    await laden(page)
+    await page.keyboard.press("Tab") // Tastaturmodus, damit :focus-visible greift
+    for (const name of ["Rosé Dawn", "Blush Mist"]) {
+      const knopf = page.getByRole("button", { name })
+      await knopf.focus()
+      const r = await knopf.evaluate((e) => {
+        const cs = getComputedStyle(e)
+        const ring = parseFloat(cs.outlineWidth) + parseFloat(cs.outlineOffset)
+        const b = e.getBoundingClientRect()
+        const c = e.closest(".gg-presets")!.getBoundingClientRect()
+        return { stil: cs.outlineStyle, ring, ob: b.top - ring, ub: b.bottom + ring, lb: b.left - ring, rb: b.right + ring, c: { t: c.top, b: c.bottom, l: c.left, r: c.right } }
+      })
+      expect(r.stil, name).toBe("solid")
+      expect(r.ring, name).toBeGreaterThan(0)
+      expect(r.ob, `${name} oben`).toBeGreaterThanOrEqual(r.c.t)
+      expect(r.ub, `${name} unten`).toBeLessThanOrEqual(r.c.b)
+      expect(r.lb, `${name} links`).toBeGreaterThanOrEqual(r.c.l - 0.5)
+      expect(r.rb, `${name} rechts`).toBeLessThanOrEqual(r.c.r + 0.5)
+    }
   })
 
   test("reduzierte Bewegung: keine laufenden Animationen", async ({ page }) => {

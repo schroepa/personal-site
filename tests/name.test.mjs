@@ -4,6 +4,10 @@ import { spawnSync } from "node:child_process"
 import { dirname, join } from "node:path"
 import { fileURLToPath } from "node:url"
 
+/** Einzige Quelle des Suchmusters: „ö“ als ein Zeichen (NFC) und zerlegt (o + U+0308, NFD); für git grep -E und für RegExp. */
+const MUSTER_TEXT = "[Ss][Cc][Hh][Rr](ö|Ö|oe|OE|Oe|o\u0308|O\u0308)[Dd][Ee][Rr]"
+const MUSTER = new RegExp(MUSTER_TEXT)
+
 const root = join(dirname(fileURLToPath(import.meta.url)), "..")
 
 /**
@@ -34,9 +38,6 @@ test("unerlaubteTreffer: Präfixe aus der Erlaubnisliste werden ausgenommen", ()
   assert.deepEqual(unerlaubteTreffer(text), ["src/a.ts:1:Schröder"])
 })
 
-/** Das Suchmuster kennt „ö“ als ein Zeichen (NFC) und zerlegt (o + U+0308, NFD). */
-const MUSTER = /[Ss][Cc][Hh][Rr](ö|Ö|oe|OE|Oe|o\u0308|O\u0308)[Dd][Ee][Rr]/
-
 test("das Muster erkennt auch zerlegtes (NFD) „Schröder“", () => {
   assert.ok(MUSTER.test("Schro\u0308der".normalize("NFD")))
   assert.ok(MUSTER.test("Schröder"))
@@ -49,7 +50,7 @@ test("die Erlaubnisliste ist klein und begründet", () => {
 })
 
 test("„Schröder“ kommt in versionierten Dateien nur in der Erlaubnisliste vor (richtig: Schrödter)", () => {
-  const r = spawnSync("git", ["grep", "-n", "-I", "-E", "[Ss][Cc][Hh][Rr](ö|Ö|oe|OE|Oe|o\u0308|O\u0308)[Dd][Ee][Rr]", "--", ".", ":!package-lock.json"], {
+  const r = spawnSync("git", ["grep", "-n", "-I", "-E", MUSTER_TEXT, "--", ".", ":!package-lock.json"], {
     cwd: root,
     encoding: "utf8",
     maxBuffer: 64 * 1024 * 1024,

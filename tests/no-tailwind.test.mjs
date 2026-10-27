@@ -71,6 +71,22 @@ test("kein Wort „tailwind“ in Code, Styles und Konfigurationen (Ausnahmen: I
   assert.ok(WORT_ERLAUBT.length <= 3, "Ausnahmeliste klein halten")
 })
 
+// Reste des Stacks im Code (auch in tests/): shadcn, Radix, tw-animate, CVA, cn()/cva()-Aufrufe und Tailwind-typische tw--Namen.
+// Ausnahmen: dieselben Inhaltspfade wie oben (Prosa) und dieser Test selbst (enthält die Suchmuster).
+const REST = /shadcn|@radix-ui|tw-animate|class-variance-authority|\bcva\(|\bcn\(|\btw-[a-z]/i
+const REST_ERLAUBT = [...WORT_ERLAUBT, "tests/no-tailwind.test.mjs"]
+
+test("kein shadcn, Radix, tw-animate, CVA, cn()/cva() oder tw--Namen in src/, scripts/, tests/ und Konfigurationen", () => {
+  const alle = [...dateien, ...sammeln(join(root, "tests"), (p) => CODE.test(p))]
+  const treffer = []
+  for (const f of new Set(alle)) {
+    const rel = relative(root, f)
+    if (REST_ERLAUBT.some((a) => rel.startsWith(a))) continue
+    if (REST.test(readFileSync(f, "utf8"))) treffer.push(rel)
+  }
+  assert.deepEqual(treffer, [])
+})
+
 test("die Tailwind-Dateien sind weg (global.css, components.json, postcss.config.mjs, ui/, lib/utils.ts)", () => {
   for (const p of ["src/styles/global.css", "src/styles/typography.css", "src/styles/animations.css", "src/styles/fonts.css", "components.json", "postcss.config.mjs", "src/components/ui", "src/lib/utils.ts", "src/layouts/ToolLayout.astro"]) {
     assert.ok(!existsSync(join(root, p)), `${p} sollte nicht mehr existieren`)
