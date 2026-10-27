@@ -15,7 +15,7 @@
 - Branch `redesign` im Worktree `~/dev/personal-site-redesign` (außerhalb von iCloud); `main` wird erst beim Livegang berührt. Vercel baut jeden Push auf `main` automatisch, Branch-Pushes erzeugen nur Previews.
 - Kein Push und kein Merge ohne ausdrückliches Ja von Patrick im Chat.
 - Commit-Nachrichten enden mit `Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>`.
-- Keine hart gesetzten Farben, Größen oder Dauern in Komponenten: nur `var(--…)` aus `tokens.css`. Token `objekt/radius` → `--objekt-radius`.
+- Keine hart gesetzten Farben, Größen oder Dauern in Komponenten: nur `var(--…)` aus `tokens.css`. Die CSS-Namen sind die in Figma hinterlegten Code-Syntax-Namen (WEB), exakt wie in `tokens.css`; in der Figma-Datei tragen sie den Collection-Präfix (z. B. `var(--theme-surface-page)`, `var(--global-size-4)`, `var(--component-input-spacing-x)`; Typography/Weight/Spacing/Layout/Motion ohne Präfix, z. B. `--text-body-size`). Wo dieses Dokument kürzere Namen wie `--surface-page` oder `--objekt-radius` nennt, gilt der tatsächliche Name aus `tokens.css`.
 - Breakpoints (Breite/Spalten/Rand/Spaltenabstand/Abschnittsabstand): 1920/12/96/32/128 · 1440/12/80/24/96 · 1024/12/48/24/80 · 768/8/32/24/64 · 844/8/32/16/48 · 390/4/20/16/48. 4-px-Raster.
 - Hell: `surface/page` #F4F2F0, `surface/secondary` #EEAD6B, `text/default` #5F5853, `text/muted` #6C645E. Dunkel: `surface/page` #24211F, `surface/secondary` #E69840, `text/muted` #A29A94. `text/on-secondary` neutral/950 in beiden Modi.
 - Radien: `objekt/radius` 24, `objekt/innenabstand` 8, `objekt/radius-verschachtelt` 16, `objekt/radius-gross` 32, `objekt/radius-klein` 4; zusätzlich `corner-shape: squircle`.
@@ -83,6 +83,13 @@ Zusätzlich je Task: leere oder sehr kurze Collections (Blog mit <2 Beiträgen, 
 **Files:**
 - Create: `design/figma-variables.json`, `scripts/export-tokens.mjs`, `scripts/export-tokens.test.mjs`, `src/styles/tokens.css` (generiert)
 - Modify: `package.json` (script `tokens`: `node scripts/export-tokens.mjs design/figma-variables.json src/styles/tokens.css`)
+
+**Korrektur nach Figma-Prüfung (2026-10-27, bindend für diesen Task):**
+- Export nur für die Collections Theme (44 Variablen, Modi Light/Dark), Component (786, Default), Global (316, Value), Typography (33, 6 Modi), Icon (1), Weight (12, Standard/Leicht/Kräftig), Spacing (10, Default/Compact), Layout (10, 6 Modi), Motion (56, Standard/Reduziert). Die Collections „Slides“ (15) und „Docs“ (7) haben kein Code-Syntax-WEB und werden **nicht** exportiert (feste Ausschlussliste im Skript). Icon: nur der Modus Default (**Entscheidung**, Rest YAGNI).
+- `codeSyntaxWeb` ist der volle String `var(--…)`; das Skript entfernt `var(` und `)` und verwendet den Namen als Custom-Property-Namen. `alias` im Dump enthält den **CSS-Namen des Ziels** (z. B. `--global-size-16`), nicht den Figma-Variablennamen.
+- BOOLEAN-Variablen werden als `1`/`0` ausgegeben. Weight-Modi Leicht/Kräftig unter `[data-weight="leicht"]` / `[data-weight="kraeftig"]`; Spacing Compact unter `[data-spacing="compact"]`.
+- Akzeptanzprüfung für Step 1: Variablenzahl je Collection im Dump stimmt mit den Zahlen oben überein.
+- Tests prüfen das Mapping an echten Namen (`var(--theme-surface-page)` → `--theme-surface-page`), nicht an `--surface-page`.
 
 **Interfaces:**
 - Produces: `buildTokensCss(dump: FigmaDump): string` mit
