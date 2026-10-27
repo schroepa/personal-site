@@ -135,21 +135,67 @@ test.describe("SiteLayout", () => {
     await expect(feld.locator("[data-raster-wert]")).toContainText("·")
   })
 
-  test("dunkel: kein Hell-Blitz", async ({ page }) => {
-    await page.addInitScript(() => {
-      localStorage.setItem("theme", "dark")
-      document.addEventListener("DOMContentLoaded", () => {
-        ;(window as unknown as { __themeBeiDcl: string | undefined }).__themeBeiDcl =
-          document.documentElement.dataset.theme
+  /**
+   * Hält das Theme fest, sobald <body> eingefügt wird (vor dem ersten Paint) und im ersten Animationsframe.
+   * Ein Hell-Blitz wäre hier als "light" (oder undefined) sichtbar.
+   */
+  async function themeBeobachten(page: Page, gespeichert?: "light" | "dark") {
+    await page.route("https://consent.cookiebot.com/**", (route) => route.abort())
+    await page.addInitScript((stored) => {
+      if (stored) localStorage.setItem("theme", stored)
+      else localStorage.removeItem("theme")
+      const w = window as unknown as { __theme: { body?: string; frame?: string } }
+      w.__theme = {}
+      new MutationObserver((_m, obs) => {
+        if (document.body) {
+          w.__theme.body = document.documentElement.dataset.theme
+          obs.disconnect()
+        }
+      }).observe(document, { childList: true, subtree: true })
+      requestAnimationFrame(() => {
+        w.__theme.frame = document.documentElement.dataset.theme
       })
-    })
-    await laden(page)
-    const theme = await page.evaluate(
-      () => (window as unknown as { __themeBeiDcl?: string }).__themeBeiDcl
-    )
-    expect(theme).toBe("dark")
-    const bg = await page.evaluate(() => getComputedStyle(document.body).backgroundColor)
-    expect(bg).toBe("rgb(36, 33, 31)")
+    }, gespeichert)
+  }
+
+  async function beobachtet(page: Page) {
+    return page.evaluate(() => (window as unknown as { __theme: { body?: string; frame?: string } }).__theme)
+  }
+
+  const bgOf = (page: Page) => page.evaluate(() => getComputedStyle(document.body).backgroundColor)
+
+  test("dunkel: kein Hell-Blitz (gespeichert dunkel)", async ({ page }) => {
+    await themeBeobachten(page, "dark")
+    await page.goto(URL)
+    const t = await beobachtet(page)
+    expect(t.body).toBe("dark")
+    expect(t.frame).toBe("dark")
+    expect(await bgOf(page)).toBe("rgb(36, 33, 31)")
+  })
+
+  test("dunkel: nichts gespeichert, System dunkel ⇒ dunkel vor dem ersten Paint", async ({ page }) => {
+    await page.emulateMedia({ colorScheme: "dark" })
+    await themeBeobachten(page)
+    await page.goto(URL)
+    const t = await beobachtet(page)
+    expect(t.body).toBe("dark")
+    expect(t.frame).toBe("dark")
+    expect(await bgOf(page)).toBe("rgb(36, 33, 31)")
+  })
+
+  test("hell: nichts gespeichert, System hell ⇒ hell; gespeichert hell schlägt System dunkel", async ({ page }) => {
+    await page.emulateMedia({ colorScheme: "light" })
+    await themeBeobachten(page)
+    await page.goto(URL)
+    expect((await beobachtet(page)).body).toBe("light")
+    expect(await bgOf(page)).toBe("rgb(244, 242, 240)")
+
+    const zweite = await page.context().newPage()
+    await zweite.emulateMedia({ colorScheme: "dark" })
+    await themeBeobachten(zweite, "light")
+    await zweite.goto(URL)
+    expect((await beobachtet(zweite)).body).toBe("light")
+    expect(await bgOf(zweite)).toBe("rgb(244, 242, 240)")
   })
 
   test("Theme-Toggle schaltet um und merkt sich die Wahl", async ({ page }) => {
@@ -176,6 +222,73 @@ test.describe("SiteLayout", () => {
         result.violations.map((v) => `${theme}: ${v.id} ${v.nodes.map((n) => n.target).join(" | ")}`)
       ).toEqual([])
     }
+  })
+
+  test("Menü: breit ohne Knopf mit sichtbarer Navigation, schmal hinter dem Menü-Knopf", async ({ page }) => {
+    await laden(page)
+    const breite = page.viewportSize()!.width
+    const knopf = page.getByRole("button", { name: "Menü" })
+    const nav = page.getByRole("navigation", { name: "Hauptnavigation" })
+    const links = nav.getByRole("link")
+    if (breite >= 1024) {
+      await expect(knopf).toBeHidden()
+      await expect(nav).toBeVisible()
+      await expect(links).toHaveCount(4)
+      await expect(links.first()).toBeVisible()
+    } else {
+      await expect(knopf).toBeVisible()
+      await expect(knopf).toHaveAttribute("aria-expanded", "false")
+      await expect(nav).toBeHidden()
+      await knopf.click()
+      await expect(knopf).toHaveAttribute("aria-expanded", "true")
+      await expect(nav).toBeVisible()
+      await expect(links.first()).toBeVisible()
+    }
+  })
+
+  test("Schriftfeld: Feld Raster erst ab 768, mobil nur Blatt und Ort", async ({ page }) => {
+    await laden(page)
+    const breite = page.viewportSize()!.width
+    const raster = page.locator("[data-schriftfeld] .feld-raster")
+    if (breite >= 768) await expect(raster).toBeVisible()
+    else await expect(raster).toBeHidden()
+    await expect(page.locator("[data-schriftfeld] .feld-blatt")).toBeVisible()
+    await expect(page.locator("[data-schriftfeld] .feld-ort")).toBeVisible()
+  })
+
+  test("Stapelung: Papierkorn und Raster liegen unter dem Text (elementFromPoint)", async ({ page }) => {
+    await laden(page)
+    const r = await page.evaluate(() => {
+      const h1 = document.querySelector("main h1") as HTMLElement
+      const range = document.createRange()
+      range.selectNodeContents(h1)
+      const box = range.getBoundingClientRect()
+      const hit = document.elementFromPoint(box.left + box.width / 2, box.top + box.height / 2)
+      const layer = (e: Element | null) => !!e?.closest("[data-papierkorn], [data-raster], [data-schriftfeld]")
+      const z = (s: string) => getComputedStyle(document.querySelector(s) as HTMLElement).zIndex
+      return {
+        inMain: !!hit?.closest("main"),
+        isH1: hit === h1,
+        layer: layer(hit),
+        z: [z("[data-papierkorn]"), z("[data-raster]"), z("main")],
+      }
+    })
+    expect(r.isH1).toBe(true)
+    expect(r.inMain).toBe(true)
+    expect(r.layer).toBe(false)
+    // Kein eigener Stapelkontext (Lichtband mischt später im selben Kontext): Reihenfolge entscheidet
+    expect(r.z).toEqual(["auto", "auto", "auto"])
+  })
+
+  test("Suche schließen im schmalen Layout: Fokus geht an den sichtbaren Menü-Knopf", async ({ page }) => {
+    await laden(page)
+    const knopf = page.getByRole("button", { name: "Menü" })
+    test.skip(!(await knopf.isVisible()), "nur im schmalen Layout relevant")
+    await page.keyboard.press("Control+k")
+    await expect(page.getByRole("dialog", { name: "Suche" })).toBeVisible()
+    await page.keyboard.press("Escape")
+    await expect(page.getByRole("dialog", { name: "Suche" })).toBeHidden()
+    await expect(knopf).toBeFocused()
   })
 
   test("kein horizontaler Überlauf", async ({ page }) => {
@@ -218,7 +331,8 @@ test.describe("SiteLayout", () => {
     await input.fill("kontakt")
     await expect(options).toHaveCount(1)
     await input.fill("zzzzqqqq")
-    await expect(page.getByText("Keine Treffer.")).toBeVisible()
+    await expect(page.getByRole("status").filter({ hasText: "Keine Treffer." })).toBeVisible()
+    await expect(page.getByRole("listbox").getByText("Keine Treffer.")).toHaveCount(0)
     await input.fill("kontakt")
     await page.keyboard.press("Enter")
     await expect(page).toHaveURL(/\/kontakt/)
@@ -230,12 +344,49 @@ test.describe("SiteLayout ohne JavaScript", () => {
 
   test("Inhalt sichtbar mit JavaScript aus", async ({ page }) => {
     await page.goto(URL)
+    const header = page.getByRole("banner")
     const main = page.locator("main")
+    const footer = page.getByRole("contentinfo")
+    await expect(header).toBeVisible()
     await expect(main).toBeVisible()
     await expect(main.locator("h1")).toBeVisible()
     await expect(main).toContainText("Dies ist eine Prüfseite")
-    const opacity = await main.evaluate((el) => getComputedStyle(el).opacity)
-    expect(opacity).toBe("1")
+    await expect(footer).toBeVisible()
+
+    const links = header.getByRole("navigation", { name: "Hauptnavigation" }).getByRole("link")
+    await expect(links).toHaveCount(4)
+    for (let i = 0; i < 4; i++) {
+      await expect(links.nth(i)).toBeVisible()
+      await links.nth(i).focus()
+      await expect(links.nth(i)).toBeFocused()
+    }
+
+    // Kein Vorfahre blendet etwas aus
+    const versteckt = await page.evaluate(() => {
+      const ziele = [
+        document.querySelector("header nav a"),
+        document.querySelector("main h1"),
+        document.querySelector("main p"),
+        document.querySelector("footer a"),
+      ]
+      return ziele.flatMap((el) => {
+        const treffer: string[] = []
+        for (let n = el as HTMLElement | null; n; n = n.parentElement) {
+          const cs = getComputedStyle(n)
+          if (Number(cs.opacity) < 1 || cs.visibility === "hidden") treffer.push(n.tagName)
+        }
+        return treffer
+      })
+    })
+    expect(versteckt).toEqual([])
+  })
+
+  test("ohne JavaScript gilt das Systemschema (dunkel)", async ({ page }) => {
+    await page.emulateMedia({ colorScheme: "dark" })
+    await page.goto(URL)
+    expect(await page.evaluate(() => getComputedStyle(document.body).backgroundColor)).toBe("rgb(36, 33, 31)")
+    await page.emulateMedia({ colorScheme: "light" })
+    expect(await page.evaluate(() => getComputedStyle(document.body).backgroundColor)).toBe("rgb(244, 242, 240)")
   })
 })
 

@@ -53,8 +53,8 @@ const personSchema = {
   jobTitle: "UI Designer & Frontend Developer",
 }
 
-// Vor dem ersten Paint: gespeichertes oder System-Theme setzen (kein Hell-Blitz), JS-Marker setzen
-const themeInline = `(${applyStoredTheme.toString()})();document.documentElement.setAttribute("data-js","");`
+// Vor dem ersten Paint: gespeichertes oder System-Theme setzen (kein Hell-Blitz)
+const themeInline = `(${applyStoredTheme.toString()})();`
 ---
 
 <!doctype html>
@@ -131,7 +131,7 @@ const themeInline = `(${applyStoredTheme.toString()})();document.documentElement
     <Suche teil="dialog" />
 
     <script>
-      import { initThemeToggle, applyStoredTheme } from "@/scripts/theme"
+      import { initThemeToggle } from "@/scripts/theme"
       import { initSchriftfeld } from "@/scripts/schriftfeld"
       import { initSuche } from "@/scripts/suche"
       import { initMenue } from "@/scripts/menue"
@@ -150,6 +150,8 @@ const themeInline = `(${applyStoredTheme.toString()})();document.documentElement
         stop()
         aufraeumen = [initThemeToggle(), initSchriftfeld(), initSuche(), initMenue()]
         document.body.setAttribute("data-bereit", "")
+        // Erst jetzt ist das Menü im schmalen Layout einklappbar; fällt das Bundle aus, bleibt die Navigation offen
+        document.documentElement.setAttribute("data-js", "")
       }
       start()
       document.addEventListener("astro:page-load", start)
@@ -160,7 +162,6 @@ const themeInline = `(${applyStoredTheme.toString()})();document.documentElement
         neu.setAttribute("data-theme", document.documentElement.getAttribute("data-theme") ?? "light")
         neu.setAttribute("data-js", "")
       })
-      document.addEventListener("astro:after-swap", applyStoredTheme)
     </script>
   </body>
 </html>
@@ -218,7 +219,7 @@ const themeInline = `(${applyStoredTheme.toString()})();document.documentElement
     border-radius: var(--global-radius-8);
     background: var(--theme-surface-primary);
     color: var(--theme-text-on-primary);
-    transform: translateY(-200%);
+    transform: translateY(-100%);
   }
 
   .skip-link:focus {

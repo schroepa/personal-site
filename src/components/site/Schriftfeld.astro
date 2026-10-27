@@ -67,27 +67,30 @@ const { blatt } = Astro.props
     color: var(--schriftfeld-wert-farbe);
   }
 
-  /* Felder ab Spalte 7 (Figma): Ort rechts, davor Raster, davor Blatt */
-  .feld-ort {
-    grid-column: -3 / span 2;
-  }
+  /* Schmal (4 Spalten): Blatt und Ort, ohne Raster */
   .feld-raster {
-    grid-column: -5 / span 2;
+    display: none;
   }
   .feld-blatt {
-    grid-column: -8 / span 3;
+    grid-column: 1 / span 2;
+  }
+  .feld-ort {
+    grid-column: 3 / span 2;
   }
 
-  /* Mobil (4 Spalten): Blatt und Ort, ohne Raster */
-  @container style(--layout-columns: 4) {
+  /* Ab 768 (8+ Spalten, Figma tablet/desktop): Felder rechts, Raster sichtbar */
+  @media (min-width: 768px) {
     .feld-raster {
-      display: none;
-    }
-    .feld-blatt {
-      grid-column: 1 / span 2;
+      display: flex;
     }
     .feld-ort {
-      grid-column: 3 / span 2;
+      grid-column: -3 / span 2;
+    }
+    .feld-raster {
+      grid-column: -5 / span 2;
+    }
+    .feld-blatt {
+      grid-column: -8 / span 3;
     }
   }
 </style>

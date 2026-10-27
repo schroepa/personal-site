@@ -41,7 +41,7 @@ const jahr = new Date().getFullYear()
     width: 100%;
     max-width: var(--layout-page-width);
     margin-inline: auto;
-    padding: var(--site-footer-spacing-y) var(--site-footer-spacing-x);
+    padding: var(--site-footer-spacing-y) var(--site-footer-spacing-x-mobil);
     /* Platz, damit das feste Schriftfeld den Footer nicht verdeckt */
     padding-bottom: calc(var(--site-footer-spacing-y) + var(--site-schriftfeld-hoehe) + var(--site-schriftfeld-versatz));
   }
@@ -106,9 +106,9 @@ const jahr = new Date().getFullYear()
     color: var(--site-footer-text);
   }
 
-  @container style(--layout-columns: 4) {
+  @media (min-width: 768px) {
     .fuss {
-      padding-inline: var(--site-footer-spacing-x-mobil);
+      padding-inline: var(--site-footer-spacing-x);
     }
   }
 </style>

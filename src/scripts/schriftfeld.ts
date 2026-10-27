@@ -45,7 +45,7 @@ export function initSchriftfeld(): () => void {
   const raster = document.querySelector<HTMLElement>("[data-raster]")
   const cleanups: Array<() => void> = []
 
-  // Ortszeit, minütlich
+  // Ortszeit: alle 15 s geprüft, damit der Minutenwechsel höchstens 15 s zu spät erscheint
   if (zeit) {
     const tick = () => {
       zeit.textContent = formatZeit(new Date())

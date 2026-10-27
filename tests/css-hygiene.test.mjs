@@ -4,6 +4,17 @@ import { readdirSync, readFileSync, existsSync, statSync } from "node:fs"
 import { join, dirname } from "node:path"
 import { fileURLToPath } from "node:url"
 
+/** Breakpoint-Bedingungen, in denen Literale erlaubt sind (exakt wie in tokens.css). */
+export const ALLOWED_MEDIA = [
+  "(min-width: 768px)",
+  "(min-width: 1024px)",
+  "(min-width: 1440px)",
+  "(min-width: 1920px)",
+  "(orientation: landscape) and (max-height: 500px)",
+]
+
+const normMedia = (s) => s.replace(/\s+/g, " ").trim()
+
 /**
  * Prüft CSS auf Literalwerte. Neue Seiten dürfen nur Figma-Tokens nutzen.
  * Erlaubt: 0, 1, 100%, auto, fr, none, inherit; calc() nur mit var()-Operanden.
@@ -16,6 +27,10 @@ export function scanCss(text) {
   const cleaned = text
     .replace(/\/\*[\s\S]*?\*\//g, (m) => m.replace(/[^\n]/g, " "))
     .replace(/url\([^)]*\)/g, (m) => m.replace(/[^\n]/g, " "))
+  // Erlaubte @media-Bedingungen (Breakpoints) neutralisieren; alles andere wird weiter geprüft
+  const cleanedMedia = cleaned.replace(/@media([^{]*)\{/g, (m, prelude) =>
+    ALLOWED_MEDIA.includes(normMedia(prelude)) ? "@media" + prelude.replace(/[^\n]/g, " ") + "{" : m
+  )
   const rules = [
     ["hex-color", /#[0-9a-fA-F]{3,8}\b/g],
     ["color-function", /\b(?:rgba?|hsla?|oklch|oklab|lab|lch|hwb|color)\(/g],
@@ -23,7 +38,7 @@ export function scanCss(text) {
     ["apply", /@apply\b/g],
     ["tailwind", /tailwind/gi],
   ]
-  cleaned.split("\n").forEach((lineText, i) => {
+  cleanedMedia.split("\n").forEach((lineText, i) => {
     for (const [rule, re] of rules) {
       re.lastIndex = 0
       let m
@@ -84,6 +99,19 @@ test("scanCss: erlaubt Tokens und strukturelle Werte", () => {
   assert.deepEqual(scanCss(ok), [])
 })
 
+test("scanCss: Literale nur in erlaubten @media-Bedingungen", () => {
+  const rules = (css) => scanCss(css).map((f) => f.rule)
+  for (const c of ALLOWED_MEDIA) {
+    assert.deepEqual(rules(`@media ${c} { a { margin: 0; } }`), [], c)
+  }
+  assert.deepEqual(rules("@media (min-width:  768px)\n{ a { margin: 0; } }"), [])
+  assert.deepEqual(rules("@media (min-width: 700px) { a { margin: 0; } }"), ["unit-literal"])
+  assert.deepEqual(rules("@media (max-width: 767px) { a { margin: 0; } }"), ["unit-literal"])
+  // Die Erlaubnis gilt nur für die Bedingung, nicht für den Rumpf
+  assert.deepEqual(rules("@media (min-width: 768px) { a { margin: 12px; } }"), ["unit-literal"])
+  assert.deepEqual(rules("@media (prefers-reduced-motion: reduce) { a { margin: 0; } }"), [])
+})
+
 test("scanCss: meldet Zeilennummern", () => {
   const f = scanCss("a {\n  color: #abc;\n}")
   assert.equal(f[0].line, 2)
@@ -113,4 +141,28 @@ test("neue Styles (neu*.css, components/site) enthalten keine Literalwerte", () 
     }
   }
   assert.deepEqual(problems, [])
+})
+
+function mediaConditions(css) {
+  return [...css.matchAll(/@media([^{]*)\{/g)].map((m) => normMedia(m[1]))
+}
+
+test("@media-Bedingungen der Komponenten stammen alle aus tokens.css", () => {
+  const known = new Set(mediaConditions(readFileSync(join(root, "src/styles/tokens.css"), "utf8")))
+  assert.ok(known.has("(min-width: 768px)"), "tokens.css sollte Breakpoints enthalten")
+  const used = []
+  for (const file of collect(join(root, "src/styles"), (n) => /^neu.*\.css$/.test(n))) {
+    for (const c of mediaConditions(readFileSync(file, "utf8"))) used.push([file, c])
+  }
+  const astroFiles = [
+    ...collect(join(root, "src/components/site"), (n) => n.endsWith(".astro")),
+    join(root, "src/layouts/SiteLayout.astro"),
+  ]
+  for (const file of astroFiles) {
+    for (const b of styleBlocks(readFileSync(file, "utf8"))) {
+      for (const c of mediaConditions(b.css)) used.push([file, c])
+    }
+  }
+  const unknown = used.filter(([, c]) => !known.has(c)).map(([f, c]) => `${f}: ${c}`)
+  assert.deepEqual(unknown, [])
 })

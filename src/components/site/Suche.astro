@@ -41,17 +41,17 @@ if (teil === "dialog") {
   teil === "ausloeser" && (
     <button
       type="button"
-      class="ausloeser"
+      class="site-suche-ausloeser"
       data-suche-trigger
       aria-keyshortcuts="Meta+K Control+K"
       aria-haspopup="dialog"
       aria-expanded="false"
     >
-      <span class="beschriftung text-small">
+      <span class="site-suche-beschriftung text-small">
         <Fragment set:html={icons.magnifyingGlass} />
         Suche
       </span>
-      <kbd class="kbd text-small" aria-hidden="true">
+      <kbd class="site-suche-kbd text-small" aria-hidden="true">
         <Fragment set:html={icons.command} />
         K
       </kbd>
@@ -62,28 +62,30 @@ if (teil === "dialog") {
 {
   teil === "dialog" && (
     <>
-      <dialog class="suche" data-suche aria-label="Suche">
-        <div class="eingabezeile">
+      <dialog class="site-suche" data-suche aria-label="Suche">
+        <div class="site-suche-eingabezeile">
           <input
             type="text"
-            class="eingabe text-body"
+            class="site-suche-eingabe text-body"
             data-suche-eingabe
             placeholder="Seiten, Projekte, Blog durchsuchen…"
             aria-label="Suche"
             role="combobox"
             aria-expanded="true"
+            aria-autocomplete="list"
             aria-controls="suche-treffer"
             autocomplete="off"
             spellcheck="false"
           />
         </div>
-        <div class="treffer" id="suche-treffer" role="listbox" aria-label="Suchergebnisse" data-suche-treffer />
-        <div class="fuss text-small">
+        <div class="site-suche-liste" id="suche-treffer" role="listbox" aria-label="Suchergebnisse" data-suche-treffer />
+        <p class="site-suche-leer text-small" role="status" data-suche-leer hidden />
+        <div class="site-suche-fuss text-small">
           <span>
-            <kbd class="kbd">↵</kbd> Auswählen
+            <kbd class="site-suche-kbd">↵</kbd> Auswählen
           </span>
           <span>
-            <kbd class="kbd">Esc</kbd> Schließen
+            <kbd class="site-suche-kbd">Esc</kbd> Schließen
           </span>
         </div>
       </dialog>
@@ -94,7 +96,7 @@ if (teil === "dialog") {
 
 <style is:global>
   /* Auslöser */
-  .ausloeser {
+  .site-suche-ausloeser {
     display: inline-flex;
     align-items: center;
     gap: var(--search-trigger-gap);
@@ -106,22 +108,22 @@ if (teil === "dialog") {
     font-family: inherit;
     cursor: pointer;
   }
-  .ausloeser:hover {
+  .site-suche-ausloeser:hover {
     background: var(--search-trigger-background-hover);
   }
-  .ausloeser:focus-visible {
+  .site-suche-ausloeser:focus-visible {
     outline: var(--search-trigger-border-width-focus) solid var(--search-trigger-border-focus);
   }
-  .ausloeser .beschriftung {
+  .site-suche-ausloeser .site-suche-beschriftung {
     display: inline-flex;
     align-items: center;
     gap: var(--search-trigger-gap-inner);
   }
-  .ausloeser svg {
+  .site-suche-ausloeser svg {
     width: var(--global-size-24);
     height: var(--global-size-24);
   }
-  .kbd {
+  .site-suche-kbd {
     display: inline-flex;
     align-items: center;
     gap: var(--kbd-gap);
@@ -131,13 +133,13 @@ if (teil === "dialog") {
     color: var(--kbd-color);
     font-family: inherit;
   }
-  .kbd svg {
+  .site-suche-kbd svg {
     width: var(--kbd-icon-size);
     height: var(--kbd-icon-size);
   }
 
   /* Dialog */
-  .suche {
+  .site-suche {
     width: 100%;
     max-width: var(--dialog-width);
     margin-top: var(--global-size-96);
@@ -148,18 +150,18 @@ if (teil === "dialog") {
     color: var(--dialog-text);
     overflow: hidden;
   }
-  .suche[open] {
+  .site-suche[open] {
     display: flex;
     flex-direction: column;
   }
-  .suche::backdrop {
+  .site-suche::backdrop {
     backdrop-filter: blur(var(--global-size-4));
   }
-  .suche .eingabezeile {
+  .site-suche .site-suche-eingabezeile {
     padding: var(--component-input-spacing-y) var(--component-input-spacing-x);
     border-bottom: var(--global-border-1) solid var(--theme-border-default);
   }
-  .suche .eingabe {
+  .site-suche .site-suche-eingabe {
     width: 100%;
     padding: var(--component-input-spacing-y) 0;
     border: 0;
@@ -167,26 +169,29 @@ if (teil === "dialog") {
     color: var(--input-text-value);
     font-family: inherit;
   }
-  .suche .eingabe::placeholder {
+  .site-suche .site-suche-eingabe::placeholder {
     color: var(--input-text-placeholder);
   }
-  .suche .treffer {
+  .site-suche .site-suche-liste {
     max-height: var(--global-size-320);
     overflow-y: auto;
     padding: var(--global-size-8);
   }
-  .suche .suche-leer {
+  .site-suche .site-suche-leer[hidden] {
+    display: none;
+  }
+  .site-suche .site-suche-leer {
     margin: 0;
     padding: var(--global-size-24) var(--global-size-8);
     text-align: center;
     color: var(--theme-text-muted);
   }
-  .suche .suche-gruppenkopf {
+  .site-suche .site-suche-gruppenkopf {
     margin: 0;
     padding: var(--global-size-4) var(--global-size-8);
     color: var(--theme-text-muted);
   }
-  .suche .suche-treffer {
+  .site-suche .site-suche-treffer {
     display: flex;
     flex-direction: column;
     gap: var(--global-size-2);
@@ -195,17 +200,17 @@ if (teil === "dialog") {
     color: var(--theme-text-default);
     text-decoration: none;
   }
-  .suche .suche-treffer[aria-selected="true"] {
+  .site-suche .site-suche-treffer[aria-selected="true"] {
     background: var(--theme-surface-muted);
     color: var(--theme-text-strong);
   }
-  .suche .suche-beschreibung {
+  .site-suche .site-suche-beschreibung {
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
     color: var(--theme-text-muted);
   }
-  .suche .fuss {
+  .site-suche .site-suche-fuss {
     display: flex;
     gap: var(--global-size-16);
     padding: var(--global-size-8) var(--global-size-16);

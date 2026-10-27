@@ -121,7 +121,7 @@ const pfad = Astro.url.pathname.replace(/\/$/, "") || "/"
   }
 
   /* Breit: eine Zeile, Menü-Knopf weg */
-  @container style(--layout-columns: 12) {
+  @media (min-width: 1024px) {
     .kopf {
       flex-wrap: nowrap;
     }

@@ -42,6 +42,7 @@ export function initSuche(): () => void {
   if (!dialog || !trigger || !daten) return () => {}
   const input = dialog.querySelector<HTMLInputElement>("[data-suche-eingabe]")!
   const liste = dialog.querySelector<HTMLElement>("[data-suche-treffer]")!
+  const leer = dialog.querySelector<HTMLElement>("[data-suche-leer]")!
 
   const index: SuchIndex = JSON.parse(daten.textContent ?? "{}")
   let aktiv = 0
@@ -54,21 +55,21 @@ export function initSuche(): () => void {
     aktiv = Math.min(aktiv, Math.max(0, treffer.length - 1))
     liste.replaceChildren()
     if (treffer.length === 0) {
-      const p = document.createElement("p")
-      p.className = "suche-leer text-small"
-      p.textContent = "Keine Treffer."
-      liste.append(p)
+      leer.textContent = "Keine Treffer."
+      leer.hidden = false
       input.removeAttribute("aria-activedescendant")
       return
     }
+    leer.textContent = ""
+    leer.hidden = true
     let nr = -1
     for (const g of gs) {
       const gruppe = document.createElement("div")
-      gruppe.className = "suche-gruppe"
+      gruppe.className = "site-suche-gruppe"
       gruppe.setAttribute("role", "group")
       gruppe.setAttribute("aria-label", g.label)
       const kopf = document.createElement("p")
-      kopf.className = "suche-gruppenkopf text-label"
+      kopf.className = "site-suche-gruppenkopf text-label"
       kopf.setAttribute("aria-hidden", "true")
       kopf.textContent = g.label
       gruppe.append(kopf)
@@ -76,7 +77,7 @@ export function initSuche(): () => void {
         nr += 1
         const i = nr
         const a = document.createElement("a")
-        a.className = "suche-treffer"
+        a.className = "site-suche-treffer"
         a.id = `suche-treffer-${i}`
         a.href = item.href
         a.setAttribute("role", "option")
@@ -87,7 +88,7 @@ export function initSuche(): () => void {
         a.append(titel)
         if (item.description) {
           const d = document.createElement("span")
-          d.className = "suche-beschreibung text-small"
+          d.className = "site-suche-beschreibung text-small"
           d.textContent = item.description
           a.append(d)
         }
@@ -127,8 +128,12 @@ export function initSuche(): () => void {
 
   const onClose = () => {
     trigger.setAttribute("aria-expanded", "false")
-    const ziel = opener && opener.isConnected ? opener : trigger
-    ziel.focus()
+    // Der Auslöser kann im geschlossenen Menü (schmales Layout) verborgen sein: dann zum Menü-Knopf
+    const sichtbar = (el: HTMLElement | null): el is HTMLElement =>
+      !!el && el.isConnected && el.getClientRects().length > 0 && getComputedStyle(el).visibility !== "hidden"
+    const knopf = document.querySelector<HTMLElement>("[data-menue-knopf]")
+    const ziel = [opener, trigger, knopf].find(sichtbar)
+    ziel?.focus()
     opener = null
   }
 
