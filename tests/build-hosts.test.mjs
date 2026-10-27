@@ -16,11 +16,6 @@ const ERLAUBT = new Set(EXTERNE_RESSOURCEN.map((r) => r.host))
 const EIGENE = new Set(["www.ptrckschrdtr.de", "ptrckschrdtr.de"])
 /** Namensraum-URIs (SVG, XHTML), laden nichts */
 const NAMENSRAUM = new Set(["www.w3.org"])
-/**
- * Bekannte Ausnahme: Testinhalt mit Unsplash-Bild im Markdown (src/content/projects/sample-art-project.md).
- * Wird laut Spec §8 vor dem Livegang entfernt (Task 15); dann entfällt diese Zeile.
- */
-const TESTINHALTE = new Set(["/projects/sample-art-project/index.html"])
 
 test("fremdeHosts: findet src/link/url()/Inline-Adressen, ignoriert <a href>, JSON-LD und relative Pfade", () => {
   const html = `<a href="https://x.example/a">l</a><link rel="stylesheet" href="https://css.example/s.css"><script src="//cdn.example/a.js"></script>
@@ -36,7 +31,7 @@ test("gebaute Seiten des neuen Layers laden nur Ressourcen von der eigenen Domai
     assert.ok(routen.includes(pflicht), `${pflicht} fehlt oder nutzt SiteLayout nicht: ${routen.join(" ")}`)
   }
   const probleme = []
-  for (const datei of neu.filter((d) => !TESTINHALTE.has(d.slice(dist.length)))) {
+  for (const datei of neu) {
     for (const h of fremdeHosts(readFileSync(datei, "utf8"))) {
       if (!ERLAUBT.has(h) && !EIGENE.has(h) && !NAMENSRAUM.has(h)) probleme.push(`${datei.slice(dist.length)}: ${h}`)
     }
