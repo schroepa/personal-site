@@ -172,6 +172,7 @@ test.describe("Labels ohne JavaScript", () => {
 // ---------------------------------------------------------------------------------------------------------- Magnet
 
 test.describe("Magnet", () => {
+  // eslint-disable-next-line no-empty-pattern -- Playwright verlangt für das erste Argument ein Destrukturierungsmuster
   test.beforeEach(({}, info) => nurDesktop(info))
 
   const knopf = (page: Page) => page.locator("#ueber-mich [data-magnet]").first()
@@ -277,6 +278,7 @@ test.describe("Magnet", () => {
 // ---------------------------------------------------------------------------------------------------- Begleiter
 
 test.describe("„Ansehen“-Begleiter", () => {
+  // eslint-disable-next-line no-empty-pattern -- Playwright verlangt für das erste Argument ein Destrukturierungsmuster
   test.beforeEach(({}, info) => nurDesktop(info))
 
   const karte = (page: Page) => page.locator("#arbeit .projekt-karte").first()
@@ -425,6 +427,7 @@ test.describe("Tag-Wischen", () => {
 // ------------------------------------------------------------------------------------------- Bild-Zoom und Signatur
 
 test.describe("Hover-Effekte", () => {
+  // eslint-disable-next-line no-empty-pattern -- Playwright verlangt für das erste Argument ein Destrukturierungsmuster
   test.beforeEach(({}, info) => nurDesktop(info))
 
   test("Bild-Zoom: leichter Zoom bei Hover mit Token-Dauer und -Kurve; Kein Zoom bei reduced motion", async ({ page }) => {
@@ -510,6 +513,7 @@ test.describe("Hover-Effekte", () => {
 // ------------------------------------------------------------------------------------------------ View Transition
 
 test.describe("View Transition Projektkarte → Fallstudie", () => {
+  // eslint-disable-next-line no-empty-pattern -- Playwright verlangt für das erste Argument ein Destrukturierungsmuster
   test.beforeEach(({}, info) => nurDesktop(info))
 
   /** Merkt sich die erste View Transition des Dokuments (Router ruft document.startViewTransition). */

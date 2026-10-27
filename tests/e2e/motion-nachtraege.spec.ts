@@ -177,6 +177,7 @@ test("Layoutverschiebung (CLS) von Hero und Signatur bleibt unter 0.01", async (
 })
 
 test.describe("Galerie-Akkordeon", () => {
+  // eslint-disable-next-line no-empty-pattern -- Playwright verlangt für das erste Argument ein Destrukturierungsmuster
   test.beforeEach(({}, info) => {
     test.skip(info.project.name !== "desktop", "setzt die Breite selbst")
   })
