@@ -3,7 +3,8 @@
 // darunter das Werkzeug (React nur für die Zustandslogik, Bedienelemente nativ, Styles in gradient-generator.css auf Tokens).
 // Bleibt indexierbar (canonical und Open-Graph kommen aus SiteLayout; der frühere eigene Werkzeug-Layer ist weg).
 //
-// Keine Astro-Insel (client:load): die bringt Inline-Skripte mit, die die CSP blockiert (Task 16). Stattdessen rendert
+// Keine Astro-Insel (client:load): die bringt Inline-Skripte mit, die die CSP blockiert (Task 16; Astros experimental.csp
+// mit Hashes wäre möglich, null Inline-Skripte sind aber strenger und versionsunabhängig). Stattdessen rendert
 // die Seite das Werkzeug hier auf dem Server und ein gebündeltes Skript hydriert es (src/scripts/gradient-generator-start.ts).
 import { createElement } from "react"
 import { renderToString } from "react-dom/server"

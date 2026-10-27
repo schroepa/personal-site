@@ -16,7 +16,7 @@
   {
     "name": "Cookiebot",
     "host": "imgsct.cookiebot.com",
-    "zweck": "Einwilligungsverwaltung: vom Banner geladene Bilder",
+    "zweck": "Einwilligungsverwaltung: von Cookiebot gegebenenfalls geladene Bilder (laut Cookiebot-CSP-Dokumentation; Zweck noch zu prüfen)",
     "einwilligung": false,
     "csp": ["img-src"]
   },

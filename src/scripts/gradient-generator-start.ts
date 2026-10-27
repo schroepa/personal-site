@@ -1,7 +1,9 @@
 /**
  * Startet den Gradient-Generator auf dem vom Server gerenderten HTML (hydrateRoot), ohne Astro-Insel.
- * Grund: Eine Insel (client:load) bringt zwei Inline-Skripte von Astro mit (Insel-Laufzeit und Ladeanweisung);
- * die strenge CSP (script-src ohne 'unsafe-inline') würde sie blockieren. So bleibt es bei gebündelten Dateien.
+ * Grund: Eine Insel (client:load) bringt zwei Inline-Skripte von Astro mit (Insel-Laufzeit und Ladeanweisung).
+ * Astro 5.18 könnte sie über `experimental.csp` per Hash freigeben (CSP als <meta>, Hashes je Build). Wir haben uns
+ * stattdessen für null Inline-Skripte entschieden: strenger (kein Hash, der zur Astro-Version passen muss) und
+ * unabhängig von einem experimentellen Feature; die CSP kommt als Header aus vercel.json.
  * Der Server rendert mit demselben identifierPrefix (GRADIENT_GENERATOR_ID_PRAEFIX), damit useId-Werte passen.
  * Läuft nach jedem Seitenwechsel des Client-Routers erneut und hängt sich vor dem Tausch wieder ab.
  */

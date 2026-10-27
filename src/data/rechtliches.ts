@@ -125,9 +125,17 @@ export const IMPRESSUM: RechtsSeite = {
   ],
 }
 
-const cookiebot = EXTERNE_RESSOURCEN.filter((r) => r.name === "Cookiebot").map((r) => r.host)
-const posthog = EXTERNE_RESSOURCEN.find((r) => r.host === "eu.i.posthog.com")!.host
-const posthogAssets = EXTERNE_RESSOURCEN.find((r) => r.host === "eu-assets.i.posthog.com")!.host
+/** Host aus EXTERNE_RESSOURCEN nachschlagen (unabhängig von der Reihenfolge der JSON); fehlt er, bricht der Build mit klarer Meldung ab. */
+export function hostEintrag(host: string): string {
+  const r = EXTERNE_RESSOURCEN.find((x) => x.host === host)
+  if (!r) throw new Error(`Host ${host} fehlt in src/data/externe-ressourcen.json, wird aber im Datenschutztext genannt`)
+  return r.host
+}
+const cookiebotSkript = hostEintrag("consent.cookiebot.com")
+const cookiebotCdn = hostEintrag("consentcdn.cookiebot.com")
+const cookiebotBilder = hostEintrag("imgsct.cookiebot.com")
+const posthog = hostEintrag("eu.i.posthog.com")
+const posthogAssets = hostEintrag("eu-assets.i.posthog.com")
 
 export const DATENSCHUTZ: RechtsSeite = {
   label: "Rechtliches",
@@ -184,7 +192,7 @@ export const DATENSCHUTZ: RechtsSeite = {
           typ: "absatz",
           kopf: "Cookiebot (Einwilligungsverwaltung).",
           teile: [
-            `Zweck: Einholen, Speichern und Nachweisen deiner Entscheidung. Bei jedem Seitenaufruf lädt dein Browser das Skript von ${cookiebot[0]}; weitere Dateien lädt es bei Bedarf von ${cookiebot[1]} nach, Bilder des Banners von ${cookiebot[2]}. Dabei erhält der Anbieter technisch bedingt deine IP-Adresse. Deine Entscheidung wird in deinem Browser gespeichert. [[PRÜFEN: Name und Speicherdauer des Cookiebot-Cookies (laut Anbieter „CookieConsent“, 12 Monate) und Umfang der zum Nachweis übermittelten Daten laut Cookiebot-Dokumentation]] [[PRÜFEN: Rechtsgrundlage für den Einsatz von Cookiebot (Art. 6 Abs. 1 lit. c oder f DSGVO, § 25 Abs. 2 TDDDG), Anbieter und Sitz, Drittlandübermittlung]]`,
+            `Zweck: Einholen, Speichern und Nachweisen deiner Entscheidung. Bei jedem Seitenaufruf lädt dein Browser das Skript von ${cookiebotSkript}; weitere Dateien lädt es bei Bedarf von ${cookiebotCdn} nach. Zusätzlich kann Cookiebot Bilder von ${cookiebotBilder} laden. [[PRÜFEN: Zweck und Datenverarbeitung von imgsct.cookiebot.com bei Cookiebot erfragen bzw. prüfen (der Host steht nur in der CSP-Dokumentation von Cookiebot)]] Dabei erhält der Anbieter technisch bedingt deine IP-Adresse. Deine Entscheidung wird in deinem Browser gespeichert. [[PRÜFEN: Name und Speicherdauer des Cookiebot-Cookies (laut Anbieter „CookieConsent“, 12 Monate) und Umfang der zum Nachweis übermittelten Daten laut Cookiebot-Dokumentation]] [[PRÜFEN: Rechtsgrundlage für den Einsatz von Cookiebot (Art. 6 Abs. 1 lit. c oder f DSGVO, § 25 Abs. 2 TDDDG), Anbieter und Sitz, Drittlandübermittlung]]`,
           ],
         },
         {

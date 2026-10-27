@@ -4,7 +4,8 @@
 // Alles andere ist hier festgelegt und in README „Sicherheits-Header & CSP“ begründet.
 //
 //   npm run headers           schreibt vercel.json neu (deterministisch)
-//   npm run headers -- --check  prüft nur, ob vercel.json aktuell ist (Exit 1 bei Abweichung)
+//   npm run headers -- --check  prüft nur, ob vercel.json aktuell ist (Exit 1 bei Abweichung); läuft auch in `prebuild`,
+//                               damit ein Vercel-Build mit veralteter vercel.json scheitert
 //
 // vercel.json ist eingecheckt; der Test scripts/build-vercel-headers.test.mjs vergleicht sie mit der Ausgabe hier.
 import { readFileSync, writeFileSync } from "node:fs"
@@ -159,7 +160,7 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
       /* fehlt */
     }
     if (ist !== soll) {
-      console.error("vercel.json ist nicht aktuell: `npm run headers` ausführen.")
+      console.error("vercel.json passt nicht zu src/data/externe-ressourcen.json bzw. scripts/build-vercel-headers.mjs. Beheben: `npm run headers` ausführen und vercel.json committen.")
       process.exit(1)
     }
     console.log("vercel.json ist aktuell.")

@@ -88,3 +88,16 @@ test("offeneStellen: findet [[…]] in beiden Seiten (Anschrift, Stand, PRÜFEN-
   assert.ok(offen.some((s) => s.startsWith("[[PRÜFEN:")), "mindestens ein PRÜFEN-Marker erwartet")
   for (const s of offen) assert.match(s, /^\[\[[^\[\]]+\]\]$/)
 })
+
+test("hostEintrag: findet Hosts unabhängig von der Reihenfolge, fehlender Host wirft verständlich", async () => {
+  const { hostEintrag } = await import("../src/data/rechtliches.ts")
+  assert.equal(hostEintrag("imgsct.cookiebot.com"), "imgsct.cookiebot.com")
+  assert.throws(() => hostEintrag("gibt-es-nicht.example"), /fehlt in src\/data\/externe-ressourcen\.json/)
+})
+
+test("imgsct.cookiebot.com: im Text nur belegte Aussage und PRÜFEN-Marker in offeneStellen()", () => {
+  const text = volltext(DATENSCHUTZ)
+  assert.ok(text.includes("Zusätzlich kann Cookiebot Bilder von imgsct.cookiebot.com laden."))
+  assert.ok(!text.includes("Bilder des Banners"))
+  assert.ok(offeneStellen().some((s) => s.includes("imgsct.cookiebot.com")))
+})
