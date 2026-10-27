@@ -246,6 +246,33 @@ test.describe("SiteLayout", () => {
     }
   })
 
+  test("Menü ist im ersten gemalten Frame nie offen (schmal)", async ({ page }) => {
+    const breite = page.viewportSize()!.width
+    test.skip(breite >= 1024, "nur im schmalen Layout relevant")
+    await page.route("https://consent.cookiebot.com/**", (route) => route.abort())
+    await page.addInitScript(() => {
+      const w = window as unknown as { __menue: boolean[] }
+      w.__menue = []
+      const sichtbar = () => {
+        const el = document.querySelector("[data-menue]") as HTMLElement | null
+        if (!el) return false
+        const r = el.getBoundingClientRect()
+        return getComputedStyle(el).display !== "none" && r.width > 0 && r.height > 0
+      }
+      let n = 0
+      const tick = () => {
+        if (document.body) w.__menue.push(sichtbar())
+        if (++n < 30) requestAnimationFrame(tick)
+      }
+      requestAnimationFrame(tick)
+    })
+    await page.goto(URL)
+    await page.waitForSelector("body[data-bereit]")
+    const frames = await page.evaluate(() => (window as unknown as { __menue: boolean[] }).__menue)
+    expect(frames.length).toBeGreaterThan(0)
+    expect(frames.every((v) => v === false)).toBe(true)
+  })
+
   test("Schriftfeld: Feld Raster erst ab 768, mobil nur Blatt und Ort", async ({ page }) => {
     await laden(page)
     const breite = page.viewportSize()!.width
