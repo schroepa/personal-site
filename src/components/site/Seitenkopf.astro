@@ -14,7 +14,7 @@ const hatZusatz = Astro.slots.has("zusatz")
 ---
 
 <div class:list={["seitenkopf", `seitenkopf-${art}`]} data-abschnitt={abschnitt} data-objekt>
-  <p class="text-label label" data-label><span aria-hidden="true">→ </span>{label}</p>
+  <p class="text-label label" data-label data-anim="label"><span aria-hidden="true">→ </span>{label}</p>
   <div class="aussage" data-aussage>
     <h1 class:list={["titel", art === "seite" ? "text-hero" : "text-h1"]}>{titel}</h1>
     {einleitung && <p class="text-lead einleitung">{einleitung}</p>}

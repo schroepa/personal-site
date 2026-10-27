@@ -76,7 +76,7 @@ const aktionen = [
   ...(repo ? [{ label: "Code", href: repo }] : []),
 ]
 const meta = projektMeta(tags, date)
-const bildName = `view-transition-name: projekt-bild-${slug}`
+const bildName = `view-transition-name: projekt-bild-${slug}; view-transition-class: projekt-bild`
 ---
 
 <SiteLayout
@@ -185,7 +185,7 @@ const bildName = `view-transition-name: projekt-bild-${slug}`
       <Abschnitt id="naechstes-projekt" label="Nächstes Projekt" layout="oben">
         <div class:list={["bild-text", { "ohne-bild": !naechstes.bild }]} data-naechstes>
           {naechstes.bild && (
-            <div class="bild-flaeche" style={`view-transition-name: projekt-bild-${naechstes.slug}`}>
+            <div class="bild-flaeche" style={`view-transition-name: projekt-bild-${naechstes.slug}; view-transition-class: projekt-bild`}>
               <img src={naechstes.bild} alt="" loading="lazy" decoding="async" />
             </div>
           )}

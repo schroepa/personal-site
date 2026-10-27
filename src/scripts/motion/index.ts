@@ -1,19 +1,25 @@
 /**
  * Einstieg der Bewegung: ruft alle Module auf und gibt das gesammelte Teardown zurück.
- * Weitere Module (Labels, Magnet …) tragen sich hier in MODULES ein. Reihenfolge: durchstreichen vor
+ * Weitere Module tragen sich hier in MODULES ein. Reihenfolge: durchstreichen vor
  * hero-woerter (es fügt das Wort „Screens“ ein, das mit den anderen Wörtern einsteigt).
  * Jedes Modul läuft einzeln abgesichert: wirft eines, laufen die übrigen weiter und das Gate (data-motion)
  * wird geöffnet, damit kein Inhalt im Startzustand hängen bleibt.
  */
 import { initAbschnittslinie } from "./abschnittslinie"
 import { initAkkordeon } from "./akkordeon"
+import { initBegleiter } from "./begleiter"
+import { initBildZoom } from "./bild-zoom"
 import { initDurchstreichen } from "./durchstreichen"
 import { gateAus, notfall, wachtStoppen } from "./gate"
 import { initHeroWoerter } from "./hero-woerter"
+import { initLabels } from "./labels"
 import { initLenis } from "./lenis"
+import { initMagnet } from "./magnet"
 import { initRasterAufbau } from "./raster-aufbau"
 import { initRasterSpalte } from "./raster-spalte"
+import { initRasterUmbau } from "./raster-umbau"
 import { initSignatur } from "./signatur"
+import { initTagWischen } from "./tag-wischen"
 import { prefersReducedMotion, REDUZIERT_QUERY } from "./tokens"
 
 export const MODULES: Array<() => () => void> = [
@@ -25,6 +31,12 @@ export const MODULES: Array<() => () => void> = [
   initSignatur,
   initAbschnittslinie,
   initAkkordeon,
+  initLabels,
+  initTagWischen,
+  initRasterUmbau,
+  initMagnet,
+  initBegleiter,
+  initBildZoom,
 ]
 
 /** Alle Module einzeln abgesichert starten; gibt das gesammelte Teardown zurück. */

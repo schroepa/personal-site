@@ -11,9 +11,8 @@
  */
 import { animate, motionValue, type MotionValue } from "motion"
 import { zaehle } from "./einmal"
-import { prefersReducedMotion, readSpring } from "./tokens"
-
-const FEIN = "(pointer: fine)"
+import { readSpring } from "./tokens"
+import { mitFeinemZeiger } from "./zeiger"
 
 /** Hörer, Federn und Zustand für feine Zeiger. Gibt das vollständige Aufräumen zurück. */
 function anlegen(raster: HTMLElement): () => void {
@@ -107,23 +106,5 @@ function anlegen(raster: HTMLElement): () => void {
 export function initRasterSpalte(): () => void {
   const raster = document.querySelector<HTMLElement>("[data-raster]")
   if (!raster) return () => {}
-  const fein = window.matchMedia(FEIN)
-  let abbau: (() => void) | null = null
-  const abgleichen = () => {
-    const soll = !prefersReducedMotion() && fein.matches
-    if (soll && !abbau) abbau = anlegen(raster)
-    else if (!soll && abbau) {
-      abbau()
-      abbau = null
-    }
-  }
-  fein.addEventListener("change", abgleichen)
-  zaehle(1)
-  abgleichen()
-  return () => {
-    fein.removeEventListener("change", abgleichen)
-    zaehle(-1)
-    abbau?.()
-    abbau = null
-  }
+  return mitFeinemZeiger(() => anlegen(raster))
 }

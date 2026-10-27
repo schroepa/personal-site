@@ -21,7 +21,7 @@ const hatTag = Astro.slots.has("tag")
 ---
 
 <section class="kontakt-panel" aria-labelledby="kontakt-titel" data-kontakt data-abschnitt="Kontakt" data-objekt>
-  <p class="text-label label"><span aria-hidden="true">→ </span>{label}</p>
+  <p class="text-label label" data-anim="label"><span aria-hidden="true">→ </span>{label}</p>
   <div class="inhalt">
     <h2 id="kontakt-titel" class="text-hero titel">{titel}</h2>
     <p class="text-body text">{text}</p>
@@ -35,7 +35,7 @@ const hatTag = Astro.slots.has("tag")
   </div>
   {
     hatTag && (
-      <div class="tag" data-tag>
+      <div class="tag" data-tag data-anim="tag">
         <slot name="tag" />
       </div>
     )

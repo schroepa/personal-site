@@ -44,3 +44,56 @@ html[data-motion] [data-anim="linie"]:not([data-anim-fertig]) {
 html:not([data-motion]) [data-ersatz] > .alt {
   display: none;
 }
+
+/* Handschrift-Tag im Kontakt-Panel: wischt von links auf (motion/tag-wischen.ts), die Maske ist der Startzustand */
+html[data-motion] [data-anim="tag"]:not([data-anim-fertig]) {
+  opacity: 1;
+  clip-path: inset(0 100% 0 0);
+}
+
+/*
+ * „Ansehen“-Begleiter (motion/begleiter.ts): folgt dem Zeiger über Projektkarten. Dekoration, nie Ziel des Zeigers.
+ * Position (transform) setzt das Skript; er ist auf den Zeigerpunkt zentriert. Ein-/Ausblenden über Token-Dauer.
+ */
+.begleiter {
+  position: fixed;
+  z-index: 1;
+  left: 0;
+  top: 0;
+  translate: -50% -50%;
+  padding: var(--global-size-8) var(--component-button-sm-spacing-x);
+  border-radius: var(--component-button-radius-pill);
+  background: var(--component-button-primary-background-default);
+  color: var(--component-button-primary-text-default);
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--motion-dauer-sofort) var(--motion-easing-blenden);
+}
+.begleiter[data-an] {
+  opacity: 1;
+}
+
+/*
+ * Bild-Zoom bei Hover: Übergang aus den Tokens (--motion-objekt-bild-zoom, --motion-easing-standard). Den Faktor setzt
+ * motion/bild-zoom.ts nur bei feinem Zeiger und ohne reduzierte Bewegung (Custom Property --bild-zoom-faktor).
+ */
+[data-bild-zoom] [data-bild] img {
+  transition: transform var(--motion-objekt-bild-zoom) var(--motion-easing-standard);
+}
+[data-bild-zoom]:hover [data-bild] img {
+  transform: scale(var(--bild-zoom-faktor, 1));
+}
+
+/*
+ * View Transition Projektkarte → Fallstudie: Dauer --motion-objekt-uebergang (600 ms) für alle benannten Gruppen, also das
+ * Cover-Bild (Name projekt-bild-<slug>, Klasse projekt-bild an Karte und Fallstudie); Kurve --motion-easing-standard.
+ * Die Überblendung der Seite selbst (root) bleibt beim Standard des Routers. Unter reduzierter Bewegung sind die
+ * Dauer-Tokens 0: keine sichtbare Übergangsanimation.
+ */
+::view-transition-group(*) {
+  animation-duration: var(--motion-objekt-uebergang);
+}
+::view-transition-group(*.projekt-bild) {
+  animation-timing-function: var(--motion-easing-standard);
+}

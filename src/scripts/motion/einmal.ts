@@ -23,7 +23,7 @@ const OBEN_REICHWEITE_PX = 100_000
 const FERTIG = "data-anim-fertig"
 
 /** Inline-Eigenschaften, die die Animationen setzen und beim Fertigstellen verschwinden. */
-const INLINE_RESTE = ["opacity", "transform", "filter", "font-weight", "letter-spacing", "clip-path", "flex-grow"]
+const INLINE_RESTE = ["opacity", "transform", "filter", "font-weight", "letter-spacing", "clip-path", "flex-grow", "white-space"]
 
 declare global {
   interface Window {
@@ -60,6 +60,11 @@ export function wiederherstellung(): boolean {
 /** Dürfen Animationen laufen? Nur mit offenem Gate, ohne reduzierte Bewegung und bei frischer Ankunft. */
 export function animationErlaubt(): boolean {
   return document.documentElement.hasAttribute("data-motion") && !prefersReducedMotion() && !wiederherstellung()
+}
+
+/** Macht Elemente sichtbar (Startzustand aus), ohne Inline-Werte zu entfernen: für Animationen, die gleich starten. */
+export function zeigen(...elemente: Array<Element | null | undefined>): void {
+  for (const el of elemente) el?.setAttribute(FERTIG, "")
 }
 
 /** Gibt Elemente im Endzustand frei und entfernt Inline-Reste der Animation. */

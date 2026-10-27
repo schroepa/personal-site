@@ -1,6 +1,8 @@
 ---
 // Projekt-Karte (Figma 260:2): randlos, ganze Karte ein Linkziel (Titel-Link mit ::after), Titel als h3 (Prop `ebene`: 2, 3 oder 4).
-// Bild mit leerem alt; view-transition-name am Bild (nur ein Name, kein Wert) für die Fallstudien-Transition.
+// Bild mit leerem alt; view-transition-name am Bild (nur ein Name, kein Wert) für die Fallstudien-Transition; die Klasse
+// projekt-bild gibt neu-bewegung.css die Dauer (--motion-objekt-uebergang). data-begleiter: „Ansehen“-Begleiter am Zeiger,
+// data-bild-zoom: leichter Bild-Zoom bei Hover (motion/begleiter.ts, bild-zoom.ts).
 interface Props {
   format: "16x10" | "4x5" | "1x1"
   meta: string
@@ -16,8 +18,8 @@ const { format, meta, titel, wirkung, bild, href, slug, ebene = 3 } = Astro.prop
 const Titel = `h${ebene}` as "h2" | "h3" | "h4"
 ---
 
-<article class:list={["projekt-karte", `format-${format}`]} data-objekt>
-  <div class="bild" data-bild style={`view-transition-name: projekt-bild-${slug}`}>
+<article class:list={["projekt-karte", `format-${format}`]} data-objekt data-begleiter data-bild-zoom>
+  <div class="bild" data-bild style={`view-transition-name: projekt-bild-${slug}; view-transition-class: projekt-bild`}>
     {bild && <img src={bild} alt="" loading="lazy" decoding="async" />}
   </div>
   <div class="text">

@@ -15,7 +15,7 @@ const titelId = `${id}-titel`
 
 <section {id} class:list={["abschnitt", `abschnitt-${layout}`]} aria-labelledby={titelId} data-abschnitt={label}>
   <div class="linie" data-linie data-anim="linie" aria-hidden="true"></div>
-  <h2 id={titelId} class="text-label label">
+  <h2 id={titelId} class="text-label label" data-anim="label">
     <span aria-hidden="true">→ </span>{nummer ? `${nummer} ` : ""}{label}
   </h2>
   <div class="inhalt" data-inhalt><slot /></div>

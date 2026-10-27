@@ -1,6 +1,7 @@
 ---
 // Pillenknopf (Figma button: sm, pill; primary und ghost). Link, wenn href gesetzt ist, sonst <button type="button">.
 // Ein ghost-Knopf mit aria-pressed="true" erscheint gewählt (wie primary).
+// data-magnet: der Knopf folgt dem feinen Zeiger ein kleines Stück (motion/magnet.ts).
 // Die Ghost-Farbe lässt sich über --knopf-ghost-farbe überschreiben (z. B. auf der Farbfläche des Kontakt-Panels).
 interface Props {
   art?: "primary" | "ghost"
@@ -14,12 +15,12 @@ const klasse = `knopf knopf-${art} text-label`
 
 {
   href ? (
-    <a class={klasse} {href} {...rest}>
+    <a class={klasse} {href} data-magnet {...rest}>
       <slot />
       <span aria-hidden="true">{pfeil}</span>
     </a>
   ) : (
-    <button class={klasse} type="button" {...rest}>
+    <button class={klasse} type="button" data-magnet {...rest}>
       <slot />
       <span aria-hidden="true">{pfeil}</span>
     </button>

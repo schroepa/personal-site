@@ -185,7 +185,13 @@ const eintraege = [
     </div>
   </Abschnitt>
 
-  <KontaktPanel email={KONTAKT_EMAIL} />
+  <!-- Mit Platzhalter-SVG im Slot „tag“ (Tag-Wischen, motion/tag-wischen.ts). Die echte Handschrift liefert Patrick;
+       auf Produktionsseiten steht kein Tag. -->
+  <KontaktPanel email={KONTAKT_EMAIL}>
+    <svg slot="tag" data-tag-platzhalter viewBox="0 0 300 120" role="img" aria-label="Platzhalter für das Handschrift-Tag">
+      <path d="M10 90 C 40 10, 70 110, 100 40 S 160 100, 190 30 S 250 90, 290 50" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" />
+    </svg>
+  </KontaktPanel>
 
   <Abschnitt id="galerie-1" nummer="11" label="Galerie, 1 Kapitel" layout="oben">
     <GalerieAkkordeon kapitel={kapitel(1)} label="Galerie mit einem Kapitel" />

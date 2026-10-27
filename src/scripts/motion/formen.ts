@@ -15,3 +15,33 @@ export const GEWICHT_START_TOKEN = "--font-weight-extralight"
 
 /** Anfangs-Sperrung der Labels (Figma schrift/sperrung: „ziehen sich von 0.6em Sperrung zusammen“). */
 export const SPERRUNG_START = "0.6em"
+
+/**
+ * Zeichenvorrat des Scrambles (Anzeigetafel). Prototyp v14: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789/·'. Kein Token.
+ * Gescrambelt werden nur Buchstaben und Ziffern des sichtbaren Textes; Leerzeichen, Pfeile und Trenner bleiben stehen.
+ */
+export const SCRAMBLE_ZEICHEN = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789/·"
+/**
+ * Takt, in dem der Scramble die noch nicht aufgelösten Zeichen neu würfelt (ms). Verhaltenswert, kein Gestaltungswert:
+ * 25 Bilder pro Sekunde (wie lichtband/bildintervall) lesen sich wie eine Anzeigetafel, jedes Bild (60 Hz) flimmerte.
+ */
+export const SCRAMBLE_TAKT_MS = 40
+
+/**
+ * Magnet-Knöpfe: Anteil des Zeigerabstands zur Knopfmitte, um den der Knopf dem Zeiger folgt (Prototyp v14: x 0.22, y 0.3),
+ * und der Höchstzug in px (Figma motion „physik/magnet“: „max. 7 × 5 px“). Beides ohne Token. Der Zug ist kleiner als
+ * der Abstand, der Zeiger bleibt also immer auf dem Knopf (Klickziel wandert nicht unter dem Zeiger weg).
+ */
+export const MAGNET_ZUG_X = 0.22
+export const MAGNET_ZUG_Y = 0.3
+export const MAGNET_MAX_X = 7
+export const MAGNET_MAX_Y = 5
+
+/** Schwellwert, unter dem ein Magnet-Versatz als Ruhe gilt (px); danach wird die Inline-Transformation entfernt. */
+export const MAGNET_RUHE_PX = 0.01
+
+/** Zoom-Faktor der Bilder beim Hover über Karten/Zeilen. Figma: „leichter Zoom“ ohne Wert, Prototyp v14: scale(1.03). */
+export const BILD_ZOOM_FAKTOR = 1.03
+
+/** Gewicht der Signatur beim Hover: Token --font-weight-light (Figma schrift/gewicht-hover: „wird bei Hover leicht (300)“). */
+export const GEWICHT_HOVER_TOKEN = "--font-weight-light"
