@@ -18,7 +18,10 @@ export async function copyEmail(el: HTMLElement): Promise<void> {
     bereich.selectNodeContents(el)
     auswahl?.removeAllRanges()
     auswahl?.addRange(bereich)
-    ansagen("Kopieren nicht möglich. Die Adresse ist markiert, mit Strg+C oder ⌘C kopieren.")
+    // Adresse in den Blick holen; bei reduzierter Bewegung ohne weiches Scrollen
+    const reduziert = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false
+    el.scrollIntoView({ block: "center", behavior: reduziert ? "auto" : "smooth" })
+    ansagen("Kopieren nicht möglich. Die Adresse steht markiert im Text, mit Strg+C oder ⌘C kopieren.")
   }
 }
 

@@ -80,7 +80,7 @@ if (teil === "dialog") {
           />
         </div>
         <div class="site-suche-liste" id="suche-treffer" role="listbox" aria-label="Suchergebnisse" data-suche-treffer />
-        <p class="site-suche-leer text-small" role="status" data-suche-leer hidden />
+        <p class="site-suche-leer text-small" role="status" data-suche-leer />
         <div class="site-suche-fuss text-small">
           <span>
             <kbd class="site-suche-kbd">↵</kbd> Auswählen
@@ -178,8 +178,9 @@ if (teil === "dialog") {
     overflow-y: auto;
     padding: var(--global-size-8);
   }
-  .site-suche .site-suche-leer[hidden] {
-    display: none;
+  /* leer bleibt die Live-Region gerendert (im Accessibility-Tree), nur ohne Höhe */
+  .site-suche .site-suche-leer:empty {
+    padding: 0;
   }
   .site-suche .site-suche-leer {
     margin: 0;

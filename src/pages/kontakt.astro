@@ -20,7 +20,7 @@ import { ABLAUF, DATEN, KONTAKT_EMAIL, KONTAKT_SEITE, LINKEDIN_URL, WOFUER } fro
       <div slot="zusatz" class="zusatz">
         <div class="aktionen">
           <Knopf art="primary" href={`mailto:${KONTAKT_EMAIL}`}>E-Mail schreiben</Knopf>
-          <Knopf art="ghost" data-kopieren pfeil="→">Adresse kopieren</Knopf>
+          <Knopf art="ghost" data-kopieren>Adresse kopieren</Knopf>
           <Knopf art="ghost" href={LINKEDIN_URL} target="_blank" rel="noopener noreferrer" pfeil="↗" aria-label="LinkedIn (öffnet in neuem Tab)">LinkedIn</Knopf>
         </div>
         <p class="text-small meldung" aria-live="polite" data-meldung></p>
@@ -60,8 +60,11 @@ import { ABLAUF, DATEN, KONTAKT_EMAIL, KONTAKT_SEITE, LINKEDIN_URL, WOFUER } fro
     margin: 0;
     color: var(--theme-text-default);
   }
+  /* Leere Live-Region bleibt gerendert (Accessibility-Tree), nur ohne Höhe */
   .meldung:empty {
-    display: none;
+    block-size: 0;
+    overflow: hidden;
+    margin-block-start: calc(var(--global-size-8) * -1); /* hebt den Flex-Abstand der leeren Zeile auf */
   }
   .daten {
     display: flex;

@@ -56,12 +56,10 @@ export function initSuche(): () => void {
     liste.replaceChildren()
     if (treffer.length === 0) {
       leer.textContent = "Keine Treffer."
-      leer.hidden = false
       input.removeAttribute("aria-activedescendant")
       return
     }
     leer.textContent = ""
-    leer.hidden = true
     let nr = -1
     for (const g of gs) {
       const gruppe = document.createElement("div")

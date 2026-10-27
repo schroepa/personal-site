@@ -6,8 +6,11 @@ import { join } from "node:path"
 // Prüft die gebaute Sitemap (dist/, nach `npm run build`). Ohne dist wird übersprungen, damit `test:scripts` schnell bleibt.
 const dist = join(process.cwd(), "dist")
 const vorhanden = existsSync(dist)
+// In CI muss gebaut sein: fehlendes dist/ ist dort ein Fehler, lokal ein ausdrücklich begründetes Überspringen
+if (!vorhanden && process.env.CI) throw new Error("dist/ fehlt: in CI vor test:scripts `npm run build` ausführen")
+const grund = "dist/ fehlt: übersprungen (lokal). Zum Prüfen erst `npm run build`, in CI ist das Pflicht."
 
-test("Sitemap enthält /kontakt und nicht /cv", { skip: vorhanden ? false : "dist/ fehlt (erst npm run build)" }, () => {
+test("Sitemap enthält /kontakt und nicht /cv", { skip: vorhanden ? false : grund }, () => {
   const xml = readdirSync(dist)
     .filter((n) => /^sitemap-\d+\.xml$/.test(n))
     .map((n) => readFileSync(join(dist, n), "utf8"))

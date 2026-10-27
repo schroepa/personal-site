@@ -154,10 +154,35 @@ test.describe("Kontakt", () => {
     await context.grantPermissions(["clipboard-read", "clipboard-write"]).catch(() => {})
     await laden(page, KONTAKT)
     const live = page.locator("[aria-live='polite']").first()
+    // Vor dem Klick: Region ist leer, aber gerendert (nicht display:none / visibility:hidden), sonst bleibt die Ansage aus
     await expect(live).toHaveText("")
+    await expect(live).toBeAttached()
+    const vorher = await live.evaluate((el) => {
+      const s = getComputedStyle(el)
+      return { display: s.display, visibility: s.visibility, hidden: el.hasAttribute("hidden") }
+    })
+    expect(vorher.display).not.toBe("none")
+    expect(vorher.visibility).not.toBe("hidden")
+    expect(vorher.hidden).toBe(false)
     await page.getByRole("button", { name: /Adresse kopieren/ }).click()
-    await expect(live).not.toHaveText("")
-    await expect(live).toHaveText(/kopiert|markiert/)
+    await expect(live).toHaveText("E-Mail-Adresse kopiert.")
+  })
+
+  test("Kopieren ohne Zwischenablage: Hinweis nennt den Ort, Adresse markiert und im Blick", async ({ page }) => {
+    await laden(page, KONTAKT)
+    await page.evaluate(() => {
+      Object.defineProperty(navigator, "clipboard", { configurable: true, value: { writeText: () => Promise.reject(new Error("blockiert")) } })
+    })
+    await page.getByRole("button", { name: /Adresse kopieren/ }).click()
+    await expect(page.locator("[aria-live='polite']").first()).toContainText("Die Adresse steht markiert im Text")
+    expect(await page.evaluate(() => window.getSelection()?.toString().trim())).toBe(KONTAKT_EMAIL)
+    // markierte Adresse liegt im sichtbaren Bereich (Scrollen ist per scrollIntoView passiert)
+    await expect
+      .poll(() => page.locator("#daten [data-email]").evaluate((el) => {
+        const r = el.getBoundingClientRect()
+        return r.top >= 0 && r.bottom <= window.innerHeight
+      }))
+      .toBe(true)
   })
 
   test("Abschnitte Wofür, Ablauf, Daten in Reihenfolge, Listen aus den Daten", async ({ page }) => {
@@ -194,8 +219,11 @@ test.describe("Kontakt", () => {
 
   test("Navigation und Fußzeile verweisen auf /kontakt", async ({ page }) => {
     await laden(page, KONTAKT)
-    await expect(page.locator("header a[href='/kontakt']").first()).toBeVisible().catch(() => {})
-    expect(await page.locator("a[href='/kontakt']").count()).toBeGreaterThanOrEqual(2)
+    // Schmal liegt die Navigation im Menü: erst öffnen
+    const menue = page.getByRole("button", { name: "Menü" })
+    if (await menue.isVisible()) await menue.click()
+    await expect(page.locator("header a[href='/kontakt']").first()).toBeVisible()
+    await expect(page.locator("footer a[href='/kontakt']").first()).toHaveAttribute("href", "/kontakt")
     await expect(page.locator("footer a[href='/impressum']")).toHaveCount(1)
     await expect(page.locator("footer a[href='/datenschutz']")).toHaveCount(1)
   })
