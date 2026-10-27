@@ -42,16 +42,21 @@ const jahr = new Date().getFullYear()
     max-width: var(--layout-page-width);
     margin-inline: auto;
     padding: var(--site-footer-spacing-y) var(--site-footer-spacing-x-mobil);
-    /* Platz, damit das feste Schriftfeld den Footer nicht verdeckt */
-    padding-bottom: calc(var(--site-footer-spacing-y) + var(--site-schriftfeld-hoehe) + var(--site-schriftfeld-versatz));
   }
 
+  /* Mobil (Figma 265:22430): alles untereinander, Navigation als Liste */
   .oben,
   .unten {
     display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: space-between;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .oben {
+    gap: var(--site-footer-gap);
+  }
+
+  .unten {
     gap: var(--site-footer-gap-links);
   }
 
@@ -66,11 +71,17 @@ const jahr = new Date().getFullYear()
 
   ul {
     display: flex;
-    flex-wrap: wrap;
-    gap: var(--global-size-24);
+    flex-direction: column;
+    gap: var(--global-size-8);
     margin: 0;
     padding: 0;
     list-style: none;
+  }
+
+  .unten ul {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: var(--site-footer-gap-links);
   }
 
   a,
@@ -106,9 +117,30 @@ const jahr = new Date().getFullYear()
     color: var(--site-footer-text);
   }
 
+  /* Ab Tablet (Figma 265:21793): Logo links, Navigation rechts; Urheberhinweis links, Rechtliches rechts */
   @media (min-width: 768px) {
     .fuss {
       padding-inline: var(--site-footer-spacing-x);
+    }
+    .oben,
+    .unten {
+      flex-direction: row;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+    }
+    .oben {
+      gap: var(--site-footer-gap);
+    }
+    .unten {
+      gap: var(--site-footer-gap-links);
+    }
+    ul,
+    .unten ul {
+      flex-direction: row;
+      flex-wrap: wrap;
+      gap: var(--global-size-24);
     }
   }
 </style>
