@@ -48,8 +48,8 @@ export function artikelMeta(tags: readonly string[] | undefined, minuten: number
   return [tags?.[0], `${minuten} Min.`, datumFormat.format(datum)].filter(Boolean).join(" · ")
 }
 
-/** Kurzer Kartentitel: Teil vor dem Geviertstrich („ProMan — Local-First …“ wird „ProMan“). */
+/** Kurzer Kartentitel: Teil vor Geviert- oder Halbgeviertstrich („ProMan — Local-First …“ wird „ProMan“). */
 export function kurzTitel(titel: string): string {
-  const teil = titel.split(" — ")[0].trim()
+  const teil = titel.split(/\s[—–]\s/)[0].trim()
   return teil || titel
 }

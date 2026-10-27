@@ -78,5 +78,7 @@ test("projektMeta und artikelMeta", () => {
 test("kurzTitel: Teil vor dem Geviertstrich", () => {
   assert.equal(kurzTitel("ProMan — Local-First Projektmanagement"), "ProMan")
   assert.equal(kurzTitel("Forma Design System"), "Forma Design System")
-  assert.equal(kurzTitel("Digital Art – Lettering, Graffiti"), "Digital Art – Lettering, Graffiti")
+  assert.equal(kurzTitel("Digital Art – Lettering, Graffiti, Tags & Styles"), "Digital Art")
+  assert.equal(kurzTitel("Meridian — Analytics Dashboard"), "Meridian")
+  assert.equal(kurzTitel("Kreuz-Berlin"), "Kreuz-Berlin")
 })

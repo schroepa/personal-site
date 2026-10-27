@@ -11,6 +11,7 @@ import KontaktPanel from "@/components/site/KontaktPanel.astro"
 import Knopf from "@/components/site/Knopf.astro"
 import Lichtband from "@/components/site/Lichtband.astro"
 import ProjektKarte from "@/components/site/ProjektKarte.astro"
+import { KONTAKT_EMAIL } from "@/data/kontakt"
 import { coverMittel, coverThumbSrc } from "@/lib/cover-image"
 import { readingTime } from "@/lib/reading-time"
 import {
@@ -36,7 +37,7 @@ const ausserdem = projekte.slice(BENTO_FORMATE.length)
 const { gross, klein } = waehleGedanken(await getCollection("blog"))
 const beitraege = [gross, ...klein].filter((b) => b !== undefined)
 
-// Platzhalterkapitel mit vorhandenen Bildern, bis die echten Kapitel vorliegen
+// TODO: Platzhalterkapitel mit vorhandenen Bildern; echte Kapitel, Titel und Ziele (statt /projects/digital-art) stehen bei Patrick aus.
 const kapitel = [
   { titel: "Digital Art – Lettering, Graffiti, Tags & Styles", bild: "/images/gallery/digital-graffiti/IMG_0094.webp" },
   { titel: "Lettering", bild: "/images/gallery/digital-graffiti/IMG_0128.webp" },
@@ -148,7 +149,7 @@ const kapitel = [
   </Abschnitt>
 
   <div class="kontakt">
-    <KontaktPanel label="06 Kontakt" email="kontakt@ptrckschrdtr.de">
+    <KontaktPanel label="06 Kontakt" email={KONTAKT_EMAIL}>
       <Knopf slot="aktionen" art="ghost" href="/cv">Lebenslauf</Knopf>
     </KontaktPanel>
   </div>
@@ -283,8 +284,13 @@ const kapitel = [
     .ueber .text {
       grid-column: 1 / span 6;
     }
+    /* Tablet: zwei Spalten mit 16 Abstand (Figma 268:850) */
+    .bento {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: var(--global-size-16);
+    }
     .bento > * {
-      grid-column: span 4;
+      grid-column: auto;
     }
     .bento > .karte:first-child {
       grid-column: 1 / -1;
@@ -303,6 +309,15 @@ const kapitel = [
     .stichworte {
       grid-column: 1 / span 7;
       grid-row: 2;
+    }
+    /* Desktop: wieder im 12er-Raster der Seite (Karte 1: 8 Spalten, übrige 4) */
+    .bento {
+      grid-template-columns: subgrid;
+      column-gap: normal;
+      row-gap: var(--layout-gutter);
+    }
+    .bento > * {
+      grid-column: span 4;
     }
     .bento > .karte:first-child {
       grid-column: span 8;

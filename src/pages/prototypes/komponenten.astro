@@ -10,6 +10,7 @@ import ProjektKarte from "@/components/site/ProjektKarte.astro"
 import ArtikelZeile from "@/components/site/ArtikelZeile.astro"
 import Inhaltsverzeichnis from "@/components/site/Inhaltsverzeichnis.astro"
 import Faktenzeile from "@/components/site/Faktenzeile.astro"
+import { KONTAKT_EMAIL } from "@/data/kontakt"
 import GalerieAkkordeon from "@/components/site/GalerieAkkordeon.astro"
 
 const lang = "Datenschutzerklärungsüberarbeitungsvorbereitungsarbeitsgruppenleitungsstellvertretung"
@@ -184,7 +185,7 @@ const eintraege = [
     </div>
   </Abschnitt>
 
-  <KontaktPanel email="patrick@ptrckschrdtr.de" />
+  <KontaktPanel email={KONTAKT_EMAIL} />
 
   <Abschnitt id="galerie-1" nummer="11" label="Galerie, 1 Kapitel" layout="oben">
     <GalerieAkkordeon kapitel={kapitel(1)} label="Galerie mit einem Kapitel" />

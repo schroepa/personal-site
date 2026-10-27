@@ -1,5 +1,6 @@
 import AxeBuilder from "@axe-core/playwright"
 import { expect, test, type Page } from "@playwright/test"
+import { KONTAKT_EMAIL } from "../../src/data/kontakt"
 import { expectNoHorizontalOverflow, setTheme } from "../helpers"
 
 const URL = "/prototypes/komponenten"
@@ -181,7 +182,7 @@ test.describe("KontaktPanel", () => {
     await expect(live).toHaveText("")
     await page.getByRole("button", { name: "Adresse kopieren" }).click()
     await expect(live).toContainText("kopiert")
-    expect(await page.evaluate(() => navigator.clipboard.readText())).toBe("patrick@ptrckschrdtr.de")
+    expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(KONTAKT_EMAIL)
   })
 
   test("Fehlerfall: Meldung mit Hinweis, Text ist markiert", async ({ page }) => {
@@ -194,7 +195,7 @@ test.describe("KontaktPanel", () => {
     })
     await page.getByRole("button", { name: "Adresse kopieren" }).click()
     await expect(page.locator(".kontakt-panel [aria-live='polite']")).toContainText("nicht möglich")
-    expect(await page.evaluate(() => window.getSelection()?.toString().trim())).toBe("patrick@ptrckschrdtr.de")
+    expect(await page.evaluate(() => window.getSelection()?.toString().trim())).toBe(KONTAKT_EMAIL)
   })
 })
 
