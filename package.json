@@ -16,7 +16,7 @@
     "typecheck": "astro check",
     "test:e2e": "playwright test",
     "tokens": "node scripts/export-tokens.mjs design/figma-variables.json src/styles/tokens.css",
-    "test:scripts": "node --test \"scripts/**/*.test.mjs\" \"src/lib/**/*.test.ts\" \"tests/*.test.mjs\"",
+    "test:scripts": "node --test \"scripts/**/*.test.mjs\" \"src/lib/**/*.test.ts\" \"src/scripts/**/*.test.mjs\" \"tests/*.test.mjs\"",
     "test": "npm run test:scripts && npm run test:e2e"
   },
   "dependencies": {
@@ -41,7 +41,9 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "github-slugger": "2.0.0",
+    "lenis": "1.3.27",
     "lucide-react": "^1.14.0",
+    "motion": "14.7.1",
     "postcss": "^8.5.6",
     "posthog-js": "^1.373.4",
     "react": "^19.2.4",

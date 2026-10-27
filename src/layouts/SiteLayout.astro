@@ -153,6 +153,7 @@ const themeInline = `(${applyStoredTheme.toString()})();document.documentElement
       import { initCookieEinstellungen } from "@/scripts/cookie-einstellungen"
       import { initGalerieAkkordeon } from "@/scripts/galerie-akkordeon"
       import { initFilter } from "@/scripts/filter"
+      import { initMotion } from "@/scripts/motion"
 
       // Skripte starten nach jedem Seitenwechsel (ClientRouter) neu und räumen vorher auf,
       // damit keine doppelten Listener entstehen.
@@ -174,7 +175,7 @@ const themeInline = `(${applyStoredTheme.toString()})();document.documentElement
             console.error(fehler)
           }
         }
-        ;[initThemeToggle, initSchriftfeld, initSuche, initMenue, initInhaltsverzeichnis, initKopieren, initCookieEinstellungen].forEach(sicher)
+        ;[initThemeToggle, initSchriftfeld, initSuche, initMenue, initInhaltsverzeichnis, initKopieren, initCookieEinstellungen, initMotion].forEach(sicher)
         document
           .querySelectorAll<HTMLElement>("[data-galerie-akkordeon]")
           .forEach((el) => sicher(() => initGalerieAkkordeon(el)))

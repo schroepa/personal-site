@@ -121,3 +121,16 @@ svg {
   clip-path: inset(50%);
   white-space: nowrap;
 }
+
+/* Lenis (weiches Scrollen, nur aktiv ohne „Bewegung reduzieren“): eigene Fassung der Regeln aus lenis.css.
+   html/body bleiben bewusst bei height: 100% aus dem Layout (Footer am Seitenende). */
+.lenis.lenis-stopped {
+  overflow: clip;
+}
+/* Eigene Scrollbereiche (Suche) scrollen nativ und reichen das Rad nicht an die Seite weiter */
+.lenis [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+.lenis.lenis-smooth iframe {
+  pointer-events: none;
+}
