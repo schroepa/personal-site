@@ -34,6 +34,11 @@ function matchesQuery(item: SearchItem, query: string): boolean {
   return haystack.includes(query)
 }
 
+// Für useSyncExternalStore-Werte, die sich nach dem Hydrieren nicht mehr ändern.
+function noopSubscribe() {
+  return () => {}
+}
+
 export default function SearchPalette({
   staticPages,
   projects,
@@ -42,24 +47,18 @@ export default function SearchPalette({
   const [open, setOpen] = React.useState(false)
   const [query, setQuery] = React.useState("")
   const [activeIndex, setActiveIndex] = React.useState(0)
-  const [mounted, setMounted] = React.useState(false)
+  // false beim Server-Render/Hydrieren, danach true — erst dann gibt es document.body.
+  const mounted = React.useSyncExternalStore(
+    noopSubscribe,
+    () => true,
+    () => false
+  )
 
   const inputRef = React.useRef<HTMLInputElement>(null)
   const itemRefs = React.useRef<Array<HTMLAnchorElement | null>>([])
 
-  React.useEffect(() => setMounted(true), [])
-
-  React.useEffect(() => {
-    function onKeyDown(e: KeyboardEvent) {
-      if (e.key.toLowerCase() === "k" && (e.metaKey || e.ctrlKey)) {
-        e.preventDefault()
-        setOpen((prev) => !prev)
-      }
-    }
-    window.addEventListener("keydown", onKeyDown)
-    return () => window.removeEventListener("keydown", onKeyDown)
-  }, [])
-
+  // Einziger Weg zum Öffnen/Schließen — auch ⌘K und die Buttons laufen hier
+  // durch, damit Suchbegriff und Auswahl beim Öffnen immer zurückgesetzt werden.
   function handleOpenChange(next: boolean) {
     setOpen(next)
     if (next) {
@@ -67,6 +66,17 @@ export default function SearchPalette({
       setActiveIndex(0)
     }
   }
+
+  React.useEffect(() => {
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key.toLowerCase() === "k" && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault()
+        handleOpenChange(!open)
+      }
+    }
+    window.addEventListener("keydown", onKeyDown)
+    return () => window.removeEventListener("keydown", onKeyDown)
+  }, [open])
 
   const groups = React.useMemo<SearchGroup[]>(() => {
     const q = query.trim().toLowerCase()
@@ -121,7 +131,7 @@ export default function SearchPalette({
     <>
       <button
         type="button"
-        onClick={() => setOpen(true)}
+        onClick={() => handleOpenChange(true)}
         data-cursor="button"
         className="hidden items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground sm:inline-flex"
       >
@@ -134,7 +144,7 @@ export default function SearchPalette({
         createPortal(
           <button
             type="button"
-            onClick={() => setOpen(true)}
+            onClick={() => handleOpenChange(true)}
             data-cursor="button"
             aria-label="Suche öffnen"
             className="fixed top-[1.375rem] right-[calc(1.25rem+44px+0.5rem)] z-[70] flex size-11 items-center justify-center rounded-full bg-background/55 text-foreground backdrop-blur-[12px] backdrop-saturate-[1.6] sm:hidden"

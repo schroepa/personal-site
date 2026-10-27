@@ -19,6 +19,11 @@ function lerp(a: number, b: number, t: number): number {
   return a + (b - a) * t
 }
 
+// Für useSyncExternalStore-Werte, die sich nach dem Hydrieren nicht mehr ändern.
+function noopSubscribe() {
+  return () => {}
+}
+
 interface LiquidToggleTrackProps {
   leadRef: React.RefObject<SVGCircleElement | null>
   trailRef: React.RefObject<SVGCircleElement | null>
@@ -86,17 +91,26 @@ function LiquidToggleTrack({
  * Liest/schreibt dieselbe `localStorage("theme")` + `.dark`-Klasse wie die
  * FOUC-Prevention und die astro:before-swap-Persistenz in BaseLayout.astro.
  */
-function useThemeState() {
-  const [dark, setDarkState] = React.useState(false)
+function subscribeToThemeClass(onChange: () => void) {
+  const observer = new MutationObserver(onChange)
+  observer.observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ["class"],
+  })
+  return () => observer.disconnect()
+}
 
-  React.useEffect(() => {
-    setDarkState(document.documentElement.classList.contains("dark"))
-  }, [])
+function useThemeState() {
+  // Die `.dark`-Klasse ist die Quelle der Wahrheit; auf dem Server immer hell.
+  const dark = React.useSyncExternalStore(
+    subscribeToThemeClass,
+    () => document.documentElement.classList.contains("dark"),
+    () => false
+  )
 
   const setDark = React.useCallback((next: boolean) => {
     document.documentElement.classList.toggle("dark", next)
     localStorage.setItem("theme", next ? "dark" : "light")
-    setDarkState(next)
     window.posthog?.capture("theme_toggled", {
       theme: next ? "dark" : "light",
     })
@@ -116,7 +130,11 @@ export default function LiquidToggle({
   portalTargetId,
 }: LiquidToggleProps) {
   const { dark, setDark } = useThemeState()
-  const [portalTarget, setPortalTarget] = React.useState<Element | null>(null)
+  const portalTarget = React.useSyncExternalStore(
+    noopSubscribe,
+    () => (portalTargetId ? document.getElementById(portalTargetId) : null),
+    () => null
+  )
   const baseId = React.useId()
 
   const reducedMotionRef = React.useRef(false)
@@ -142,11 +160,7 @@ export default function LiquidToggle({
     trailXRef.current = startX
     targetXRef.current = startX
     applyPositions(startX, startX)
-
-    if (portalTargetId) {
-      setPortalTarget(document.getElementById(portalTargetId))
-    }
-  }, [portalTargetId])
+  }, [portalTarget])
 
   function applyPositions(lead: number, trail: number) {
     leadCircleRef.current?.setAttribute("cx", String(lead))
