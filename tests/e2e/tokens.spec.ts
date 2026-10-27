@@ -62,24 +62,51 @@ test("--objekt-radius ist 24px", async ({ page }) => {
   expect(br).toBe("24px")
 })
 
-for (const stil of STILE) {
-  test(`.text-${stil}: Schriftgröße entspricht --text-${stil}-size`, async ({
+const KLASSEN = [...STILE, "prose"] as const
+
+for (const stil of KLASSEN) {
+  test(`.text-${stil}: Größe, Zeilenhöhe, Laufweite, Gewicht entsprechen den Tokens`, async ({
     page,
   }) => {
     await page.goto(URL)
-    const { actual, token, weight } = await page.evaluate((s) => {
-      const el = document.querySelector(`#t-${s}`)!
+    const r = await page.evaluate((s) => {
+      const stilToken = s === "prose" ? "body" : s
+      const weightToken = s === "mono" ? "code" : stilToken
+      const el = document.querySelector(`#t-${s}`) as HTMLElement
+      const cs = getComputedStyle(el)
+      const root = getComputedStyle(document.documentElement)
+      // Token-Wert als CSS-Wert auf eine Sonde setzen und gegen den berechneten Wert prüfen
+      const resolve = (prop: string, token: string) => {
+        const value = root.getPropertyValue(token).trim()
+        const probe = document.createElement("span")
+        document.body.appendChild(probe)
+        probe.style.setProperty(prop, value)
+        const out = { value, computed: getComputedStyle(probe).getPropertyValue(prop) }
+        probe.remove()
+        return out
+      }
       return {
-        actual: getComputedStyle(el).fontSize,
-        token: getComputedStyle(document.documentElement)
-          .getPropertyValue(`--text-${s}-size`)
-          .trim(),
-        weight: getComputedStyle(el).fontWeight,
+        size: { ...resolve("font-size", `--text-${stilToken}-size`), actual: cs.fontSize },
+        lh: { ...resolve("line-height", `--text-${stilToken}-line-height`), actual: cs.lineHeight },
+        ls: { ...resolve("letter-spacing", `--text-${stilToken}-letter-spacing`), actual: cs.letterSpacing },
+        w: { ...resolve("font-weight", `--text-${weightToken}-weight`), actual: cs.fontWeight },
+        transform: cs.textTransform,
+        numeric: cs.fontVariantNumeric,
+        family: cs.fontFamily,
       }
     }, stil)
-    expect(token).toMatch(/^\d+(\.\d+)?px$/)
-    expect(actual).toBe(token)
-    if (stil === "signatur") expect(weight).toBe("900")
+    for (const k of ["size", "lh", "ls", "w"] as const) {
+      expect(r[k].value, `${k} token`).not.toBe("")
+      expect(r[k].actual, k).toBe(r[k].computed)
+    }
+    if (stil === "signatur") expect(r.w.actual).toBe("900")
+    if (stil === "label") expect(r.transform).toBe("uppercase")
+    if (stil === "mono") {
+      expect(r.numeric).toContain("tabular-nums")
+      expect(r.family).toContain("Geist Mono")
+    } else {
+      expect(r.family).toContain("Geist Variable")
+    }
   })
 }
 
@@ -100,8 +127,9 @@ test("Signatur und Hero: Größe folgt Token auf Mobile und Desktop", async ({
   const expected = {
     390: { signatur: "40px", hero: "36px" },
     1440: { signatur: "64px", hero: "48px" },
+    1920: { signatur: "72px", hero: "56px" },
   } as const
-  for (const w of [390, 1440] as const) {
+  for (const w of [390, 1440, 1920] as const) {
     await page.setViewportSize({ width: w, height: 900 })
     for (const s of ["signatur", "hero"] as const) {
       const { actual, token } = await read(s)
@@ -111,12 +139,65 @@ test("Signatur und Hero: Größe folgt Token auf Mobile und Desktop", async ({
   }
 })
 
-test("Fokusring nutzt --theme-border-focus", async ({ page }) => {
+test("Fokusring: 2px solid, Offset 3px, Farbe aus --theme-border-focus", async ({
+  page,
+}) => {
   await page.goto(URL)
+  await page.focus("#focus-probe")
+  await page.keyboard.press("Shift+Tab")
   await page.keyboard.press("Tab")
   const o = await page.evaluate(() => {
-    const cs = getComputedStyle(document.querySelector("#focus-probe")!)
-    return { w: cs.outlineWidth, s: cs.outlineStyle }
+    const el = document.activeElement as HTMLElement
+    const cs = getComputedStyle(el)
+    const probe = document.createElement("span")
+    document.body.appendChild(probe)
+    probe.style.color = getComputedStyle(document.documentElement)
+      .getPropertyValue("--theme-border-focus")
+      .trim()
+    const token = getComputedStyle(probe).color
+    probe.remove()
+    return {
+      id: el.id,
+      focusVisible: el.matches(":focus-visible"),
+      w: cs.outlineWidth,
+      s: cs.outlineStyle,
+      off: cs.outlineOffset,
+      color: cs.outlineColor,
+      token,
+    }
   })
-  expect(o).toEqual({ w: "2px", s: "solid" })
+  expect(o.id).toBe("focus-probe")
+  expect(o.focusVisible).toBe(true)
+  expect(o.w).toBe("2px")
+  expect(o.s).toBe("solid")
+  expect(o.off).toBe("3px")
+  expect(o.color).toBe(o.token)
+})
+
+test("alte Seite bleibt unberührt: kein data-site, Hintergrund = --background", async ({
+  browser,
+}) => {
+  const ctx = await browser.newContext({ colorScheme: "light" })
+  const page = await ctx.newPage()
+  await page.goto("/")
+  await page.evaluate(() => localStorage.setItem("theme", "dark"))
+  await page.reload()
+  const r = await page.evaluate(() => {
+    const probe = document.createElement("span")
+    document.body.appendChild(probe)
+    probe.style.color = getComputedStyle(document.documentElement)
+      .getPropertyValue("--background")
+      .trim()
+    const expected = getComputedStyle(probe).color
+    probe.remove()
+    return {
+      site: document.body.getAttribute("data-site"),
+      bg: getComputedStyle(document.body).backgroundColor,
+      expected,
+    }
+  })
+  expect(r.site).toBeNull()
+  expect(r.bg).not.toBe("rgb(244, 242, 240)")
+  expect(r.bg).toBe(r.expected)
+  await ctx.close()
 })

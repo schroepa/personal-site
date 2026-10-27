@@ -83,8 +83,8 @@
 
 :root {
     /* ── Warm Near-Black Palette ─────────────────────────────────────── */
-    --background: var(--theme-surface-page);
-    --foreground: var(--theme-text-default);
+    --background: oklch(1 0 0);
+    --foreground: oklch(0.15 0.005 75);
 
     --card: oklch(1 0 0);
     --card-foreground: oklch(0.15 0.005 75);
@@ -189,10 +189,6 @@
   background: transparent !important;
 }
 
-/* ─── Additive: Font Variables ───────────────────────────────────────────── */
-
-
-
 /* ─── Additive: Typografie-Skala (Major Third, 1.250) ────────────────────── */
 
 :root {
@@ -263,19 +259,20 @@
 
 /* ═══ ENDE LEGACY ═══════════════════════════════════════════════════════════ */
 
-/* ═══ NEU: Basis und Textstile ═══════════════════════════════════════════════ */
+/* ═══ NEU: Basis und Textstile ═══════════════════════════════════════════════
+ * Globale Regeln gelten nur für neue Seiten: SiteLayout (Task 3) setzt
+ * <body data-site="neu">. Alte Seiten (BaseLayout, .dark-Klasse) bleiben unberührt.
+ * Die .text-*-Klassen sind neu benannt und daher unabhängig vom Marker. */
 
-html {
-  font-family: var(--font-sans);
-}
-
-body {
+:where(body[data-site="neu"]) {
   margin: 0;
+  font-family: var(--font-sans);
   background: var(--theme-surface-page);
   color: var(--theme-text-default);
 }
 
-:focus-visible {
+:where(body[data-site="neu"]) :focus-visible,
+:where(body[data-site="neu"]):focus-visible {
   outline: 2px solid var(--theme-border-focus, currentColor);
   outline-offset: 3px;
 }
@@ -355,6 +352,6 @@ body {
   font-size: var(--text-mono-size);
   line-height: var(--text-mono-line-height);
   letter-spacing: var(--text-mono-letter-spacing);
-  font-weight: var(--text-code-weight);
+  font-weight: var(--text-code-weight); /* Figma kennt für Mono nur den Code-Text-Stil, kein --text-mono-weight */
   font-variant-numeric: tabular-nums;
 }
