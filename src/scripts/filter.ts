@@ -1,4 +1,4 @@
-import { filterByTag, filterStatus } from "@/lib/filter"
+import { filterByTag, filterStatus, type Einheit } from "@/lib/filter"
 
 /**
  * Themenfilter der Blog-Übersicht. Das Markup liefert die Seite (alles sichtbar, Chips erst mit JS):
@@ -6,6 +6,7 @@ import { filterByTag, filterStatus } from "@/lib/filter"
  * - [data-eintrag][data-tags]: ein Beitrag mit seinen Schlagwörtern als JSON-Liste
  * - [data-gruppe]: Abschnitt (Neu, Jahr); ohne sichtbaren Eintrag wird er samt Überschrift ausgeblendet
  * - [data-filter-leer]: Statusmeldung (role="status", Geschwister der Liste): „N Beiträge“ bei aktivem Filter, Hinweis bei 0
+ * [data-filter-einheit="Projekt|Projekte"] am Wurzelelement ändert die Wortwahl der Meldung (Standard: Beitrag|Beiträge).
  * Ein zweiter Klick auf den gewählten Chip hebt den Filter auf. Gibt eine Funktion zum Abmelden zurück.
  */
 function tagsVon(el: HTMLElement): string[] {
@@ -21,6 +22,8 @@ export function initFilter(root: HTMLElement): () => void {
   const chips = root.querySelector<HTMLElement>("[data-filter-chips]")
   if (!chips) return () => {}
   const status = root.querySelector<HTMLElement>("[data-filter-leer]")
+  const [ein, mehr] = (root.dataset.filterEinheit ?? "").split("|")
+  const einheit: Einheit | undefined = ein && mehr ? { ein, mehr } : undefined
 
   const anwenden = (tag: string | null) => {
     const eintraege = [...root.querySelectorAll<HTMLElement>("[data-eintrag]")].map((el) => ({ el, tags: tagsVon(el) }))
@@ -29,7 +32,7 @@ export function initFilter(root: HTMLElement): () => void {
     for (const gruppe of root.querySelectorAll<HTMLElement>("[data-gruppe]")) {
       gruppe.hidden = !gruppe.querySelector("[data-eintrag]:not([hidden])")
     }
-    if (status) status.textContent = filterStatus(sichtbar.size, tag !== null)
+    if (status) status.textContent = filterStatus(sichtbar.size, tag !== null, einheit)
     for (const knopf of chips.querySelectorAll<HTMLButtonElement>("button")) {
       const gewaehlt = knopf.dataset.tag === undefined ? tag === null : knopf.dataset.tag === tag
       knopf.setAttribute("aria-pressed", String(gewaehlt))

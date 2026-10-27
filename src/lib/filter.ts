@@ -1,8 +1,15 @@
+/** Wortwahl der Statusmeldung (Standard: Beiträge). */
+export interface Einheit {
+  ein: string
+  mehr: string
+}
+const BEITRAEGE: Einheit = { ein: "Beitrag", mehr: "Beiträge" }
+
 /** Ansage für den Statusbereich: leer ohne Filter, „Keine Beiträge zu diesem Thema.“ bei 0, sonst „N Beiträge“. */
-export function filterStatus(anzahl: number, gefiltert: boolean): string {
-  if (anzahl === 0) return "Keine Beiträge zu diesem Thema."
+export function filterStatus(anzahl: number, gefiltert: boolean, einheit: Einheit = BEITRAEGE): string {
+  if (anzahl === 0) return `Keine ${einheit.mehr} zu diesem Thema.`
   if (!gefiltert) return ""
-  return anzahl === 1 ? "1 Beitrag" : `${anzahl} Beiträge`
+  return anzahl === 1 ? `1 ${einheit.ein}` : `${anzahl} ${einheit.mehr}`
 }
 
 /**

@@ -46,3 +46,13 @@ test("filterStatus: leer ohne Filter, Hinweis bei 0, sonst Anzahl (Einzahl/Mehrz
   assert.equal(filterStatus(1, true), "1 Beitrag")
   assert.equal(filterStatus(6, true), "6 Beiträge")
 })
+
+test("filterStatus: Wortwahl für andere Einträge (Projekte)", async () => {
+  const { filterStatus } = await import("./filter.ts")
+  const projekte = { ein: "Projekt", mehr: "Projekte" }
+  assert.equal(filterStatus(0, true, projekte), "Keine Projekte zu diesem Thema.")
+  assert.equal(filterStatus(1, true, projekte), "1 Projekt")
+  assert.equal(filterStatus(3, true, projekte), "3 Projekte")
+  assert.equal(filterStatus(3, false, projekte), "")
+  assert.equal(filterStatus(0, true), "Keine Beiträge zu diesem Thema.")
+})
