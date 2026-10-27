@@ -48,16 +48,29 @@ test("dist/cv.pdf: gültiges PDF, höchstens 3 Seiten, Titel mit Namen", { skip:
 })
 
 const hatPdftotext = spawnSync("pdftotext", ["-v"]).error === undefined
+// In CI muss pdftotext (poppler-utils) da sein: sonst bliebe die Textprüfung dort stillschweigend aus
+if (vorhanden && !hatPdftotext && process.env.CI) throw new Error("pdftotext fehlt: in CI poppler-utils installieren")
 test(
-  "dist/cv.pdf: Text enthält Namen und Einträge aus cv.ts (nur mit pdftotext)",
-  { skip: !vorhanden ? grund : hatPdftotext ? false : "pdftotext nicht installiert: Textprüfung übersprungen (Titel- und Seitenprüfung laufen trotzdem)" },
+  "dist/cv.pdf: Text enthält Name und mehrere Einträge aus cv.ts, keinen Seitenrahmen (pdftotext)",
+  { skip: !vorhanden ? grund : hatPdftotext ? false : "pdftotext nicht installiert: lokal übersprungen (Titel- und Seitenprüfung laufen trotzdem), in CI Pflicht" },
   async () => {
     const { cvData } = await import("../src/data/cv.ts")
     const r = spawnSync("pdftotext", ["-layout", pdfPfad, "-"], { encoding: "utf8" })
-    const text = r.stdout.replace(/\s+/g, " ")
-    assert.ok(text.includes(cvData.name), "Name fehlt")
-    assert.ok(text.includes(cvData.experience[0].role.split(" ")[0]))
-    assert.ok(text.includes(cvData.projects[0].title), "Projekt fehlt")
-    assert.ok(!/Zum Inhalt springen|Hauptnavigation|PTRCKSCHRDTR/.test(text), "Seitenrahmen im PDF")
+    // Zeilenumbrüche und Silbentrennung einebnen, damit lange Sätze nicht an Umbrüchen scheitern
+    // Meta-Spalten stehen per text-transform in Großbuchstaben: ohne Groß-/Kleinschreibung vergleichen
+    const text = r.stdout.replace(/\s+/g, " ").toLowerCase()
+    const erwartet = [
+      cvData.name,
+      cvData.experience[0].company.split(" — ")[0],
+      cvData.experience.at(-1).company,
+      cvData.projects[0].title,
+      cvData.projects.at(-1).title,
+      cvData.techStack[0].category,
+      cvData.education[0].title,
+      cvData.languages[0].name,
+      cvData.languages.at(-1).name,
+    ]
+    for (const e of erwartet) assert.ok(text.includes(e.toLowerCase()), `fehlt im PDF: ${e}`)
+    assert.ok(!/zum inhalt springen|hauptnavigation|ptrckschrdtr|impressum|datenschutz/.test(text), "Seitenrahmen im PDF")
   }
 )

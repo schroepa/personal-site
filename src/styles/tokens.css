@@ -464,6 +464,55 @@
   --effekt-lichtband-hell: 0;
   --effekt-lichtband-dunkel: 1;
 }
+/* Theme · Print (Light) */
+@media print {
+  :root,
+  :root:not([data-theme="light"]),
+  :root[data-theme="dark"] {
+    --theme-surface-page: var(--global-color-neutral-100);
+    --theme-text-default: var(--global-color-neutral-700);
+    --theme-text-inverse: var(--global-color-neutral-50);
+    --theme-surface-container: var(--white);
+    --theme-text-on-container: var(--global-color-neutral-700);
+    --theme-image-tint: transparent;
+    --theme-surface-overlay: var(--global-color-neutral-50);
+    --theme-text-on-overlay: var(--global-color-neutral-800);
+    --theme-surface-primary: var(--global-color-neutral-950);
+    --theme-text-on-primary: var(--global-color-neutral-50);
+    --theme-surface-secondary: var(--global-color-orange-350);
+    --theme-text-on-secondary: var(--global-color-neutral-950);
+    --theme-surface-muted: var(--global-color-neutral-250);
+    --theme-text-muted: var(--global-color-neutral-650);
+    --theme-text-inverse-muted: var(--global-color-neutral-200);
+    --theme-surface-subtle: var(--global-color-neutral-150);
+    --theme-text-strong: var(--global-color-neutral-950);
+    --theme-status-danger: var(--global-color-red-650);
+    --theme-border-default: var(--global-color-neutral-200);
+    --theme-border-input: var(--global-color-neutral-300);
+    --theme-border-focus: var(--global-color-neutral-550);
+    --theme-surface-secondary-subtle: var(--global-color-orange-50);
+    --theme-border-secondary: var(--global-color-orange-450);
+    --theme-card-background: var(--global-color-neutral-50);
+    --theme-status-danger-subtle: var(--global-color-red-50);
+    --theme-status-success: var(--global-color-green-800);
+    --theme-status-success-subtle: var(--global-color-green-50);
+    --theme-surface-primary-hover: var(--global-color-neutral-850);
+    --theme-surface-primary-pressed: var(--global-color-neutral-800);
+    --theme-surface-secondary-hover: var(--global-color-orange-400);
+    --theme-surface-secondary-pressed: var(--global-color-orange-350);
+    --theme-surface-danger: var(--global-color-red-650);
+    --theme-surface-danger-hover: var(--global-color-red-700);
+    --theme-surface-danger-pressed: var(--global-color-red-750);
+    --theme-text-on-danger: var(--global-color-neutral-50);
+    --border-raster: var(--global-color-neutral-300);
+    --effekt-papierkorn-deckkraft: 17%;
+    --effekt-papierkorn-hell: 1;
+    --effekt-papierkorn-dunkel: 0;
+    --effekt-lichtband-deckkraft: 100%;
+    --effekt-lichtband-hell: 1;
+    --effekt-lichtband-dunkel: 0;
+  }
+}
 
 /* Typography */
 /* Typography · Mobile Portrait */

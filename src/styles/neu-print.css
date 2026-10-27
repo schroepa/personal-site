@@ -9,18 +9,19 @@
 
 @media print {
   /* Seitenrahmen weg: Kopf, Fuß, Schriftfeld, Papierkorn, Raster, Skip-Link, Suche, Cookie-Dialog, Aktionen im Seitenkopf */
-  header,
-  footer,
-  [data-papierkorn],
-  [data-raster],
-  [data-schriftfeld],
-  .skip-link,
-  dialog,
+  body > .skip-link,
+  body > dialog,
+  .seite > header,
+  .seite > footer,
+  .seite > [data-papierkorn],
+  .seite > [data-raster],
+  body > [data-schriftfeld],
   #CybotCookiebotDialog,
-  [data-zusatz] {
+  main [data-zusatz] {
     display: none !important;
   }
 
+  html,
   body {
     background: none;
   }

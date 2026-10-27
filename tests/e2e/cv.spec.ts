@@ -2,6 +2,7 @@ import AxeBuilder from "@axe-core/playwright"
 import { expect, test, type Page } from "@playwright/test"
 import { expectNoHorizontalOverflow, expectSingleH1, setTheme } from "../helpers"
 import { cvData } from "../../src/data/cv.ts"
+import { buildPdfOptions } from "../../scripts/cv-pdf-options.mjs"
 
 const CV = "/cv"
 const ABSCHNITTE = ["Profil", "Erfahrung", "Projekte", "Kompetenzen", "Tech Stack", "Ausbildung", "Sprachen"]
@@ -129,6 +130,44 @@ test.describe("Lebenslauf", () => {
     expect((await page.locator("main").innerText()).length).toBeGreaterThan(1000)
   })
 
+  test("Druck im dunklen Theme: trotzdem helle Werte, lesbarer Text auf weißem Papier", async ({ page }) => {
+    await page.addInitScript(() => localStorage.setItem("theme", "dark"))
+    await page.emulateMedia({ media: "print", colorScheme: "dark" })
+    await laden(page)
+    expect(await page.evaluate(() => document.documentElement.getAttribute("data-theme"))).toBe("dark")
+    const r = await page.evaluate(() => {
+      // erwarteter Light-Wert: --theme-text-default im Druck, als Farbe aufgelöst
+      const probe = document.createElement("span")
+      probe.style.color = "var(--theme-text-default)"
+      document.body.append(probe)
+      const erwartet = getComputedStyle(probe).color
+      probe.remove()
+      const farben = ["body", "main p", "#erfahrung .titel", "#erfahrung .beschreibung"].map((s) => getComputedStyle(document.querySelector(s)!).color)
+      return { erwartet, farben, body: getComputedStyle(document.body).backgroundColor, html: getComputedStyle(document.documentElement).backgroundColor }
+    })
+    // Light-Wert (neutral/700 = #5F5853), nicht der Dark-Wert (neutral/50)
+    expect(r.erwartet).toBe("rgb(95, 88, 83)")
+    expect(r.farben[0]).toBe(r.erwartet)
+    expect(r.farben[1]).toBe(r.erwartet)
+    // kein dunkler Untergrund
+    for (const bg of [r.body, r.html]) expect(["rgba(0, 0, 0, 0)", "rgb(255, 255, 255)"]).toContain(bg)
+    // Kontrast aller Textfarben im Hauptbereich gegen Weiß mindestens 4,5:1
+    const kontraste = await page.evaluate(() => {
+      const lum = (c: string) => {
+        const [r, g, b] = c.match(/\d+(\.\d+)?/g)!.slice(0, 3).map(Number).map((v) => {
+          const x = v / 255
+          return x <= 0.03928 ? x / 12.92 : ((x + 0.055) / 1.055) ** 2.4
+        })
+        return 0.2126 * r + 0.7152 * g + 0.0722 * b
+      }
+      const farben = new Set<string>()
+      for (const el of document.querySelectorAll("main *")) if (el.getClientRects().length > 0 && [...el.childNodes].some((n) => n.nodeType === 3 && n.textContent!.trim())) farben.add(getComputedStyle(el).color)
+      return [...farben].map((c) => ({ c, ratio: 1.05 / (lum(c) + 0.05) }))
+    })
+    expect(kontraste.length).toBeGreaterThan(0)
+    for (const k of kontraste) expect(k.ratio, k.c).toBeGreaterThanOrEqual(4.5)
+  })
+
   test("Druckansicht: Einträge brechen nicht mitten durch", async ({ page }) => {
     await laden(page)
     await page.emulateMedia({ media: "print" })
@@ -141,7 +180,7 @@ test.describe("Lebenslauf", () => {
     test.skip(browserName !== "chromium" || info.project.name !== "desktop", "page.pdf nur in Chromium, einmal reicht")
     await laden(page)
     await page.emulateMedia({ media: "print", colorScheme: "light" })
-    const buf = await page.pdf({ format: "A4", printBackground: true, margin: { top: "18mm", right: "16mm", bottom: "18mm", left: "16mm" } })
+    const buf = await page.pdf(buildPdfOptions())
     expect(buf.subarray(0, 4).toString()).toBe("%PDF")
     const seiten = pdfSeiten(buf)
     expect(seiten).toBeGreaterThanOrEqual(1)

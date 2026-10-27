@@ -18,6 +18,8 @@
  * - Modus -> CSS (siehe PLANS):
  *   Theme       Light = :root; Dark = :root[data-theme="dark"] und
  *               @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) }.
+ *               Zusätzlich als letzter Theme-Block @media print { :root, :root:not([data-theme="light"]),
+ *               :root[data-theme="dark"] } mit den Light-Werten: gedruckt wird immer hell.
  *   Typography/Layout
  *               Mobile Portrait (390) ist der Standard (:root). Die übrigen Modi als Media-Queries,
  *               aufsteigend sortiert, damit spätere (größere/spezifischere) gewinnen:
@@ -95,6 +97,12 @@ const PLANS = {
     { mode: 'Reduziert', media: '(prefers-reduced-motion: reduce)', selector: ROOT },
   ],
   Icon: [{ mode: 'Default', selector: ROOT }],
+};
+
+/** Light-Werte im Druck, auch bei data-theme="dark" oder dunkler Systemeinstellung (siehe buildTokens). */
+const PRINT_LIGHT = {
+  media: 'print',
+  selector: [ROOT, ':root:not([data-theme="light"])', ':root[data-theme="dark"]'].join(',\n  '),
 };
 
 const FONT_WEIGHTS = {
@@ -219,6 +227,13 @@ export function buildTokens(dump) {
         decls.push([prop, value]);
       }
       blocks.push({ entry, mode, decls });
+    }
+
+    // Druck immer hell: nach den beiden Dark-Blöcken noch einmal die Light-Werte (gleiche Deklarationen, Quelle ist der
+    // Light-Block), mit mindestens der Spezifität der Dark-Selektoren und als letzter Block der Collection.
+    if (collection.name === 'Theme') {
+      const light = blocks.find((b) => b.mode.name === 'Light' && !b.entry.media);
+      if (light) blocks.push({ entry: PRINT_LIGHT, mode: { name: 'Print (Light)' }, decls: light.decls });
     }
 
     out.push(`\n/* ${collection.name} */`);

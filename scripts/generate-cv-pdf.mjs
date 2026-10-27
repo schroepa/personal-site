@@ -81,6 +81,11 @@ async function main() {
       await page.addInitScript(buildInitScript())
       await page.goto(`${BASE_URL}/cv`, { waitUntil: 'networkidle' })
       await page.emulateMedia({ media: 'print', colorScheme: 'light' })
+      // Schriften (und Bilder, falls die Seite welche bekommt) müssen fertig geladen sein, sonst druckt Chromium Ersatzschrift
+      await page.evaluate(async () => {
+        await document.fonts.ready
+        await Promise.all([...document.images].map((img) => img.decode().catch(() => {})))
+      })
       await page.pdf({ path: OUTPUT_PATH, ...buildPdfOptions() })
       console.log(`[cv-pdf] PDF geschrieben nach ${OUTPUT_PATH}`)
     } finally {

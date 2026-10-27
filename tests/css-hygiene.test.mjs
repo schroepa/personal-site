@@ -11,7 +11,7 @@ export const ALLOWED_MEDIA = [
   "(min-width: 1440px)",
   "(min-width: 1920px)",
   "(orientation: landscape) and (max-height: 500px)",
-  // Medientyp ohne Wert: kein Designwert, nötig für die Druckansicht des Lebenslaufs (neu-print.css, PDF aus der Webseite)
+  // Medientyp ohne Wert: kein Designwert; tokens.css (Druck immer hell) und die Druckansicht des Lebenslaufs (neu-print.css) nutzen ihn
   "print",
 ]
 
@@ -169,8 +169,8 @@ function mediaConditions(css) {
 
 test("@media-Bedingungen der Komponenten stammen alle aus tokens.css", () => {
   const known = new Set(mediaConditions(readFileSync(join(root, "src/styles/tokens.css"), "utf8")))
-  // Einzige Bedingung außerhalb von tokens.css: der Medientyp print (kein Wert, siehe ALLOWED_MEDIA)
-  known.add("print")
+  // print steht in tokens.css (generierter Block „Druck immer hell“), nicht von Hand ergänzt
+  assert.ok(known.has("print"), "tokens.css sollte @media print enthalten")
   assert.ok(known.has("(min-width: 768px)"), "tokens.css sollte Breakpoints enthalten")
   const used = []
   for (const file of collect(join(root, "src/styles"), (n) => /^neu.*\.css$/.test(n))) {

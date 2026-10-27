@@ -251,7 +251,8 @@ test('doppelte Property-Namen: erste gewinnt, Widerspruch als Warnung', () => {
       ]),
     ),
   );
-  assert.equal(css.match(/--theme-text-on-danger: #111111;/g).length, 1);
+  // einmal im Light-Block, einmal im Print-Block (Light-Werte); nie ein zweiter Wert
+  assert.equal(css.match(/--theme-text-on-danger: #111111;/g).length, 2);
   assert.doesNotMatch(css, /#333333/);
   assert.equal(warnings.length >= 1, true);
   assert.match(warnings[0], /--theme-text-on-danger/);
@@ -359,4 +360,50 @@ test('Real: keine Slides/Docs-Tokens, bekannte Figma-Duplikate werden gemeldet',
     assert.ok(css.includes(`/* WARNUNG: Variable "${n}" ausgelassen, Code-Syntax --theme-text-on-danger doppelt vergeben */`), n);
   }
   assert.equal((css.match(/\/\* WARNUNG/g) ?? []).length, 2);
+});
+
+// ---- Druck immer hell ------------------------------------------------------
+const themeFixture = () =>
+  dump(
+    col('Theme', ['Light', 'Dark'], [
+      v('surface/page', '--theme-surface-page', 'COLOR', { Light: '#F4F2F0', Dark: '#24211F' }),
+      v('text/default', '--theme-text-default', 'COLOR', { Light: '#5F5853', Dark: '#F4F2F0' }),
+    ]),
+  );
+
+/** Deklarationen `--x: y;` eines Blocktexts als Liste. */
+const decls = (text) => [...text.matchAll(/(--[\w-]+):\s*([^;]+);/g)].map((m) => `${m[1]}: ${m[2]}`);
+
+test('Print-Block: Fixture, Light-Werte nach beiden Dark-Blöcken', () => {
+  const css = buildTokensCss(themeFixture());
+  const printAt = css.indexOf('@media print {');
+  assert.notEqual(printAt, -1, css);
+  assert.ok(printAt > css.indexOf(':root[data-theme="dark"] {'), 'nach dem data-theme-Dark-Block');
+  assert.ok(printAt > css.indexOf('@media (prefers-color-scheme: dark)'), 'nach dem System-Dark-Block');
+  const print = css.slice(printAt);
+  assert.match(print, /:root,\n\s+:root:not\(\[data-theme="light"\]\),\n\s+:root\[data-theme="dark"\] \{/);
+  assert.deepEqual(decls(print), ['--theme-surface-page: #F4F2F0', '--theme-text-default: #5F5853']);
+  // gleiche Deklarationen wie der Light-Block
+  assert.deepEqual(decls(print), decls(block(css, ':root {')));
+});
+
+test('Print-Block: nur im Theme, genau einmal, nichts nach ihm außer weiteren Collections', () => {
+  const css = buildTokensCss(dump(...themeFixture().collections, col('Global', ['m'], [v('s', '--global-size-4', 'FLOAT', { m: 4 })])));
+  assert.equal((css.match(/@media print/g) ?? []).length, 1);
+});
+
+test('Real: Print-Block enthält exakt die Deklarationen des Light-Blocks und alle Dark-Eigenschaften', () => {
+  const { css } = buildTokens(real);
+  const themeStart = css.indexOf('/* Theme · Light */');
+  const light = block(css.slice(themeStart), ':root {');
+  const printAt = css.indexOf('@media print {');
+  assert.ok(printAt > css.indexOf(':root[data-theme="dark"] {', themeStart));
+  const printText = css.slice(printAt, css.indexOf('\n}\n', css.indexOf('\n  }', printAt)) + 3);
+  assert.deepEqual(decls(printText), decls(light));
+  // Jede Eigenschaft, die ein Dark-Block setzt, wird im Druck auf den Light-Wert zurückgesetzt
+  const props = new Set(decls(printText).map((d) => d.split(':')[0]));
+  const darkSystem = css.slice(css.indexOf('@media (prefers-color-scheme: dark)', themeStart), css.indexOf('/* Theme · Dark */\n:root[data-theme'));
+  const darkAttr = block(css.slice(themeStart), ':root[data-theme="dark"] {');
+  for (const d of [...decls(darkSystem), ...decls(darkAttr)]) assert.ok(props.has(d.split(':')[0]), d);
+  assert.ok(props.size >= 20);
 });
