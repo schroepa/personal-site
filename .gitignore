@@ -27,3 +27,8 @@ pnpm-debug.log*
 
 # agent state
 .superpowers/
+
+# tests and baseline
+.baseline/
+test-results/
+playwright-report/

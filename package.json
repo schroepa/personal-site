@@ -13,7 +13,10 @@
     "astro": "astro",
     "lint": "eslint .",
     "format": "prettier --write \"**/*.{ts,tsx,astro}\"",
-    "typecheck": "astro check"
+    "typecheck": "astro check",
+    "test:e2e": "playwright test",
+    "test:scripts": "node --test \"scripts/**/*.test.mjs\" \"src/lib/**/*.test.ts\"",
+    "test": "npm run test:scripts && npm run test:e2e"
   },
   "dependencies": {
     "@astrojs/react": "^4.4.2",
@@ -49,7 +52,9 @@
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.9",
+    "@axe-core/playwright": "^4.14.0",
     "@eslint/js": "^9.39.4",
+    "@playwright/test": "^1.61.1",
     "@remotion/cli": "^4.0.486",
     "@remotion/renderer": "^4.0.486",
     "@types/three": "^0.185.1",
