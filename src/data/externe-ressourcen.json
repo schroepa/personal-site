@@ -1,0 +1,37 @@
+[
+  {
+    "name": "Cookiebot",
+    "host": "consent.cookiebot.com",
+    "zweck": "Einwilligungsverwaltung: Skript und Banner, Abfrage und Nachweis deiner Entscheidung",
+    "einwilligung": false,
+    "csp": ["script-src", "connect-src"]
+  },
+  {
+    "name": "Cookiebot",
+    "host": "consentcdn.cookiebot.com",
+    "zweck": "Einwilligungsverwaltung: vom Cookiebot-Skript nachgeladene Dateien",
+    "einwilligung": false,
+    "csp": ["script-src", "connect-src", "frame-src"]
+  },
+  {
+    "name": "Cookiebot",
+    "host": "imgsct.cookiebot.com",
+    "zweck": "Einwilligungsverwaltung: vom Banner geladene Bilder",
+    "einwilligung": false,
+    "csp": ["img-src"]
+  },
+  {
+    "name": "PostHog",
+    "host": "eu.i.posthog.com",
+    "zweck": "Reichweitenmessung (Seitenaufrufe), EU-Endpunkt für Bibliothek und Datenübertragung",
+    "einwilligung": true,
+    "csp": ["script-src", "connect-src"]
+  },
+  {
+    "name": "PostHog",
+    "host": "eu-assets.i.posthog.com",
+    "zweck": "Reichweitenmessung: vom PostHog-Skript nachgeladene Erweiterungen und Konfiguration, EU-Endpunkt",
+    "einwilligung": true,
+    "csp": ["script-src", "connect-src"]
+  }
+]

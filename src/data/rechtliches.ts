@@ -9,6 +9,7 @@
 //
 // Anrede: durchgehend „du“ (Arbeitsannahme, Entscheidung Sie/du offen).
 import { KONTAKT_EMAIL } from "./kontakt.ts"
+import externeRessourcen from "./externe-ressourcen.json" with { type: "json" }
 
 export const NAME = "Patrick Schrödter"
 
@@ -20,9 +21,12 @@ export const PLATZHALTER = {
 
 /**
  * Alle externen Hosts, von denen die Website Ressourcen lädt oder an die sie Daten sendet.
- * Quelle für den Abschnitt „Externe Ressourcen“ der Datenschutzerklärung und (Task 16) für die CSP.
+ * Einzige Quelle: src/data/externe-ressourcen.json. Daraus entstehen der Abschnitt „Externe Ressourcen“ der
+ * Datenschutzerklärung (hier) und die CSP in vercel.json (scripts/build-vercel-headers.mjs liest das Feld `csp`,
+ * also welche CSP-Direktiven den Host brauchen). Neuer Host: dort eintragen, dann `npm run headers`.
  * Belege: Cookiebot-Skript in src/layouts/SiteLayout.astro (`https://consent.cookiebot.com/uc.js`),
- * PostHog-Host in .env (`PUBLIC_POSTHOG_HOST`) und src/components/posthog.astro (`api_host`, Bibliothek von `<host>/static/array.js`, Zeile 33).
+ * imgsct.cookiebot.com (nur img-src) aus der Cookiebot-CSP-Dokumentation (Stand 11.03.2025, siehe README „Sicherheits-Header & CSP“),
+ * PostHog-Host in .env (`PUBLIC_POSTHOG_HOST`) und src/scripts/posthog-skript.ts (`api_host`, Bibliothek von `<host>/static/array.js`).
  * eu-assets.i.posthog.com: node_modules/posthog-js/lib/src/utils/request-router.js (Zeilen 64-70: Region EU aus api_host `eu.i.posthog.com`;
  * Zeilen 99-111: Ziel „assets“ ergibt `https://eu-assets.i.posthog.com`), genutzt von remote-config.js:38 und
  * entrypoints/external-scripts-loader.js:89-109 für Konfiguration und Erweiterungen. Gilt für die installierte Version (posthog-js 1.373.4);
@@ -36,32 +40,13 @@ export interface ExterneRessource {
   einwilligung: boolean
 }
 
-export const EXTERNE_RESSOURCEN: ExterneRessource[] = [
-  {
-    name: "Cookiebot",
-    host: "consent.cookiebot.com",
-    zweck: "Einwilligungsverwaltung: Skript und Banner, Abfrage und Nachweis deiner Entscheidung",
-    einwilligung: false,
-  },
-  {
-    name: "Cookiebot",
-    host: "consentcdn.cookiebot.com",
-    zweck: "Einwilligungsverwaltung: vom Cookiebot-Skript nachgeladene Dateien",
-    einwilligung: false,
-  },
-  {
-    name: "PostHog",
-    host: "eu.i.posthog.com",
-    zweck: "Reichweitenmessung (Seitenaufrufe), EU-Endpunkt für Bibliothek und Datenübertragung",
-    einwilligung: true,
-  },
-  {
-    name: "PostHog",
-    host: "eu-assets.i.posthog.com",
-    zweck: "Reichweitenmessung: vom PostHog-Skript nachgeladene Erweiterungen und Konfiguration, EU-Endpunkt",
-    einwilligung: true,
-  },
-]
+// Nur die Felder für den Text; `csp` braucht allein der Header-Generator.
+export const EXTERNE_RESSOURCEN: ExterneRessource[] = externeRessourcen.map(({ name, host, zweck, einwilligung }) => ({
+  name,
+  host,
+  zweck,
+  einwilligung,
+}))
 
 // ---------------------------------------------------------------------------------------------
 // Inhalte
@@ -199,7 +184,7 @@ export const DATENSCHUTZ: RechtsSeite = {
           typ: "absatz",
           kopf: "Cookiebot (Einwilligungsverwaltung).",
           teile: [
-            `Zweck: Einholen, Speichern und Nachweisen deiner Entscheidung. Bei jedem Seitenaufruf lädt dein Browser das Skript von ${cookiebot[0]}; weitere Dateien lädt es bei Bedarf von ${cookiebot[1]} nach. Dabei erhält der Anbieter technisch bedingt deine IP-Adresse. Deine Entscheidung wird in deinem Browser gespeichert. [[PRÜFEN: Name und Speicherdauer des Cookiebot-Cookies (laut Anbieter „CookieConsent“, 12 Monate) und Umfang der zum Nachweis übermittelten Daten laut Cookiebot-Dokumentation]] [[PRÜFEN: Rechtsgrundlage für den Einsatz von Cookiebot (Art. 6 Abs. 1 lit. c oder f DSGVO, § 25 Abs. 2 TDDDG), Anbieter und Sitz, Drittlandübermittlung]]`,
+            `Zweck: Einholen, Speichern und Nachweisen deiner Entscheidung. Bei jedem Seitenaufruf lädt dein Browser das Skript von ${cookiebot[0]}; weitere Dateien lädt es bei Bedarf von ${cookiebot[1]} nach, Bilder des Banners von ${cookiebot[2]}. Dabei erhält der Anbieter technisch bedingt deine IP-Adresse. Deine Entscheidung wird in deinem Browser gespeichert. [[PRÜFEN: Name und Speicherdauer des Cookiebot-Cookies (laut Anbieter „CookieConsent“, 12 Monate) und Umfang der zum Nachweis übermittelten Daten laut Cookiebot-Dokumentation]] [[PRÜFEN: Rechtsgrundlage für den Einsatz von Cookiebot (Art. 6 Abs. 1 lit. c oder f DSGVO, § 25 Abs. 2 TDDDG), Anbieter und Sitz, Drittlandübermittlung]]`,
           ],
         },
         {

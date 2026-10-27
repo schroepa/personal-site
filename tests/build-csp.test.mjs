@@ -66,3 +66,19 @@ test("gebaute Seiten des neuen Layers binden Kopf- und PostHog-Skript als Datei 
     assert.equal(attr(skripte[0], "id"), "Cookiebot", datei)
   }
 })
+
+test("gebaute Seiten: jedes <script src> ist eigene Domain oder ein Host aus script-src von vercel.json", { skip: vorhanden ? false : grund }, async () => {
+  const { buildHeaders, ladeRessourcen } = await import("../scripts/build-vercel-headers.mjs")
+  const csp = buildHeaders(ladeRessourcen())[0].headers.find((h) => h.key === "Content-Security-Policy").value
+  const scriptSrc = csp.split("; ").find((d) => d.startsWith("script-src ")).split(" ").slice(1)
+  const probleme = []
+  for (const datei of htmlDateien(dist)) {
+    for (const m of readFileSync(datei, "utf8").matchAll(/<script\b([^>]*)>/g)) {
+      const src = attr(m[1], "src")
+      if (src === undefined || src.startsWith("/")) continue
+      const origin = new URL(src).origin
+      if (!scriptSrc.includes(origin)) probleme.push(`${datei.slice(dist.length)}: ${src}`)
+    }
+  }
+  assert.deepEqual(probleme, [])
+})

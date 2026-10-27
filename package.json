@@ -16,6 +16,7 @@
     "typecheck": "astro check",
     "test:e2e": "playwright test",
     "tokens": "node scripts/export-tokens.mjs design/figma-variables.json src/styles/tokens.css",
+    "headers": "node scripts/build-vercel-headers.mjs",
     "test:scripts": "node --test \"scripts/**/*.test.mjs\" \"src/lib/**/*.test.ts\" \"src/scripts/**/*.test.mjs\" \"tests/*.test.mjs\"",
     "test": "npm run test:scripts && npm run test:e2e"
   },
