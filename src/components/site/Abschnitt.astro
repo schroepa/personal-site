@@ -1,0 +1,72 @@
+---
+// Abschnitt (Figma 189:313): Linie, Label als h2 „→ 03 Arbeit“, Inhalt im 12er-Raster.
+// Der Pfeil ist dekorativ (aria-hidden), der Name der Überschrift bleibt „03 Arbeit“.
+// Horizontaler Rand und Seitenbreite liefert <main> in SiteLayout, daher hier ohne --abschnitt-rand/-breite.
+interface Props {
+  id: string
+  label: string
+  nummer?: string
+  layout?: "links" | "oben"
+}
+const { id, label, nummer, layout = "links" } = Astro.props
+const titelId = `${id}-titel`
+---
+
+<section {id} class:list={["abschnitt", `abschnitt-${layout}`]} aria-labelledby={titelId}>
+  <div class="linie" data-linie aria-hidden="true"></div>
+  <h2 id={titelId} class="text-label label">
+    <span aria-hidden="true">→ </span>{nummer ? `${nummer} ` : ""}{label}
+  </h2>
+  <div class="inhalt" data-inhalt><slot /></div>
+</section>
+
+<style>
+  .abschnitt {
+    display: grid;
+    grid-template-columns: repeat(var(--layout-columns), minmax(0, 1fr));
+    column-gap: var(--abschnitt-spaltenabstand);
+    row-gap: var(--abschnitt-abstand);
+    padding-bottom: var(--abschnitt-abstand-unten);
+  }
+
+  .linie {
+    grid-column: 1 / -1;
+    height: var(--abschnitt-linie-staerke);
+    background: var(--abschnitt-linie-farbe);
+  }
+
+  .label {
+    grid-column: 1 / -1;
+    margin: 0;
+    color: var(--abschnitt-label-farbe);
+    overflow-wrap: anywhere;
+  }
+
+  .inhalt {
+    grid-column: 1 / -1;
+    min-width: 0;
+    display: grid;
+    grid-template-columns: subgrid;
+    row-gap: var(--abschnitt-inhalt-abstand);
+    align-content: start;
+  }
+
+  .inhalt > :global(*) {
+    grid-column: 1 / -1;
+    margin: 0;
+    min-width: 0;
+  }
+
+  /* Label links (3 Spalten), Inhalt 9 Spalten, Fließtext höchstens 7 davon; darunter immer oben */
+  @media (min-width: 1024px) {
+    .abschnitt-links .label {
+      grid-column: 1 / span 3;
+    }
+    .abschnitt-links .inhalt {
+      grid-column: 4 / span 9;
+    }
+    .abschnitt-links .inhalt > :global(p) {
+      grid-column: 1 / span 7;
+    }
+  }
+</style>

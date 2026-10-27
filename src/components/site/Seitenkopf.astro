@@ -1,0 +1,81 @@
+---
+// Seitenkopf (Figma 262:423): Label, einzige h1 der Seite, Einleitung und Slot „zusatz“ (Filter oder Faktenzeile).
+// art=seite: Titel in text/hero über 9 von 12 Spalten; art=artikel: Titel in text/h1 über 8 Spalten.
+interface Props {
+  art: "seite" | "artikel"
+  label: string
+  titel: string
+  einleitung?: string
+}
+const { art, label, titel, einleitung } = Astro.props
+const hatZusatz = Astro.slots.has("zusatz")
+---
+
+<div class:list={["seitenkopf", `seitenkopf-${art}`]}>
+  <p class="text-label label" data-label><span aria-hidden="true">→ </span>{label}</p>
+  <div class="aussage" data-aussage>
+    <h1 class:list={["titel", art === "seite" ? "text-hero" : "text-h1"]}>{titel}</h1>
+    {einleitung && <p class="text-lead einleitung">{einleitung}</p>}
+    {
+      hatZusatz && (
+        <div class="zusatz" data-zusatz>
+          <slot name="zusatz" />
+        </div>
+      )
+    }
+  </div>
+</div>
+
+<style>
+  .seitenkopf {
+    display: flex;
+    flex-direction: column;
+    gap: var(--seitenkopf-abstand);
+    padding-top: var(--seitenkopf-abstand-oben);
+    padding-bottom: var(--seitenkopf-abstand-unten);
+  }
+
+  .label {
+    margin: 0;
+    color: var(--seitenkopf-label-farbe);
+    overflow-wrap: anywhere;
+  }
+
+  .aussage {
+    display: grid;
+    grid-template-columns: repeat(var(--layout-columns), minmax(0, 1fr));
+    gap: var(--seitenkopf-text-abstand) var(--seitenkopf-spaltenabstand);
+  }
+
+  .aussage > * {
+    grid-column: 1 / -1;
+    margin: 0;
+    min-width: 0;
+  }
+
+  .titel {
+    color: var(--seitenkopf-titel-farbe);
+    overflow-wrap: anywhere;
+    hyphens: auto;
+  }
+
+  .einleitung {
+    color: var(--seitenkopf-text-farbe);
+    overflow-wrap: anywhere;
+  }
+
+  @media (min-width: 768px) {
+    .aussage > .einleitung {
+      grid-column: 1 / span 7;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .seitenkopf-seite .titel {
+      grid-column: 1 / span 9;
+    }
+    .seitenkopf-artikel .titel {
+      grid-column: 1 / span 8;
+    }
+  }
+</style>

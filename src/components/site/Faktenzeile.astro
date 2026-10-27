@@ -1,0 +1,121 @@
+---
+// Faktenzeile (Figma 262:883): drei Fakten als dl (dt Bezeichnung, dd Wert) und Aktionen.
+// Externe Aktionen öffnen im neuen Tab mit sichtbarem ↗ und Hinweis im Namen.
+import Knopf from "./Knopf.astro"
+
+interface Fakt {
+  label: string
+  wert: string
+}
+interface Props {
+  fakten: [Fakt, Fakt, Fakt]
+  aktionen?: { label: string; href: string }[]
+}
+const { fakten, aktionen = [] } = Astro.props
+const istExtern = (href: string) => /^https?:\/\//.test(href)
+---
+
+<div class="faktenzeile">
+  <dl class="fakten">
+  {
+    fakten.map((fakt) => (
+      <div class="fakt">
+        <dt class="text-label bezeichnung">{fakt.label}</dt>
+        <dd class="text-body wert">{fakt.wert}</dd>
+      </div>
+    ))
+  }
+  </dl>
+  {
+    aktionen.length > 0 && (
+      <div class="aktionen">
+        {aktionen.map((aktion, i) =>
+          istExtern(aktion.href) ? (
+            <Knopf
+              art={i === 0 ? "primary" : "ghost"}
+              href={aktion.href}
+              target="_blank"
+              rel="noopener"
+              pfeil="↗"
+              aria-label={`${aktion.label} (öffnet in neuem Tab)`}
+            >
+              {aktion.label}
+            </Knopf>
+          ) : (
+            <Knopf art={i === 0 ? "primary" : "ghost"} href={aktion.href}>
+              {aktion.label}
+            </Knopf>
+          )
+        )}
+      </div>
+    )
+  }
+</div>
+
+<style>
+  .faktenzeile {
+    display: grid;
+    grid-template-columns: repeat(var(--layout-columns), minmax(0, 1fr));
+    gap: var(--faktenzeile-reihenabstand) var(--faktenzeile-spaltenabstand);
+  }
+
+  /* Die Fakten bilden das dl und erben die Spalten der Zeile */
+  .fakten {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: subgrid;
+    gap: inherit;
+    margin: 0;
+  }
+
+  .fakt,
+  .aktionen {
+    grid-column: 1 / -1;
+    min-width: 0;
+  }
+
+  .fakt {
+    display: flex;
+    flex-direction: column;
+    gap: var(--faktenzeile-abstand);
+  }
+
+  .bezeichnung,
+  .wert {
+    margin: 0;
+    overflow-wrap: anywhere;
+  }
+  .bezeichnung {
+    color: var(--faktenzeile-bezeichnung-farbe);
+  }
+  .wert {
+    color: var(--faktenzeile-wert-farbe);
+  }
+
+  .aktionen {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--faktenzeile-aktion-abstand);
+    align-items: flex-start;
+  }
+
+  /* Tablet (8 Spalten): zwei Fakten pro Reihe */
+  @media (min-width: 768px) {
+    .fakt {
+      grid-column: span 4;
+    }
+  }
+
+  /* Desktop (12 Spalten): drei Fakten und Aktionen je 3 Spalten in einer Reihe */
+  @media (min-width: 1024px) {
+    .fakten {
+      grid-column: 1 / span 9;
+    }
+    .fakt {
+      grid-column: span 3;
+    }
+    .aktionen {
+      grid-column: span 3;
+    }
+  }
+</style>
