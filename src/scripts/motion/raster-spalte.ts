@@ -3,6 +3,9 @@
  * (--spalte-an) eine Feder treibt. Ein: --motion-feder-spalte-ein (450 ms), aus: --motion-feder-spalte-aus
  * (1300 ms, die Spur klingt nach). Nur bei pointer: fine und ohne reduzierte Bewegung.
  *
+ * Der Zeiger wird pro Frame ausgewertet (rAF-Drossel, nicht pro Ereignis). Ob ein feiner Zeiger da ist, gilt live:
+ * wechselt (pointer: fine) zur Laufzeit, legt das Modul die Hörer an oder ab.
+ *
  * Gleiche Quelle wie das Schriftfeld: über einem [data-objekt] sind dessen Spalten hervorgehoben („Spalte a–b“).
  * Die Spalten tragen data-hover, solange sie hervorgehoben sind.
  */
@@ -12,10 +15,8 @@ import { prefersReducedMotion, readSpring } from "./tokens"
 
 const FEIN = "(pointer: fine)"
 
-export function initRasterSpalte(): () => void {
-  const raster = document.querySelector<HTMLElement>("[data-raster]")
-  if (!raster || prefersReducedMotion() || !window.matchMedia(FEIN).matches) return () => {}
-
+/** Hörer, Federn und Zustand für feine Zeiger. Gibt das vollständige Aufräumen zurück. */
+function anlegen(raster: HTMLElement): () => void {
   const werte = new Map<HTMLElement, MotionValue<number>>()
   const an = new Set<HTMLElement>()
   const spalten = () =>
@@ -46,17 +47,17 @@ export function initRasterSpalte(): () => void {
     }
   }
 
-  const beiBewegung = (e: PointerEvent) => {
+  const auswerten = (x: number, ziel: Element | null) => {
     const liste = spalten()
     const soll = new Set<HTMLElement>()
     // Toleranz: der halbe Spaltenabstand, damit die Lücke zwischen zwei Spalten nicht „keine“ ergibt (gemessen, nicht gesetzt)
     const abstand = parseFloat(getComputedStyle(raster).columnGap) || 0
     const unter = liste.find((s) => {
       const r = s.getBoundingClientRect()
-      return e.clientX >= r.left - abstand / 2 && e.clientX <= r.right + abstand / 2
+      return x >= r.left - abstand / 2 && x <= r.right + abstand / 2
     })
     if (unter) soll.add(unter)
-    const objekt = (e.target as Element | null)?.closest?.("[data-objekt]")
+    const objekt = ziel?.closest?.("[data-objekt]")
     if (objekt) {
       const o = objekt.getBoundingClientRect()
       for (const s of liste) {
@@ -66,7 +67,23 @@ export function initRasterSpalte(): () => void {
     }
     setzen(soll)
   }
-  const beiVerlassen = () => setzen(new Set())
+
+  // Drossel: pro Frame wird nur die letzte Zeigerposition ausgewertet
+  let letzte: { x: number; ziel: Element | null } | null = null
+  let rafId = 0
+  const beiBewegung = (e: PointerEvent) => {
+    letzte = { x: e.clientX, ziel: e.target as Element | null }
+    if (rafId) return
+    rafId = requestAnimationFrame(() => {
+      rafId = 0
+      if (letzte) auswerten(letzte.x, letzte.ziel)
+      letzte = null
+    })
+  }
+  const beiVerlassen = () => {
+    letzte = null
+    setzen(new Set())
+  }
 
   document.addEventListener("pointermove", beiBewegung, { passive: true })
   document.documentElement.addEventListener("pointerleave", beiVerlassen)
@@ -75,6 +92,7 @@ export function initRasterSpalte(): () => void {
   return () => {
     document.removeEventListener("pointermove", beiBewegung)
     document.documentElement.removeEventListener("pointerleave", beiVerlassen)
+    cancelAnimationFrame(rafId)
     zaehle(-2)
     for (const [spalte, w] of werte) {
       w.stop()
@@ -83,5 +101,29 @@ export function initRasterSpalte(): () => void {
     }
     werte.clear()
     an.clear()
+  }
+}
+
+export function initRasterSpalte(): () => void {
+  const raster = document.querySelector<HTMLElement>("[data-raster]")
+  if (!raster) return () => {}
+  const fein = window.matchMedia(FEIN)
+  let abbau: (() => void) | null = null
+  const abgleichen = () => {
+    const soll = !prefersReducedMotion() && fein.matches
+    if (soll && !abbau) abbau = anlegen(raster)
+    else if (!soll && abbau) {
+      abbau()
+      abbau = null
+    }
+  }
+  fein.addEventListener("change", abgleichen)
+  zaehle(1)
+  abgleichen()
+  return () => {
+    fein.removeEventListener("change", abgleichen)
+    zaehle(-1)
+    abbau?.()
+    abbau = null
   }
 }

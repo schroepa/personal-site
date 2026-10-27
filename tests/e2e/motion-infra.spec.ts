@@ -281,6 +281,8 @@ test.describe("Bewegungs-Infrastruktur", () => {
     await expect(page.locator("h1")).toBeVisible()
     await page.emulateMedia({ reducedMotion: "reduce" })
     await expect.poll(() => page.evaluate(() => matchMedia("(prefers-reduced-motion: reduce)").matches)).toBe(true)
+    // Die Änderungsmeldung der Medienabfrage kommt erst mit dem nächsten Frame; ohne Wartezeit würden beide Wechsel zu keinem
+    await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))))
     await page.emulateMedia({ reducedMotion: "no-preference" })
     await expect.poll(() => fehler.filter((f) => f.includes("--motion-scroll-glaettung")).length).toBeGreaterThan(1)
     expect(seitenfehler).toEqual([])

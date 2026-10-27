@@ -22,3 +22,25 @@ html[data-motion] [data-anim="linie"]:not([data-anim-fertig]) {
   transform: scaleX(0);
   transform-origin: left;
 }
+
+/*
+ * Galerie-Akkordeon (ab 768 px): geschlossene Bilder sitzen seitlich versetzt (Prototyp v14, Versatz ±24 px =
+ * --global-size-24, Richtung vom offenen Streifen weg). Der Versatz ist Ruhezustand unter Bewegung und gehört
+ * deshalb ins CSS (hinter dem Gate); motion/akkordeon.ts gleitet nur zwischen den CSS-Zuständen.
+ */
+@media (min-width: 768px) {
+  html[data-motion] [data-galerie-akkordeon] > a:has(~ a[aria-current="true"]) img {
+    transform: translateX(calc(-1 * var(--global-size-24)));
+  }
+  html[data-motion] [data-galerie-akkordeon] > a[aria-current="true"] ~ a img {
+    transform: translateX(var(--global-size-24));
+  }
+}
+
+/*
+ * Ausfallsicherung für die Dekoration „Screens“ (aria-hidden, von motion/durchstreichen.ts eingefügt): ohne
+ * offenes Gate (Watchdog, gescheitertes Modul, reduzierte Bewegung) darf sie nie sichtbar neben „Systeme.“ stehen.
+ */
+html:not([data-motion]) [data-ersatz] > .alt {
+  display: none;
+}

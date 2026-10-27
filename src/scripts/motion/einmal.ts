@@ -77,12 +77,12 @@ export function fertig(...elemente: Array<Element | null | undefined>): void {
 /**
  * Gibt Elemente frei, sobald die Animation fertig ist. Einen Frame später: Motion schreibt den Endwert
  * nach dem Ende noch inline, das fertig() sonst nicht mehr aufräumen könnte.
+ * Auch bei abgelehnter oder abgebrochener Animation (cancel, Fehler) wird freigegeben: ein Element darf nie
+ * im Startzustand (opacity 0) hängen bleiben, nur weil seine Animation nicht zu Ende lief.
  */
 export function fertigNach(steuerung: { then: (onResolve: () => void, onReject?: () => void) => unknown }, ...elemente: Array<Element | null | undefined>): void {
-  steuerung.then(
-    () => void requestAnimationFrame(() => fertig(...elemente)),
-    () => {}
-  )
+  const freigeben = () => void requestAnimationFrame(() => fertig(...elemente))
+  steuerung.then(freigeben, freigeben)
 }
 
 /** Liegt das Element unterhalb des Bereichs, ab dem revealOnce auslöst? (nur dann wird animiert) */

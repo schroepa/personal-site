@@ -10,6 +10,10 @@
  * danach blenden „Screens“ nach oben aus und „Systeme.“ von unten ein (--motion-schrift-ersatz, 800 ms).
  * „Systeme.“ steht von Anfang an im Textfluss (unsichtbar) und reserviert den Platz, „Screens“ liegt darüber:
  * so verschiebt sich nichts (der Prototyp klappt die Breite zusammen und umbricht mobil kurz).
+ *
+ * Sauberes DOM: Tokens werden vor jeder DOM-Änderung gelesen; die Dekoration „Screens“ kommt erst unmittelbar
+ * vor dem Start der Animationen ins Dokument. Wirft ein Schritt danach, wird sie wieder entfernt und nur der
+ * Endtext („Systeme.“) bleibt (und der Fehler geht an initMotion). Das Teardown räumt genauso auf.
  */
 import { animate } from "motion"
 import { abbrechen, animationErlaubt, fertig } from "./einmal"
@@ -46,34 +50,45 @@ export function initDurchstreichen(): () => void {
   strich.className = "strich"
   inhalt.append(strich)
   alt.append(inhalt)
-  ersatz.prepend(alt)
 
   const ende = verzoegerung + streichen
-  const steuerungen = [
-    animate(strich, { transform: ["scaleX(0)", "scaleX(1)"] }, { duration: streichen, ease, delay: verzoegerung }),
-    animate(
-      inhalt,
-      { opacity: [1, 0], transform: ["translateY(0px)", `translateY(${-weg}px)`] },
-      { duration: dauer, ease, delay: ende }
-    ),
-    animate(
-      neu,
-      { opacity: [0, 1], transform: [`translateY(${weg}px)`, "translateY(0px)"] },
-      { duration: dauer, ease, delay: ende }
-    ),
-  ]
+  const steuerungen: Array<ReturnType<typeof animate>> = []
+  const aufraeumen = () => {
+    steuerungen.splice(0).forEach(abbrechen)
+    alt.remove()
+    fertig(neu)
+  }
+  try {
+    // Erst jetzt ins Dokument: unmittelbar vor dem Start
+    ersatz.prepend(alt)
+    steuerungen.push(
+      animate(strich, { transform: ["scaleX(0)", "scaleX(1)"] }, { duration: streichen, ease, delay: verzoegerung }),
+      animate(
+        inhalt,
+        { opacity: [1, 0], transform: ["translateY(0px)", `translateY(${-weg}px)`] },
+        { duration: dauer, ease, delay: ende }
+      ),
+      animate(
+        neu,
+        { opacity: [0, 1], transform: [`translateY(${weg}px)`, "translateY(0px)"] },
+        { duration: dauer, ease, delay: ende }
+      )
+    )
+  } catch (fehler) {
+    aufraeumen()
+    throw fehler
+  }
   steuerungen[2].then(
     () =>
       requestAnimationFrame(() => {
         alt.remove()
         fertig(neu)
       }),
-    () => {}
+    () => {
+      alt.remove()
+      fertig(neu)
+    }
   )
 
-  return () => {
-    steuerungen.forEach(abbrechen)
-    alt.remove()
-    fertig(neu)
-  }
+  return aufraeumen
 }

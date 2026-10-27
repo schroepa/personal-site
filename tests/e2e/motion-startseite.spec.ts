@@ -295,18 +295,24 @@ test.describe("mit Bewegung", () => {
     }
   })
 
-  test("Akkordeon: Streifen wechseln mit Feder, das Bild behält die Breite des offenen Fensters, Sättigung kommt aus dem Zustand", async ({ page }) => {
+  test("Akkordeon: Streifen wechseln mit Feder, das Bild behält die Breite des offenen Fensters, Graustufe kommt aus dem CSS-Zustand", async ({ page }) => {
     test.skip((page.viewportSize()?.width ?? 0) < 768, "schmal ist das Akkordeon ein Wisch-Streifen")
     await laden(page)
     const streifen = page.locator("#digital-art [data-galerie-akkordeon] > a")
     await streifen.first().scrollIntoViewIfNeeded()
-    // Ruhezustand: geschlossene Bilder entsättigt und versetzt, das offene neutral
+    // Ruhezustand gehört dem CSS: keine Inline-Werte; geschlossene Bilder grau und versetzt, das offene neutral
     const ruhe = await page.evaluate(() => {
       const s = [...document.querySelectorAll<HTMLElement>("#digital-art [data-galerie-akkordeon] > a")]
-      return s.map((e) => e.querySelector("img")!.style.filter)
+      return s.map((e) => {
+        const img = e.querySelector("img")!
+        return { inline: img.getAttribute("style") ?? "", filter: getComputedStyle(img).filter, x: new DOMMatrix(getComputedStyle(img).transform).m41 }
+      })
     })
-    expect(ruhe[0]).toBe("saturate(1)")
-    expect(ruhe[1]).toMatch(/^saturate\(0?\.\d+\)$/)
+    expect(ruhe.every((r) => r.inline === "")).toBe(true)
+    expect(ruhe[0].filter).toMatch(/^grayscale\(0\)$|^none$/)
+    expect(ruhe[1].filter).toBe("grayscale(1)")
+    expect(ruhe[0].x).toBe(0)
+    expect(Math.abs(ruhe[1].x)).toBeGreaterThan(1)
     await page.evaluate(() => {
       const w = window as unknown as { __akk: Array<{ g0: number; g3: number; b3: number; f3: number; x3: number; breit: number }> }
       w.__akk = []
@@ -314,7 +320,7 @@ test.describe("mit Bewegung", () => {
       const wurzel = s[0].parentElement!
       const tick = () => {
         const img = s[3].querySelector("img")!
-        const m = /saturate\(([\d.]+)\)/.exec(getComputedStyle(img).filter)
+        const m = /grayscale\(([\d.]+)\)/.exec(getComputedStyle(img).filter)
         w.__akk.push({
           g0: parseFloat(getComputedStyle(s[0]).flexGrow),
           g3: parseFloat(getComputedStyle(s[3]).flexGrow),
@@ -342,10 +348,10 @@ test.describe("mit Bewegung", () => {
     // Fenster: Bildbreite bleibt in jedem Frame gleich der Breite des offenen Streifens
     const b = proben.map((p) => p.b3)
     expect(Math.max(...b) - Math.min(...b)).toBeLessThan(1.5)
-    // Sättigung des öffnenden Bildes wandert von der geschlossenen Stufe zu 1, das Bild gleitet zur Mitte
-    expect(proben[0].f3).toBeLessThan(1)
-    expect(proben[proben.length - 1].f3).toBeCloseTo(1, 2)
-    expect(proben.some((p) => p.f3 > proben[0].f3 + 0.05 && p.f3 < 0.98)).toBe(true)
+    // Graustufe des öffnenden Bildes wandert von der geschlossenen Stufe (1) zu 0, das Bild gleitet zur Mitte
+    expect(proben[0].f3).toBeGreaterThan(0.5)
+    expect(proben[proben.length - 1].f3).toBeCloseTo(0, 2)
+    expect(proben.some((p) => p.f3 < proben[0].f3 - 0.05 && p.f3 > 0.02)).toBe(true)
     expect(Math.abs(proben[0].x3)).toBeGreaterThan(1)
     expect(Math.abs(proben[proben.length - 1].x3)).toBeLessThan(0.5)
     // Endzustand: nur noch das CSS (kein Inline-flex-grow), offener Streifen 3

@@ -8,12 +8,13 @@
 import { initAbschnittslinie } from "./abschnittslinie"
 import { initAkkordeon } from "./akkordeon"
 import { initDurchstreichen } from "./durchstreichen"
-import { gateAus, wachtStoppen } from "./gate"
+import { gateAus, notfall, wachtStoppen } from "./gate"
 import { initHeroWoerter } from "./hero-woerter"
 import { initLenis } from "./lenis"
 import { initRasterAufbau } from "./raster-aufbau"
 import { initRasterSpalte } from "./raster-spalte"
 import { initSignatur } from "./signatur"
+import { prefersReducedMotion, REDUZIERT_QUERY } from "./tokens"
 
 export const MODULES: Array<() => () => void> = [
   initLenis,
@@ -26,9 +27,8 @@ export const MODULES: Array<() => () => void> = [
   initAkkordeon,
 ]
 
-export function initMotion(): () => void {
-  // Das Bündel läuft: der Watchdog im Kopf (gate.ts) wird nicht mehr gebraucht
-  wachtStoppen()
+/** Alle Module einzeln abgesichert starten; gibt das gesammelte Teardown zurück. */
+function starten(): () => void {
   const abmelden: Array<() => void> = []
   // Die Meldung nennt das Modul (der äußere sicher()-Schutz in SiteLayout kennt es nicht)
   for (const modul of MODULES) {
@@ -36,7 +36,7 @@ export function initMotion(): () => void {
       abmelden.push(modul())
     } catch (fehler) {
       console.error(`Bewegungsmodul „${modul.name || "anonym"}“ fehlgeschlagen:`, fehler)
-      gateAus()
+      notfall()
     }
   }
   return () => {
@@ -47,5 +47,25 @@ export function initMotion(): () => void {
         console.error("Bewegungsmodul-Teardown fehlgeschlagen:", fehler)
       }
     }
+  }
+}
+
+export function initMotion(): () => void {
+  // Das Bündel läuft: der Watchdog im Kopf (gate.ts) wird nicht mehr gebraucht
+  wachtStoppen()
+  let stoppen = starten()
+  // Systemeinstellung „Bewegung reduzieren“ zur Laufzeit: laufende Animationen abbrechen (Teardown stellt den
+  // Endzustand her), bei „reduzieren“ das Gate schließen, danach alle Module neu anlegen (sie prüfen die
+  // Einstellung selbst; Lenis und die Zeigereffekte entstehen bzw. verschwinden damit).
+  const reduziert = window.matchMedia(REDUZIERT_QUERY)
+  const beiWechsel = () => {
+    stoppen()
+    if (prefersReducedMotion()) gateAus()
+    stoppen = starten()
+  }
+  reduziert.addEventListener("change", beiWechsel)
+  return () => {
+    reduziert.removeEventListener("change", beiWechsel)
+    stoppen()
   }
 }

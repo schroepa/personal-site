@@ -53,3 +53,19 @@ export function wachtStoppen(): void {
 export function gateAus(): void {
   document.documentElement.removeAttribute("data-motion")
 }
+
+/**
+ * Notausstieg, wenn ein Modul scheitert: Gate öffnen UND alles freigeben, was schon im Startzustand wartet oder
+ * gerade animiert (sonst bliebe z. B. ein Wort mit verzögertem Einstieg noch Sekunden unsichtbar). Laufende
+ * Web-Animations-Animationen der markierten Elemente werden abgebrochen, ihre Elemente als fertig markiert.
+ */
+export function notfall(): void {
+  gateAus()
+  for (const el of document.querySelectorAll<HTMLElement>("[data-anim]")) {
+    for (const a of el.getAnimations({ subtree: true })) a.cancel()
+    el.setAttribute("data-anim-fertig", "")
+    el.style.removeProperty("opacity")
+    el.style.removeProperty("transform")
+    el.style.removeProperty("clip-path")
+  }
+}

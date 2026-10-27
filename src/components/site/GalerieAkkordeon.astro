@@ -206,8 +206,9 @@ const nummer = (i: number) => String(i + 1).padStart(2, "0")
     .streifen[aria-current="true"] {
       flex-grow: var(--galerie-gewicht);
     }
+    /* grayscale(0) statt none: gleiche Funktion wie geschlossen, damit motion/akkordeon.ts dazwischen gleiten kann */
     .streifen[aria-current="true"] .bild img {
-      filter: none;
+      filter: grayscale(0);
     }
     .streifen[aria-current="true"] .seite {
       display: none;
