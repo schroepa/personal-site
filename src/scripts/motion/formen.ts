@@ -45,3 +45,10 @@ export const BILD_ZOOM_FAKTOR = 1.03
 
 /** Gewicht der Signatur beim Hover: Token --font-weight-light (Figma schrift/gewicht-hover: „wird bei Hover leicht (300)“). */
 export const GEWICHT_HOVER_TOKEN = "--font-weight-light"
+
+/**
+ * Lichtband (Prototyp v14, docs/reference/atmosphaere.js): beim Scrollen zieht sich das Band zusammen. Weg nach oben
+ * bis 40 px (translateY −40 px) und Stauchung bis scaleY 0.55 (= 1 − 0.45). Beides ohne Figma-Token.
+ */
+export const LICHTBAND_ZUG_MAX_PX = 40
+export const LICHTBAND_SKALA_MIN = 0.55
