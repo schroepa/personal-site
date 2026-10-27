@@ -6,7 +6,7 @@ Persönliche Website von Patrick Schrödter: Portfolio, Blog, Lebenslauf und ein
 
 - **Astro 5** (statischer Export), **TypeScript**, React 19 nur noch für das Tool `/tools/gradient-generator`.
 - **Vanilla CSS auf Figma-Tokens.** Alle Werte (Farben, Größen, Abstände, Dauern) kommen aus `src/styles/tokens.css`; Einstieg ist `src/styles/neu.css`, Komponenten nutzen Astro-Scoped-Styles. Kein Tailwind, keine Utility-Klassen, kein shadcn im neuen Layer (`tests/css-hygiene.test.mjs` prüft das).
-- **Übergangsstand:** Tailwind 4, shadcn/Radix und die Legacy-Styles (`global.css`, `typography.css`, `animations.css`, `fonts.css`) sind noch im Repo, weil nur das Tool `gradient-generator` (`ToolLayout`, `GradientGenerator.tsx`, `src/components/ui/`) und die Seiten unter `og-render/` sie nutzen. Task 15b stellt beides auf Tokens um und entfernt Tailwind und shadcn.
+- **Kein Tailwind, kein shadcn, kein Radix** (auch nicht als Abhängigkeit; `tests/no-tailwind.test.mjs` und die CSS-Hygiene-Tests halten das fest). Der Gradient-Generator unter `/tools/gradient-generator` nutzt native Bedienelemente (`input[type=range]`, `details`/`summary`, `input[type=color]`, `select`) mit eigenem CSS in `src/components/gradient-generator.css` auf denselben Tokens; React übernimmt dort nur die Zustandslogik (Presets, Regler, PNG-Export). Ohne JavaScript zeigt die Seite einen Hinweis statt des Werkzeugs.
 - Bewegung mit `motion` und `lenis`, Schrift Geist (lokal), Lichtband als eigener WebGL-Shader (`src/scripts/lichtband.ts`).
 - Tests: Playwright (E2E, axe) und `node:test`.
 
@@ -88,7 +88,7 @@ Alles Rechtliche liegt in `src/data/rechtliches.ts` (nicht in den `.astro`-Datei
 ## Aufbau
 
 - `src/pages/`: Routen (`blog/[slug].astro`, `projects/[slug].astro`, `llms*.txt.ts`, `tools/`, `prototypes/` für Bausteinseiten, `og-render/`)
-- `src/layouts/`: `SiteLayout` (Basis), `ArtikelLayout`, `ProjektLayout`; `ToolLayout` nur für das Tool (bis 15b)
+- `src/layouts/`: `SiteLayout` (Basis, auch für das Tool), `ArtikelLayout`, `ProjektLayout`
 - `src/components/site/`: die Bausteine des neuen Designs (Seitenkopf, Abschnitt, Knopf, Projektkarte, Galerie-Akkordeon, Schriftfeld, …)
 - `src/scripts/`: kleine Skripte je Komponente (`schriftfeld.ts`, `suche.ts`, `filter.ts`, …) und die Bewegung
 - `src/lib/`: reine Funktionen mit `node:test` (Blog, Projekte, Filter, Fallstudie, JSON-LD, …)
