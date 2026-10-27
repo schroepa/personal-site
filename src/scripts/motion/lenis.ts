@@ -19,6 +19,8 @@ declare global {
   interface Window {
     /** Nur in Dev-/Testbuilds: Anzahl lebender Lenis-Instanzen */
     __lenisCount?: number
+    /** Nur in Dev-/Testbuilds: die lebende Instanz (Tests beobachten scrollTo) */
+    __lenis?: Lenis | null
   }
 }
 
@@ -40,12 +42,14 @@ export function initLenis(): () => void {
       anchors: true,
     })
     zaehlen(1)
+    if (import.meta.env.DEV) window.__lenis = lenis
   }
   const zerstoeren = () => {
     if (!lenis) return
     lenis.destroy()
     lenis = null
     zaehlen(-1)
+    if (import.meta.env.DEV) window.__lenis = null
   }
   const abgleichen = () => {
     const soll = !prefersReducedMotion() && !touch.matches
@@ -62,9 +66,10 @@ export function initLenis(): () => void {
   }
 
   if (import.meta.env.DEV && window.__lenisCount === undefined) window.__lenisCount = lebend
-  abgleichen()
+  // Zuerst anmelden, dann starten: scheitert der Start am Token, bleibt die spätere Erholung möglich
   reduziert.addEventListener("change", beiAenderung)
   touch.addEventListener("change", beiAenderung)
+  beiAenderung()
 
   return () => {
     reduziert.removeEventListener("change", beiAenderung)

@@ -48,7 +48,7 @@ test.describe("Bewegungs-Infrastruktur", () => {
     await page.evaluate(() => ((window as unknown as { __marker: string }).__marker = "start"))
     for (const pfad of ["/blog", "/projects", "/about", "/kontakt", "/"]) {
       // Schmal liegt die Navigation hinter dem Menü-Knopf: wie ein Besucher öffnen und den echten Link wählen
-      const knopf = page.getByRole("button", { name: "Menü" })
+      const knopf = page.getByRole("button", { name: "Menü", exact: true })
       if (await knopf.isVisible()) await knopf.click()
       const link = pfad === "/" ? page.locator("header a.logo") : page.getByRole("navigation", { name: "Hauptnavigation" }).locator(`a[href="${pfad}"]`)
       await link.click()
@@ -131,45 +131,77 @@ test.describe("Bewegungs-Infrastruktur", () => {
     expect(reduziert.reduziert).toBe(true)
   })
 
-  test("Anker scrollt zum Ziel und beachtet scroll-margin-top (breit: Inhaltsverzeichnis, schmal: Link „Zum Inhalt springen“)", async ({ page }) => {
-    await page.emulateMedia({ reducedMotion: "no-preference" })
+  /**
+   * Löst einen echten Anker aus und liefert die Folge der scrollY-Werte pro Frame (1,5 s lang) samt Start/Ende.
+   * Breit: Inhaltsverzeichnis; schmal (Verzeichnis bewusst ausgeblendet): Sprunglink #inhalt per Tab und Enter.
+   */
+  async function ankerLaufen(page: Page) {
     await laden(page, "/blog/single-source-of-truth-ist-eine-luege")
-    expect(await lenisAnzahl(page)).toBe(1)
     const toc = page.locator("[data-inhaltsverzeichnis] a[href^='#']").nth(3)
-    let id: string
-    if (await toc.isVisible()) {
-      id = decodeURIComponent((await toc.getAttribute("href"))!.slice(1))
-      await toc.click()
-    } else {
-      // Das Inhaltsverzeichnis ist unterhalb des Breakpoints bewusst ausgeblendet: der echte Anker ist dort
-      // der Sprunglink #inhalt (per Tastatur erreicht), von weiter unten auf der Seite aus
-      id = "inhalt"
+    const breit = await toc.isVisible()
+    const id = breit ? decodeURIComponent((await toc.getAttribute("href"))!.slice(1)) : "inhalt"
+    if (!breit) {
       await page.evaluate(() => window.scrollTo(0, 1500))
       await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(1000)
       await page.keyboard.press("Tab")
-      await page.locator(".skip-link").focus()
-      await page.keyboard.press("Enter")
+      await expect(page.locator(".skip-link")).toBeFocused()
     }
-    const ergebnis = () =>
-      page.evaluate((i) => {
-        const el = document.getElementById(i)!
-        return { top: el.getBoundingClientRect().top, rand: parseFloat(getComputedStyle(el).scrollMarginTop) || 0, y: window.scrollY }
-      }, id)
-    // Warten, bis die Bewegung zur Ruhe kommt
-    let letzte = -1
-    await expect
-      .poll(async () => {
-        const y = (await ergebnis()).y
-        const ruhig = Math.abs(y - letzte) < 0.5
-        letzte = y
-        return ruhig
-      }, { timeout: 8000 })
-      .toBe(true)
-    const e = await ergebnis()
-    if (id !== "inhalt") expect(e.y).toBeGreaterThan(100)
-    else expect(e.y).toBeLessThan(500)
+    const start = await page.evaluate(() => window.scrollY)
+    await page.evaluate(() => {
+      const w = window as unknown as { __proben: number[]; __lenis?: { scrollTo: (...a: unknown[]) => unknown } | null; __scrollToAufrufe: unknown[] }
+      // Beobachtung: ruft Lenis' Anker-Handler scrollTo auf? (Lenis verhindert den nativen Sprung nicht, siehe Bericht)
+      w.__scrollToAufrufe = []
+      if (w.__lenis) {
+        const original = w.__lenis.scrollTo.bind(w.__lenis)
+        w.__lenis.scrollTo = (...a: unknown[]) => (w.__scrollToAufrufe.push(a[0]), original(...a))
+      }
+      w.__proben = []
+      const ende = performance.now() + 1500
+      const tick = () => {
+        w.__proben.push(window.scrollY)
+        if (performance.now() < ende) requestAnimationFrame(tick)
+      }
+      requestAnimationFrame(tick)
+    })
+    if (breit) await toc.click()
+    else await page.keyboard.press("Enter")
+    await page.waitForFunction(() => performance.now() > 0 && (window as unknown as { __proben: number[] }).__proben.length > 60)
+    const proben = await page.evaluate(() => (window as unknown as { __proben: number[] }).__proben)
+    const aufrufe = await page.evaluate(() => (window as unknown as { __scrollToAufrufe: unknown[] }).__scrollToAufrufe)
+    return { id, breit, start, proben, aufrufe }
+  }
+
+  test("Anker: Lenis' Anker-Handler greift (scrollTo mit dem Hash), Ziel beachtet scroll-margin-top und Hash", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "no-preference" })
+    expect(await (async () => { await laden(page, "/"); return lenisAnzahl(page) })()).toBe(1)
+    const { id, breit, proben, aufrufe } = await ankerLaufen(page)
+    const ende = proben[proben.length - 1]
+    // Beweis für Lenis: Ohne `anchors: true` (oder ohne Instanz) würde scrollTo nie mit dem Hash aufgerufen.
+    // Zwischenwerte sind nicht beobachtbar: Lenis verhindert den nativen Hash-Sprung nicht, scrollY springt sofort.
+    expect(aufrufe).toEqual([`#${id}`]) // Lenis übergibt den dekodierten Hash
+    const e = await page.evaluate((i) => {
+      const el = document.getElementById(i)!
+      return { top: el.getBoundingClientRect().top, rand: parseFloat(getComputedStyle(el).scrollMarginTop) || 0 }
+    }, id)
+    if (breit) expect(ende).toBeGreaterThan(100)
+    else expect(ende).toBeLessThan(500)
     expect(Math.abs(e.top - e.rand)).toBeLessThan(2)
     expect(await page.evaluate(() => location.hash)).toBe(`#${encodeURIComponent(id)}`.replace(/%2F/g, "/"))
+  })
+
+  test("Anker, Gegenprobe: unter reduced motion ohne Lenis kein scrollTo-Aufruf, Sprung zum Ziel bleibt nativ", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "reduce" })
+    const { id, start, proben, aufrufe } = await ankerLaufen(page)
+    const ende = proben[proben.length - 1]
+    expect(ende).not.toBe(start)
+    expect(aufrufe).toEqual([])
+    expect(await page.evaluate(() => (window as unknown as { __lenis?: unknown }).__lenis ?? null)).toBeNull()
+    expect(await lenisAnzahl(page)).toBe(0)
+    const e = await page.evaluate((i) => {
+      const el = document.getElementById(i)!
+      return { top: el.getBoundingClientRect().top, rand: parseFloat(getComputedStyle(el).scrollMarginTop) || 0 }
+    }, id)
+    expect(Math.abs(e.top - e.rand)).toBeLessThan(2)
   })
 
   test("Tastatur: PageDown scrollt", async ({ page }) => {
@@ -223,6 +255,36 @@ test.describe("Bewegungs-Infrastruktur", () => {
     expect(seitenfehler).toEqual([])
     expect(await lenisAnzahl(page)).toBe(0)
     await expect(page.locator("h1")).toBeVisible()
+  })
+
+  test("Defektes Glättungs-Token beim Laden: Seite benutzbar, Fehler nennt das Token, späterer Wechsel wirft nicht", async ({ page }) => {
+    const fehler: string[] = []
+    const seitenfehler: string[] = []
+    page.on("console", (m) => m.type() === "error" && fehler.push(m.text()))
+    page.on("pageerror", (e) => seitenfehler.push(e.message))
+    await page.emulateMedia({ reducedMotion: "no-preference" })
+    // Vor allen Seitenskripten: die Variable am Dokument kaputt setzen (überstimmt das Token auf :root)
+    await page.addInitScript(() => {
+      const stil = document.createElement("style")
+      stil.textContent = ":root:root { --motion-scroll-glaettung: kaputt; }"
+      document.addEventListener("DOMContentLoaded", () => document.head.append(stil))
+      new MutationObserver((_, o) => {
+        if (document.head) {
+          document.head.append(stil)
+          o.disconnect()
+        }
+      }).observe(document, { childList: true, subtree: true })
+    })
+    await laden(page)
+    expect(fehler.join("\n")).toContain("--motion-scroll-glaettung")
+    expect(await lenisAnzahl(page)).toBe(0)
+    await expect(page.locator("h1")).toBeVisible()
+    await page.emulateMedia({ reducedMotion: "reduce" })
+    await expect.poll(() => page.evaluate(() => matchMedia("(prefers-reduced-motion: reduce)").matches)).toBe(true)
+    await page.emulateMedia({ reducedMotion: "no-preference" })
+    await expect.poll(() => fehler.filter((f) => f.includes("--motion-scroll-glaettung")).length).toBeGreaterThan(1)
+    expect(seitenfehler).toEqual([])
+    expect(await lenisAnzahl(page)).toBe(0)
   })
 
   test("Axe, keine Konsolenfehler", async ({ page }) => {

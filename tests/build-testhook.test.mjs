@@ -3,7 +3,7 @@ import assert from "node:assert/strict"
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs"
 import { join } from "node:path"
 
-// Der Test-Hook window.__lenisCount darf nur in Dev-/Testbuilds existieren, nie in gebautem JavaScript (dist/).
+// Der Test-Hook window.__lenisCount und window.__lenis dürfen nur in Dev-/Testbuilds existieren, nie in gebautem JavaScript (dist/).
 const dist = join(process.cwd(), "dist")
 const vorhanden = existsSync(dist)
 if (!vorhanden && process.env.CI) throw new Error("dist/ fehlt: in CI vor test:scripts `npm run build` ausführen")
@@ -13,11 +13,11 @@ function jsDateien(ordner) {
   return readdirSync(ordner).flatMap((n) => {
     const pfad = join(ordner, n)
     if (statSync(pfad).isDirectory()) return jsDateien(pfad)
-    return /\.(m?js|html)$/.test(n) ? [pfad] : []
+    return /\.(m?js|html|map|json)$/.test(n) ? [pfad] : []
   })
 }
 
-test("dist: __lenisCount kommt in keinem JavaScript oder HTML des Builds vor", { skip: vorhanden ? false : grund }, () => {
-  const treffer = jsDateien(dist).filter((f) => readFileSync(f, "utf8").includes("__lenisCount"))
+test("dist: __lenis (Test-Hooks) kommt in keinem Datei des Builds (js, html, map, json) vor", { skip: vorhanden ? false : grund }, () => {
+  const treffer = jsDateien(dist).filter((f) => readFileSync(f, "utf8").includes("__lenis"))
   assert.deepEqual(treffer, [])
 })
