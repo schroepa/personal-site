@@ -21,6 +21,11 @@ interface Props {
   /** Name der Seite für das Schriftfeld */
   blatt: string
   noindex?: boolean
+  /** Artikel setzen og:type=article samt Veröffentlichungsdatum, Autor und Schlagwörter */
+  ogType?: "website" | "article"
+  articleDate?: Date
+  articleAuthor?: string
+  articleTags?: string[]
 }
 
 const {
@@ -30,6 +35,10 @@ const {
   ogImage,
   blatt,
   noindex = false,
+  ogType = "website",
+  articleDate,
+  articleAuthor,
+  articleTags = [],
 } = Astro.props
 
 const siteName = "ptrckschrdtr.de"
@@ -89,7 +98,7 @@ const themeInline = `(${applyStoredTheme.toString()})();document.documentElement
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
 
-    <meta property="og:type" content="website" />
+    <meta property="og:type" content={ogType} />
     <meta property="og:url" content={canonical} />
     <meta property="og:site_name" content={siteName} />
     <meta property="og:title" content={metaTitle} />
@@ -99,6 +108,9 @@ const themeInline = `(${applyStoredTheme.toString()})();document.documentElement
     <meta property="og:image:height" content={String(ogImageHeight)} />
     <meta property="og:image:alt" content={metaTitle} />
     <meta property="og:locale" content="de_DE" />
+    {ogType === "article" && articleDate && <meta property="article:published_time" content={articleDate.toISOString()} />}
+    {ogType === "article" && articleAuthor && <meta property="article:author" content={articleAuthor} />}
+    {ogType === "article" && articleTags.map((tag) => <meta property="article:tag" content={tag} />)}
 
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:site" content="@fertone" />
@@ -138,6 +150,7 @@ const themeInline = `(${applyStoredTheme.toString()})();document.documentElement
       import { initInhaltsverzeichnis } from "@/scripts/inhaltsverzeichnis"
       import { initKopieren } from "@/scripts/kopieren"
       import { initGalerieAkkordeon } from "@/scripts/galerie-akkordeon"
+      import { initFilter } from "@/scripts/filter"
 
       // Skripte starten nach jedem Seitenwechsel (ClientRouter) neu und räumen vorher auf,
       // damit keine doppelten Listener entstehen.
@@ -163,6 +176,7 @@ const themeInline = `(${applyStoredTheme.toString()})();document.documentElement
         document
           .querySelectorAll<HTMLElement>("[data-galerie-akkordeon]")
           .forEach((el) => sicher(() => initGalerieAkkordeon(el)))
+        document.querySelectorAll<HTMLElement>("[data-filter-root]").forEach((el) => sicher(() => initFilter(el)))
         document.body.setAttribute("data-bereit", "")
         document.documentElement.setAttribute("data-js", "")
       }

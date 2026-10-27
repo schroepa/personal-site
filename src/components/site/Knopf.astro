@@ -1,5 +1,6 @@
 ---
 // Pillenknopf (Figma button: sm, pill; primary und ghost). Link, wenn href gesetzt ist, sonst <button type="button">.
+// Ein ghost-Knopf mit aria-pressed="true" erscheint gewählt (wie primary).
 // Die Ghost-Farbe lässt sich über --knopf-ghost-farbe überschreiben (z. B. auf der Farbfläche des Kontakt-Panels).
 interface Props {
   art?: "primary" | "ghost"
@@ -61,5 +62,17 @@ const klasse = `knopf knopf-${art} text-label`
   }
   .knopf-ghost:active {
     background: var(--component-button-ghost-background-pressed);
+  }
+
+  /* Umschalter (aria-pressed): gewählt sieht aus wie primary (Themenfilter, Figma 266:23243) */
+  .knopf-ghost[aria-pressed="true"] {
+    background: var(--component-button-primary-background-default);
+    color: var(--component-button-primary-text-default);
+  }
+  .knopf-ghost[aria-pressed="true"]:hover {
+    background: var(--component-button-primary-background-hover);
+  }
+  .knopf-ghost[aria-pressed="true"]:active {
+    background: var(--component-button-primary-background-pressed);
   }
 </style>

@@ -1,379 +1,148 @@
 ---
-import BaseLayout from '@/layouts/BaseLayout.astro';
-import { getCollection } from 'astro:content';
-import { readingTime } from '@/lib/reading-time';
-import { blogCoverThumb } from '@/lib/cover-image';
+// Blog-Übersicht „Gedanken“ (Figma 266:23181 / 266:23730 / 266:24201): Seitenkopf mit Themenfiltern ·
+// Neu (jüngster Beitrag, groß) · übrige Beiträge nach Jahren absteigend · Kontakt-Panel.
+// Ohne JavaScript sind alle Beiträge sichtbar und die Filter versteckt (html[data-js]); src/scripts/filter.ts blendet aus.
+import { getCollection } from "astro:content"
+import SiteLayout from "@/layouts/SiteLayout.astro"
+import Abschnitt from "@/components/site/Abschnitt.astro"
+import ArtikelZeile from "@/components/site/ArtikelZeile.astro"
+import Knopf from "@/components/site/Knopf.astro"
+import KontaktPanel from "@/components/site/KontaktPanel.astro"
+import Seitenkopf from "@/components/site/Seitenkopf.astro"
+import { KONTAKT_EMAIL } from "@/data/kontakt"
+import { gruppiereNachJahr, themenListe, veroeffentlichte, zeilenMeta } from "@/lib/blog"
+import { coverMittel, coverThumbSrc } from "@/lib/cover-image"
+import { readingTime } from "@/lib/reading-time"
+import { artikelMeta } from "@/lib/startseite"
 
-const posts = await getCollection('blog', ({ data }) => !data.draft);
-const sorted = posts.sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+const slugVon = (id: string) => id.replace(/\.md$/, "")
 
-const formatDate = (date: Date) =>
-  new Intl.DateTimeFormat('de-DE', { year: 'numeric', month: 'short' }).format(date);
-
-// Tag-Häufigkeit für den Filter zählen, absteigend sortiert — häufigste
-// Themen zuerst, damit die Filterzeile mit dem Wichtigsten beginnt.
-const tagCounts = new Map<string, number>();
-for (const post of sorted) {
-  for (const tag of post.data.tags ?? []) {
-    tagCounts.set(tag, (tagCounts.get(tag) ?? 0) + 1);
-  }
-}
-const tags = [...tagCounts.entries()].sort((a, b) => b[1] - a[1]);
+const sortiert = veroeffentlichte(await getCollection("blog"))
+const [neu, ...rest] = sortiert
+const gruppen = gruppiereNachJahr(rest)
+const themen = themenListe(sortiert)
+const tagsAttr = (tags?: string[]) => JSON.stringify(tags ?? [])
 ---
 
-<BaseLayout title="Blog — Patrick Schröder" description="Gedanken zu Design, Frontend und Tooling.">
-  <!-- Hero: Header linksbündig am unteren Viewport-Rand -->
-  <div class="page-grid page-hero">
-    <header class="blog-header">
-      <h1 class="t-h1 mb-4" data-reveal="lines">Blog</h1>
-      <p class="t-lead text-muted-foreground prose-col">
-        Gedanken zu Design, Frontend-Entwicklung und den Tools dazwischen.
-      </p>
-    </header>
-  </div>
-
-  <!-- Liste scrollt darunter weiter -->
-  <div class="page-grid pb-24">
-    {tags.length > 0 && (
-      <div class="tag-filter" role="group" aria-label="Nach Thema filtern">
-        <button type="button" class="tag-filter-item is-active" data-tag-filter="" aria-pressed="true">
-          Alle <span class="tag-filter-count">{sorted.length}</span>
-        </button>
-        {tags.map(([tag, count]) => (
-          <button type="button" class="tag-filter-item" data-tag-filter={tag} aria-pressed="false">
-            {tag} <span class="tag-filter-count">{count}</span>
-          </button>
-        ))}
-      </div>
-    )}
-
-    <p class="tag-filter-empty" hidden>Keine Artikel mit diesem Tag.</p>
-
-    <ol class="post-list" aria-label="Alle Artikel">
-      {sorted.map((post) => {
-        const slug = post.id.replace(/\.md$/, '')
-        const mins = readingTime(post.body ?? '')
-
-        return (
-          <li class="post-item" data-tags={(post.data.tags ?? []).join('|')}>
-            <a
-              href={`/blog/${slug}`}
-              class="post-link"
-              data-cursor="link"
-            >
-              <!-- Thumbnail: immer sichtbar, kompakt -->
-              <div class="post-thumb" aria-hidden="true">
-                {post.data.coverImage ? (
-                  <img
-                    src={blogCoverThumb(post.data.coverImage)}
-                    alt=""
-                    loading="lazy"
-                    decoding="async"
-                    class="post-thumb-img"
-                  />
-                ) : (
-                  <div class="post-thumb-fallback"></div>
-                )}
-              </div>
-
-              <!-- Textblock: Meta, Titel, Beschreibung, Tags -->
-              <div class="post-body">
-                <div class="post-meta">
-                  <time datetime={post.data.date.toISOString()}>
-                    {formatDate(post.data.date)}
-                  </time>
-                  <span aria-hidden="true">·</span>
-                  <span>{mins} min</span>
-                </div>
-
-                <h2 class="post-title">{post.data.title}</h2>
-                <p class="post-desc">{post.data.description}</p>
-
-                {post.data.tags && post.data.tags.length > 0 && (
-                  <div class="post-tags">
-                    {post.data.tags.map((tag) => (
-                      <span class="post-tag">{tag}</span>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </a>
-          </li>
+<SiteLayout
+  title="Gedanken — Patrick Schröder"
+  description="Notizen über Systeme, Code und Handwerk: Was ich beim Bauen von Design Systems, Werkzeugen und Interfaces lerne."
+  blatt="Übersicht"
+>
+  <div data-filter-root>
+    <Seitenkopf
+      art="seite"
+      label="Gedanken"
+      titel="Notizen über Systeme, Code und Handwerk."
+      einleitung="Was ich beim Bauen von Design Systems, Werkzeugen und Interfaces lerne. Ehrlich, aus der Praxis, ohne Hochglanz."
+    >
+      {
+        themen.length > 0 && (
+          <div slot="zusatz" class="filter" data-filter-chips role="group" aria-label="Nach Thema filtern">
+            <Knopf art="ghost" aria-pressed="true">Alle</Knopf>
+            {themen.map((t) => (
+              <Knopf art="ghost" aria-pressed="false" data-tag={t}>
+                {t}
+              </Knopf>
+            ))}
+          </div>
         )
-      })}
-    </ol>
+      }
+    </Seitenkopf>
 
+    <div data-filter-liste>
+      {
+        neu && (
+          <div data-gruppe>
+            <Abschnitt id="neu" label="Neu" layout="links">
+              <div class="zeilen">
+                <div data-eintrag data-slug={slugVon(neu.id)} data-tags={tagsAttr(neu.data.tags)}>
+                  <ArtikelZeile
+                    groesse="gross"
+                    meta={artikelMeta(neu.data.tags, readingTime(neu.body ?? ""), neu.data.date)}
+                    titel={neu.data.title}
+                    auszug={neu.data.description}
+                    bild={coverMittel(neu.data.coverImage)}
+                    href={`/blog/${slugVon(neu.id)}`}
+                  />
+                </div>
+              </div>
+            </Abschnitt>
+          </div>
+        )
+      }
+      {
+        gruppen.map((g) => (
+          <div data-gruppe>
+            <Abschnitt id={`jahr-${g.jahr}`} label={String(g.jahr)} layout="links">
+              <div class="zeilen">
+                {g.eintraege.map((b) => (
+                  <div data-eintrag data-slug={slugVon(b.id)} data-tags={tagsAttr(b.data.tags)}>
+                    <ArtikelZeile
+                      groesse="klein"
+                      auszugAnzeigen
+                      meta={zeilenMeta(b.data.tags, b.data.date)}
+                      titel={b.data.title}
+                      auszug={b.data.description}
+                      bild={coverThumbSrc(b.data.coverImage)}
+                      href={`/blog/${slugVon(b.id)}`}
+                    />
+                  </div>
+                ))}
+              </div>
+            </Abschnitt>
+          </div>
+        ))
+      }
+    </div>
+    <p class="text-body leer" role="status" data-filter-leer></p>
   </div>
-</BaseLayout>
+
+  <div class="kontakt">
+    <KontaktPanel label="Kontakt" email={KONTAKT_EMAIL} />
+  </div>
+</SiteLayout>
 
 <style>
-  /* ── Hero: volle Viewporthöhe, Header unten links ───────────────────── */
-  .page-hero {
-    min-height: 100dvh;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
-    padding-bottom: 5rem;
-  }
-
-  /* ── Header ──────────────────────────────────────────────────────────── */
-  .blog-header {
-    margin-bottom: 0;
-  }
-
-  /* ── Tag-Filter: plain text wie .post-tag, kein Pill/Rahmen ───────────── */
-  .tag-filter {
+  /* Themenfilter: Knöpfe in einer umbrechenden Reihe (Figma 266:23243, Abstand 8); ohne JavaScript ausgeblendet */
+  .filter {
     display: flex;
     flex-wrap: wrap;
-    align-items: center;
-    row-gap: 0.625rem;
-    column-gap: 1.5rem;
-    padding-bottom: 1.5rem;
-    margin-bottom: 1.5rem;
-    border-bottom: 1px solid color-mix(in oklch, var(--foreground) 12%, transparent);
+    gap: var(--global-size-8);
   }
-
-  .tag-filter-item {
-    appearance: none;
-    background: none;
-    border: none;
-    padding: 0;
-    margin: 0;
-    cursor: pointer;
-    font-family: var(--font-sans);
-    font-size: var(--text-xs);
-    letter-spacing: var(--tracking-wide);
-    text-transform: uppercase;
-    color: var(--muted-foreground);
-    text-underline-offset: 4px;
-    transition: color 200ms ease;
-    -webkit-tap-highlight-color: transparent;
-  }
-
-  .tag-filter-item:hover {
-    color: var(--foreground);
-  }
-
-  .tag-filter-item:focus-visible {
-    outline: 2px solid var(--foreground);
-    outline-offset: 4px;
-    border-radius: 2px;
-  }
-
-  .tag-filter-item.is-active {
-    color: var(--foreground);
-    text-decoration: underline;
-  }
-
-  .tag-filter-count {
-    color: color-mix(in oklch, var(--muted-foreground) 70%, transparent);
-    font-variant-numeric: tabular-nums;
-  }
-
-  .tag-filter-item.is-active .tag-filter-count {
-    color: var(--muted-foreground);
-  }
-
-  .tag-filter-empty {
-    font-size: var(--text-sm);
-    color: var(--muted-foreground);
-    padding: 2rem 0;
-    margin: 0;
-  }
-
-  /* Gefilterte Items ausblenden statt aus dem DOM zu entfernen */
-  .post-item[hidden] {
+  :global(html:not([data-js])) .filter {
     display: none;
   }
 
-  /* ── Liste ───────────────────────────────────────────────────────────── */
-  .post-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    border-top: 1px solid color-mix(in oklch, var(--foreground) 12%, transparent);
+  /* Der Seitenkopf sitzt bündig unter dem Kopf (Figma 266:23228): Abschnittsabstand oben von <main> aufheben */
+  [data-filter-root] {
+    margin-block-start: calc(-1 * var(--layout-section-gap));
   }
 
-  .post-item {
-    /* Link übernimmt die gesamte Fläche */
+  /* Eintrag und Gruppe werden per hidden ausgeblendet; die Gruppe ist ein Raster und braucht die Regel ausdrücklich */
+  [data-eintrag][hidden],
+  [data-gruppe][hidden] {
+    display: none;
   }
 
-  /* ── Zeile: Thumbnail | Text ─────────────────────────────────────────── */
-  .post-link {
-    display: grid;
-    grid-template-columns: clamp(80px, 12vw, 160px) 1fr;
-    gap: 1.5rem;
-    align-items: start;
-    padding: 1.25rem 0;
-    border-bottom: 1px solid color-mix(in oklch, var(--foreground) 12%, transparent);
-    text-decoration: none;
-    color: var(--foreground);
-    transition: opacity 250ms ease;
-  }
-
-  .post-link:focus-visible {
-    outline: 2px solid var(--foreground);
-    outline-offset: 4px;
-  }
-
-  /* Kontext-Dimming: nicht-gehoverte Einträge zurücktreten */
-  .post-list:has(.post-link:hover) .post-link:not(:hover) {
-    opacity: 0.25;
-  }
-
-  /* ── Thumbnail ───────────────────────────────────────────────────────── */
-  .post-thumb {
-    width: 100%;
-    aspect-ratio: 3 / 2;
-    overflow: hidden;
-    background: var(--muted);
-    flex-shrink: 0;
-  }
-
-  .post-thumb-img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-    transition: transform 500ms cubic-bezier(0.25, 1, 0.5, 1);
-  }
-
-  .post-link:hover .post-thumb-img {
-    transform: scale(1.04);
-  }
-
-  .post-thumb-fallback {
-    width: 100%;
-    height: 100%;
-    background:
-      radial-gradient(ellipse 80% 80% at 20% 30%,
-        color-mix(in oklch, var(--mesh-warm) 50%, transparent) 0%, transparent 70%),
-      radial-gradient(ellipse 60% 60% at 80% 70%,
-        color-mix(in oklch, var(--mesh-cool) 40%, transparent) 0%, transparent 65%),
-      var(--muted);
-  }
-
-  /* ── Textblock ───────────────────────────────────────────────────────── */
-  .post-body {
+  /* Zeilen: 40 Abstand (Figma 266:23312) */
+  .zeilen {
     display: flex;
     flex-direction: column;
-    gap: 0.25rem;
-    padding-top: 0.125rem; /* optische Ausrichtung mit Thumbnail-Oberkante */
+    gap: var(--global-size-40);
+  }
+  .zeilen > :global(*) {
+    min-width: 0;
   }
 
-  .post-meta {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-size: var(--text-xs);
-    letter-spacing: var(--tracking-wide);
-    text-transform: uppercase;
-    color: var(--muted-foreground);
-    margin-bottom: 0.25rem;
-  }
-
-  .post-title {
-    font-size: var(--text-base);
-    font-weight: 500;
-    line-height: var(--leading-snug);
-    letter-spacing: var(--tracking-snug);
+  /* Statusmeldung bei 0 Treffern (leer, solange Beiträge sichtbar sind, dann ohne Höhe; bleibt im Dokument, damit die Ansage zuverlässig ist) */
+  .leer {
     margin: 0;
+    color: var(--theme-text-default);
   }
 
-  .post-desc {
-    font-size: var(--text-sm);
-    line-height: var(--leading-normal);
-    color: var(--muted-foreground);
-    margin: 0.125rem 0 0;
-    /* Maximal 2 Zeilen anzeigen */
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
-
-  /* ── Tags: plain text, kein Pill ────────────────────────────────────── */
-  .post-tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.625rem;
-    margin-top: 0.375rem;
-  }
-
-  .post-tag {
-    font-size: var(--text-xs);
-    letter-spacing: var(--tracking-wide);
-    text-transform: uppercase;
-    color: var(--muted-foreground);
-  }
-
-  /* ── Mobile ──────────────────────────────────────────────────────────── */
-  @media (max-width: 480px) {
-    .post-link {
-      grid-template-columns: 80px 1fr;
-      gap: 1rem;
-    }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .post-link,
-    .post-thumb-img { transition: none; }
-    .post-link:hover .post-thumb-img { transform: none; }
+  /* Kontakt: 80 Abstand zum Fuß (die Hauptfläche bringt schon den Abschnittsabstand mit) */
+  .kontakt {
+    margin-block-end: calc(var(--global-size-80) - var(--layout-section-gap));
   }
 </style>
-
-<script>
-  function initTagFilter() {
-    const filterGroup = document.querySelector<HTMLElement>('.tag-filter')
-    const items = document.querySelectorAll<HTMLLIElement>('.post-item')
-    const emptyMsg = document.querySelector<HTMLElement>('.tag-filter-empty')
-    if (!filterGroup || items.length === 0) return
-    if (filterGroup.dataset.filterInit) return
-    filterGroup.dataset.filterInit = '1'
-
-    const buttons = filterGroup.querySelectorAll<HTMLButtonElement>('[data-tag-filter]')
-
-    function applyFilter(tag: string) {
-      let visibleCount = 0
-      items.forEach((item) => {
-        const itemTags = (item.dataset.tags ?? '').split('|')
-        const match = tag === '' || itemTags.includes(tag)
-        item.hidden = !match
-        if (match) visibleCount++
-      })
-      if (emptyMsg) emptyMsg.hidden = visibleCount > 0
-
-      buttons.forEach((btn) => {
-        const isActive = (btn.dataset.tagFilter ?? '') === tag
-        btn.classList.toggle('is-active', isActive)
-        btn.setAttribute('aria-pressed', String(isActive))
-      })
-    }
-
-    buttons.forEach((btn) => {
-      btn.addEventListener('click', () => {
-        const tag = btn.dataset.tagFilter ?? ''
-        const url = new URL(window.location.href)
-        if (tag) {
-          url.searchParams.set('tag', tag)
-        } else {
-          url.searchParams.delete('tag')
-        }
-        window.history.pushState({}, '', url)
-        applyFilter(tag)
-      })
-    })
-
-    window.addEventListener('popstate', () => {
-      const tag = new URL(window.location.href).searchParams.get('tag') ?? ''
-      applyFilter(tag)
-    })
-
-    // Deep-Link: Filter aus der URL übernehmen, falls z.B. ein gefilterter
-    // Blog-Link geteilt wurde (?tag=Design%20Systems)
-    const initialTag = new URL(window.location.href).searchParams.get('tag') ?? ''
-    if (initialTag) applyFilter(initialTag)
-  }
-
-  document.addEventListener('astro:page-load', initTagFilter)
-</script>

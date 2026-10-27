@@ -1,56 +1,47 @@
 ---
-import PostLayout from '@/layouts/PostLayout.astro'
-import { getCollection, render } from 'astro:content'
-import type { GetStaticPaths } from 'astro'
+// Blogartikel im neuen Design. Veröffentlichte Beiträge, jüngste zuerst; Weiterlesen ohne den aktuellen Beitrag.
+import { getCollection, render } from "astro:content"
+import type { InferGetStaticPropsType } from "astro"
+import ArtikelLayout from "@/layouts/ArtikelLayout.astro"
+import { ueberschriftenFuerInhalt, veroeffentlichte, weiterlesen } from "@/lib/blog"
+import { readingTime } from "@/lib/reading-time"
 
-export const getStaticPaths: GetStaticPaths = async () => {
-  const posts = await getCollection('blog', ({ data }) => !data.draft)
-  const sorted = posts.sort((a, b) => b.data.date.getTime() - a.data.date.getTime())
-
-  return sorted.map((post, index) => {
-    const prev = sorted[index + 1] // älter = vorheriger
-    const next = sorted[index - 1] // neuer  = nächster
-
-    return {
-      params: { slug: post.id.replace(/\.md$/, '') },
-      props: {
-        post,
-        prev: prev ? {
-          slug: prev.id.replace(/\.md$/, ''),
-          title: prev.data.title,
-          description: prev.data.description,
-          tags: prev.data.tags ?? [],
-          coverImage: prev.data.coverImage,
-        } : undefined,
-        next: next ? {
-          slug: next.id.replace(/\.md$/, ''),
-          title: next.data.title,
-          description: next.data.description,
-          tags: next.data.tags ?? [],
-          coverImage: next.data.coverImage,
-        } : undefined,
-      },
-    }
-  })
+export async function getStaticPaths() {
+  // getStaticPaths wird aus dem Modul herausgehoben: Hilfsfunktionen müssen darin stehen
+  const slugVon = (id: string) => id.replace(/\.md$/, "")
+  const sortiert = veroeffentlichte(await getCollection("blog"))
+  return sortiert.map((post) => ({
+    params: { slug: slugVon(post.id) },
+    props: {
+      post,
+      weiter: weiterlesen(sortiert, post.id).map((b) => ({
+        slug: slugVon(b.id),
+        title: b.data.title,
+        description: b.data.description,
+        tags: b.data.tags ?? [],
+        date: b.data.date,
+        coverImage: b.data.coverImage,
+      })),
+    },
+  }))
 }
 
-const { post, prev, next } = Astro.props
-const { Content } = await render(post)
-const slug = post.id.replace(/\.md$/, '')
+type Props = InferGetStaticPropsType<typeof getStaticPaths>
+const slugVon = (id: string) => id.replace(/\.md$/, "")
+const { post, weiter } = Astro.props as Props
+const { Content, headings } = await render(post)
 ---
 
-<PostLayout
+<ArtikelLayout
   title={post.data.title}
   description={post.data.description}
   date={post.data.date}
   tags={post.data.tags}
   coverImage={post.data.coverImage}
-  body={post.body ?? ''}
-  pageUrl={`https://www.ptrckschrdtr.de/blog/${slug}`}
-  slug={slug}
-  kind="blog"
-  prev={prev}
-  next={next}
+  slug={slugVon(post.id)}
+  minuten={readingTime(post.body ?? "")}
+  eintraege={ueberschriftenFuerInhalt(headings)}
+  weiterlesen={weiter}
 >
   <Content />
-</PostLayout>
+</ArtikelLayout>

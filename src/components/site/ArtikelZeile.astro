@@ -11,8 +11,10 @@ interface Props {
   bild?: string
   /** Überschriftebene des Titels (Standard 3, unter einem Abschnitts-h2) */
   ebene?: 2 | 3 | 4
+  /** Auszug zeigen (Figma „Auszug anzeigen“): Standard bei gross, bei klein aus (Blog-Listen schalten ihn ein) */
+  auszugAnzeigen?: boolean
 }
-const { groesse, meta, titel, auszug, href, bild, ebene = 3 } = Astro.props
+const { groesse, meta, titel, auszug, href, bild, ebene = 3, auszugAnzeigen = groesse === "gross" } = Astro.props
 const Titel = `h${ebene}` as "h2" | "h3" | "h4"
 ---
 
@@ -23,7 +25,7 @@ const Titel = `h${ebene}` as "h2" | "h3" | "h4"
   <div class="text" data-text>
     <p class="text-label meta">{meta}</p>
     <Titel class="text-h3 titel"><a {href}>{titel}</a></Titel>
-    {groesse === "gross" && auszug && <p class="text-body auszug">{auszug}</p>}
+    {auszugAnzeigen && auszug && <p class={groesse === "gross" ? "text-body auszug" : "text-small auszug"}>{auszug}</p>}
     {groesse === "gross" && <p class="text-body mehr" aria-hidden="true">Artikel lesen →</p>}
   </div>
 </article>

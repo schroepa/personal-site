@@ -1,0 +1,169 @@
+/* Artikeltext im neuen Design (Figma 266:23558 und Prosa-Atome): gestaltet das gerenderte Markdown unter .prose.
+   Nur Figma-Tokens aus tokens.css. Wird ausschließlich von ArtikelLayout importiert.
+   Abdeckung: h2–h4, p, ul/ol, blockquote, pre/code, Inline-Code, a, hr, img/figure, strong/em. */
+
+.prose {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-stack-paragraph);
+  min-width: 0;
+  color: var(--theme-text-default);
+  overflow-wrap: anywhere;
+}
+
+.prose > * {
+  margin: 0;
+  min-width: 0;
+}
+
+/* Fließtext (Figma: text/prose = text/body) */
+.prose p,
+.prose li {
+  font-size: var(--text-body-size);
+  line-height: var(--text-body-line-height);
+  letter-spacing: var(--text-body-letter-spacing);
+  font-weight: var(--text-body-weight);
+}
+
+/* Zwischentitel; der Abstand zum Absatz davor ist der Absatzabstand (Figma 266:23573), kein eigener Rand.
+   scroll-margin: Sprungziel liegt nicht bündig am oberen Rand des Fensters. */
+.prose h2,
+.prose h3,
+.prose h4 {
+  color: var(--theme-text-strong);
+  scroll-margin-top: var(--layout-block-gap);
+}
+.prose h2 {
+  font-size: var(--text-h2-size);
+  line-height: var(--text-h2-line-height);
+  letter-spacing: var(--text-h2-letter-spacing);
+  font-weight: var(--text-h2-weight);
+}
+.prose h3 {
+  font-size: var(--text-h3-size);
+  line-height: var(--text-h3-line-height);
+  letter-spacing: var(--text-h3-letter-spacing);
+  font-weight: var(--text-h3-weight);
+}
+.prose h4 {
+  font-size: var(--text-lead-size);
+  line-height: var(--text-lead-line-height);
+  letter-spacing: var(--text-lead-letter-spacing);
+  font-weight: var(--text-h3-weight);
+}
+
+.prose strong {
+  color: var(--theme-text-strong);
+  font-weight: var(--text-h3-weight);
+}
+
+/* Links: Farben aus den Link-Tokens, Unterstreichung trägt die Erkennbarkeit (Farbe gleich dem Fließtext) */
+.prose a {
+  color: var(--link-color-default);
+  text-decoration: underline;
+  text-decoration-thickness: var(--global-border-1);
+  text-underline-offset: var(--link-gap);
+  border-radius: var(--link-radius);
+}
+.prose a:visited {
+  color: var(--link-color-visited);
+}
+.prose a:hover {
+  color: var(--link-color-hover);
+}
+.prose a:focus-visible {
+  outline: var(--link-border-width-focus) solid var(--link-border-focus);
+}
+
+/* Listen */
+.prose ul,
+.prose ol {
+  padding-inline-start: var(--global-size-24);
+}
+.prose li + li,
+.prose li > ul,
+.prose li > ol {
+  margin-top: var(--space-stack-heading-text);
+}
+
+/* Zitat (Figma 266:23581): eingerückt, text/lead in text/strong, ohne Fläche */
+.prose blockquote {
+  padding: var(--global-size-16) 0 var(--global-size-16) var(--global-size-48);
+  color: var(--theme-text-strong);
+}
+.prose blockquote p {
+  margin: 0;
+  font-size: var(--text-lead-size);
+  line-height: var(--text-lead-line-height);
+  letter-spacing: var(--text-lead-letter-spacing);
+  font-weight: var(--text-lead-weight);
+}
+.prose blockquote > * + * {
+  margin-top: var(--space-stack-paragraph);
+}
+
+/* Code: Geist Mono (Figma 266:23589: Fläche subtle, 16/24 Innenabstand, verschachtelter Radius) */
+.prose code,
+.prose pre {
+  font-family: var(--global-font-family-mono), monospace;
+  font-size: var(--text-mono-size);
+  line-height: var(--text-mono-line-height);
+  letter-spacing: var(--text-mono-letter-spacing);
+  font-weight: var(--text-code-weight);
+}
+
+.prose :not(pre) > code {
+  padding: var(--inline-code-padding-y) var(--inline-code-padding-x);
+  border-radius: var(--inline-code-radius);
+  background: var(--inline-code-background);
+  color: var(--inline-code-color-text);
+  overflow-wrap: anywhere;
+}
+
+/* Die Syntaxfarben von Shiki stehen als Inline-Style am Element; Figma kennt nur einfarbigen Code,
+   darum hier bewusst mit !important überschrieben. */
+.prose pre {
+  padding: var(--global-size-16) var(--global-size-24);
+  border-radius: var(--objekt-radius-verschachtelt);
+  corner-shape: squircle;
+  background: var(--code-block-background) !important;
+  color: var(--theme-text-strong) !important;
+  overflow-x: auto;
+  white-space: pre;
+  hyphens: none;
+  overflow-wrap: normal;
+}
+.prose pre code {
+  padding: 0;
+  border-radius: 0;
+  background: none;
+  color: inherit;
+}
+.prose pre span {
+  color: inherit !important;
+}
+
+/* Trennlinie */
+.prose hr {
+  width: 100%;
+  height: var(--divider-thickness);
+  border: 0;
+  background: var(--divider-color);
+}
+
+/* Bilder */
+.prose img {
+  width: 100%;
+  height: auto;
+  border-radius: var(--image-radius);
+  background: var(--image-background);
+}
+.prose figure > * {
+  margin: 0;
+}
+.prose figcaption {
+  margin-top: var(--space-stack-heading-text);
+  color: var(--theme-text-muted);
+  font-size: var(--text-small-size);
+  line-height: var(--text-small-line-height);
+}

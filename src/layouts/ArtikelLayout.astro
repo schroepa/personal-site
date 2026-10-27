@@ -1,0 +1,222 @@
+---
+// Artikelvorlage im neuen Design (Figma 266:23503; löst PostLayout.astro ab):
+// Seitenkopf art=artikel · Titelbild · Text über 7 von 9 Spalten mit Inhaltsverzeichnis (Figma 266:23558) ·
+// Weiterlesen (höchstens 2 Zeilen, ohne den aktuellen Beitrag) · Kontakt-Panel.
+// Lesefortschritt, Lightbox und Artikelfuß des alten Layouts stehen nicht in Figma und entfallen.
+import SiteLayout from "@/layouts/SiteLayout.astro"
+import Abschnitt from "@/components/site/Abschnitt.astro"
+import ArtikelZeile from "@/components/site/ArtikelZeile.astro"
+import Inhaltsverzeichnis from "@/components/site/Inhaltsverzeichnis.astro"
+import KontaktPanel from "@/components/site/KontaktPanel.astro"
+import Seitenkopf from "@/components/site/Seitenkopf.astro"
+import { KONTAKT_EMAIL } from "@/data/kontakt"
+import { zeilenMeta } from "@/lib/blog"
+import { blogCoverSrcset, coverThumbSrc, COVER_SIZES, isBlogCover } from "@/lib/cover-image"
+import { artikelMeta } from "@/lib/startseite"
+import "@/styles/neu-prose.css"
+
+export interface WeiterlesenEintrag {
+  slug: string
+  title: string
+  description: string
+  tags?: string[]
+  date: Date
+  coverImage?: string
+}
+
+interface Props {
+  title: string
+  description: string
+  date: Date
+  tags?: string[]
+  coverImage?: string
+  slug: string
+  /** Lesezeit in Minuten */
+  minuten: number
+  /** Zwischentitel (h2) für das Inhaltsverzeichnis */
+  eintraege: { id: string; text: string }[]
+  weiterlesen?: WeiterlesenEintrag[]
+}
+
+const { title, description, date, tags = [], coverImage, slug, minuten, eintraege, weiterlesen = [] } = Astro.props
+
+const siteUrl = "https://www.ptrckschrdtr.de"
+const pageUrl = `${siteUrl}/blog/${slug}`
+// Vorgerenderte Vorschaubilder (postbuild: generate-og-images) für Beiträge mit Titelbild
+const ogImage = coverImage ? `/images/og/blog-${slug}.png` : undefined
+const ogImageAbsolute = ogImage ? new URL(ogImage, siteUrl).toString() : `${siteUrl}/og-default.png`
+
+const artikelSchema = {
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  headline: title,
+  description,
+  datePublished: date.toISOString(),
+  dateModified: date.toISOString(),
+  author: { "@type": "Person", name: "Patrick Schröder", url: siteUrl },
+  publisher: { "@type": "Person", name: "Patrick Schröder", url: siteUrl },
+  image: ogImageAbsolute,
+  url: pageUrl,
+  inLanguage: "de-DE",
+  ...(tags.length > 0 && { keywords: tags.join(", ") }),
+}
+
+const coverSrcset = coverImage && isBlogCover(coverImage) ? blogCoverSrcset(coverImage) : undefined
+// Nach Figma braucht ein Inhaltsverzeichnis mindestens drei Zwischentitel
+const mitInhalt = eintraege.length >= 3
+---
+
+<SiteLayout
+  title={title}
+  description={description}
+  canonical={pageUrl}
+  ogImage={ogImage}
+  blatt="Artikel"
+  ogType="article"
+  articleDate={date}
+  articleAuthor="Patrick Schröder"
+  articleTags={tags}
+>
+  <script slot="head" is:inline type="application/ld+json" set:html={JSON.stringify(artikelSchema)} />
+
+  <div class="kopf">
+    <Seitenkopf art="artikel" label={artikelMeta(tags, minuten, date)} titel={title} einleitung={description} />
+  </div>
+
+  <div class="titelbild" data-titelbild>
+    <div class="bild">
+      {
+        coverImage && (
+          <img
+            src={coverImage}
+            srcset={coverSrcset}
+            sizes={coverSrcset ? COVER_SIZES : undefined}
+            alt=""
+            loading="eager"
+            fetchpriority="high"
+            decoding="async"
+          />
+        )
+      }
+    </div>
+  </div>
+
+  <Abschnitt id="artikel" label="Artikel" layout="links">
+    <div class="artikel-inhalt" data-artikel-inhalt>
+      <div class="prose" data-prose><slot /></div>
+      {
+        mitInhalt && (
+          <div class="verzeichnis">
+            <Inhaltsverzeichnis {eintraege} />
+          </div>
+        )
+      }
+    </div>
+  </Abschnitt>
+
+  {
+    weiterlesen.length > 0 && (
+      <div data-weiterlesen>
+        <Abschnitt id="weiterlesen" label="Weiterlesen" layout="links">
+          <div class="zeilen">
+            {weiterlesen.map((b) => (
+              <div data-eintrag data-slug={b.slug}>
+                <ArtikelZeile
+                  groesse="klein"
+                  meta={zeilenMeta(b.tags, b.date)}
+                  titel={b.title}
+                  auszug={b.description}
+                  bild={coverThumbSrc(b.coverImage)}
+                  href={`/blog/${b.slug}`}
+                />
+              </div>
+            ))}
+          </div>
+        </Abschnitt>
+      </div>
+    )
+  }
+
+  <div class="kontakt">
+    <KontaktPanel label="Kontakt" email={KONTAKT_EMAIL} />
+  </div>
+</SiteLayout>
+
+<style>
+  /* Der Seitenkopf sitzt bündig unter dem Kopf (Figma 266:23550): Abschnittsabstand oben von <main> aufheben */
+  .kopf {
+    margin-block-start: calc(-1 * var(--layout-section-gap));
+  }
+
+  /* Titelbild (Figma 266:23556): Höhe 240 / 360 / 640, großer Objektradius, 96 Abstand darunter */
+  .titelbild {
+    padding-bottom: var(--global-size-96);
+  }
+  .bild {
+    height: var(--size-240);
+    overflow: hidden;
+    border-radius: var(--objekt-radius-gross);
+    corner-shape: squircle;
+    background: var(--image-background);
+  }
+  .bild img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* Text und Inhaltsverzeichnis im Raster des Abschnitts; mobil ohne Verzeichnis (Figma 266:24481) */
+  .artikel-inhalt {
+    display: grid;
+    grid-template-columns: subgrid;
+    align-items: start;
+  }
+  .artikel-inhalt > * {
+    grid-column: 1 / -1;
+    min-width: 0;
+  }
+  .verzeichnis {
+    display: none;
+  }
+
+  .zeilen {
+    display: flex;
+    flex-direction: column;
+    gap: var(--global-size-40);
+  }
+  .zeilen > * {
+    min-width: 0;
+  }
+
+  /* Kontakt: 80 Abstand zum Fuß (die Hauptfläche bringt schon den Abschnittsabstand mit) */
+  .kontakt {
+    margin-block-end: calc(var(--global-size-80) - var(--layout-section-gap));
+  }
+
+  @media (min-width: 768px) {
+    .bild {
+      height: var(--size-360);
+    }
+    .artikel-inhalt > .prose {
+      grid-column: 1 / span 6;
+      grid-row: 1;
+    }
+    .artikel-inhalt > .verzeichnis {
+      display: block;
+      grid-column: 7 / span 2;
+      grid-row: 1;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .bild {
+      height: var(--global-size-640);
+    }
+    .artikel-inhalt > .prose {
+      grid-column: 1 / span 7;
+    }
+    .artikel-inhalt > .verzeichnis {
+      grid-column: 8 / span 2;
+    }
+  }
+</style>
