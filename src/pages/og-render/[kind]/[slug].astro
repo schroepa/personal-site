@@ -1,6 +1,6 @@
 ---
 import { getCollection } from 'astro:content'
-import type { GetStaticPaths } from 'astro'
+import '@/styles/neu.css'
 
 // Rein für den Build-Prozess: rendert pro Artikel/Projekt mit Cover-Bild eine
 // statische Seite, die per Playwright zu einem OG-Bild (1200×630) geschossen
@@ -12,7 +12,7 @@ import type { GetStaticPaths } from 'astro'
 // gesamten Screenshot-Lauf für alle Bilder mitreißt. Graustufen-Filter +
 // SVG-feTurbulence-Grain (dieselbe Technik wie GrainOverlay.astro) liefern
 // eine optisch sehr ähnliche, aber reine CSS/SVG-Annäherung ohne GPU-Prozess.
-export const getStaticPaths: GetStaticPaths = async () => {
+export async function getStaticPaths() {
   const posts = await getCollection('blog', ({ data }) => !data.draft && data.coverImage)
   const projects = await getCollection('projects', ({ data }) => data.coverImage)
 
@@ -29,7 +29,10 @@ export const getStaticPaths: GetStaticPaths = async () => {
   return [...blogPaths, ...projectPaths]
 }
 
-const { coverImage } = Astro.props
+interface Props {
+  coverImage: string
+}
+const { coverImage } = Astro.props as Props
 ---
 
 <!doctype html>
@@ -38,39 +41,48 @@ const { coverImage } = Astro.props
     <meta charset="UTF-8" />
     <meta name="robots" content="noindex, nofollow" />
     <title>og-render</title>
-    <style>
-      html, body { margin: 0; padding: 0; background: #fff; }
-      #frame { position: relative; width: 1200px; height: 630px; overflow: hidden; }
-      .frame-img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        filter: grayscale(1) contrast(1.15);
-      }
-      .frame-grain {
-        position: absolute;
-        inset: 0;
-        filter: url(#og-grain);
-        opacity: 0.1;
-        mix-blend-mode: overlay;
-        pointer-events: none;
-      }
-    </style>
   </head>
   <body>
-    <svg style="display:none" aria-hidden="true">
+    <svg class="filter-defs" aria-hidden="true" focusable="false">
       <defs>
-        <filter id="og-grain" x="0%" y="0%" width="100%" height="100%" color-interpolation-filters="sRGB">
-          <feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch" result="noiseOut" />
-          <feColorMatrix type="saturate" values="0" in="noiseOut" result="greyNoise" />
-          <feBlend in="SourceGraphic" in2="greyNoise" mode="overlay" result="blended" />
-          <feComposite in="blended" in2="SourceGraphic" operator="in" />
+        <!-- grayscale(1) contrast(1.15): Sättigung 0, dann linear um 1.15 um den Mittelwert (Achsenabschnitt 0.5 - 0.5 * 1.15) -->
+        <filter id="og-bild" color-interpolation-filters="sRGB">
+          <feColorMatrix type="saturate" values="0" />
+          <feComponentTransfer>
+            <feFuncR type="linear" slope="1.15" intercept="-0.075" />
+            <feFuncG type="linear" slope="1.15" intercept="-0.075" />
+            <feFuncB type="linear" slope="1.15" intercept="-0.075" />
+          </feComponentTransfer>
         </filter>
       </defs>
     </svg>
     <div id="frame">
       <img class="frame-img" src={coverImage} alt="" />
-      <div class="frame-grain"></div>
     </div>
   </body>
 </html>
+
+<style>
+  html,
+  body {
+    block-size: 100%;
+  }
+  .filter-defs {
+    position: absolute;
+    inline-size: 0;
+    block-size: 0;
+  }
+  #frame {
+    position: relative;
+    inline-size: 100%;
+    block-size: 100%;
+    overflow: hidden;
+  }
+  .frame-img {
+    inline-size: 100%;
+    block-size: 100%;
+    max-inline-size: none;
+    object-fit: cover;
+    filter: url(#og-bild);
+  }
+</style>

@@ -6,11 +6,8 @@ import { fileURLToPath } from "node:url"
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..")
 
-/** Dateien des alten Layers mit bekannten Typfehlern. Neue Dateien dürfen hier nie auftauchen. */
-// entfällt in Task 15b (og-render wird dort auf Tokens umgestellt)
-const LEGACY = new Set([
-  "src/pages/og-render/[kind]/[slug].astro", // coverImage: unknown (Task 15b)
-])
+/** Dateien mit bekannten Typfehlern. Seit Task 15b leer; der Mechanismus bleibt als Leitplanke: jede neue Datei mit Fehler schlägt fehl. */
+const LEGACY = new Set([])
 
 /** Dateien mit Fehlern aus der Ausgabe von `astro check` (ohne Farbcodes). */
 export function fehlerDateien(ausgabe) {

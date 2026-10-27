@@ -72,6 +72,10 @@ function collect(dir, match) {
   })
 }
 
+/** Werkzeugseite und OG-Render (Task 15b): Seiten mit eigenem Style-Block, dazu das CSS des Gradient-Generators. */
+const WERKZEUG_ASTRO = [join(root, "src/pages/tools/gradient-generator.astro"), join(root, "src/pages/og-render/[kind]/[slug].astro")]
+const WERKZEUG_CSS = [join(root, "src/components/gradient-generator.css")]
+
 function styleBlocks(astro) {
   return [...astro.matchAll(/<style[^>]*>([\s\S]*?)<\/style>/g)].map((m) => ({
     offset: astro.slice(0, m.index).split("\n").length,
@@ -131,8 +135,9 @@ test("scanCss: meldet Zeilennummern", () => {
 test("neue Styles (neu*.css, components/site) enthalten keine Literalwerte", () => {
   const files = [
     ...collect(join(root, "src/styles"), (n) => /^neu.*\.css$/.test(n)),
+    ...WERKZEUG_CSS,
   ]
-  assert.ok(files.length >= 2, "neu.css und neu-fonts.css erwartet")
+  assert.ok(files.length >= 3, "neu.css und neu-fonts.css erwartet")
   const problems = []
   for (const file of files) {
     for (const f of scanCss(readFileSync(file, "utf8"))) {
@@ -153,6 +158,7 @@ test("neue Styles (neu*.css, components/site) enthalten keine Literalwerte", () 
     join(root, "src/pages/404.astro"),
     ...collect(join(root, "src/pages/blog"), (n) => n.endsWith(".astro")),
     ...collect(join(root, "src/pages/projects"), (n) => n.endsWith(".astro")),
+    ...WERKZEUG_ASTRO,
   ]
   assert.ok(astroFiles.length >= 8, "Layout und Site-Komponenten erwartet")
   assert.ok(astroFiles.some((f) => f.endsWith("ArtikelLayout.astro")) && existsSync(join(root, "src/styles/neu-prose.css")), "ArtikelLayout und neu-prose.css erwartet")
@@ -176,7 +182,7 @@ test("@media-Bedingungen der Komponenten stammen alle aus tokens.css", () => {
   assert.ok(known.has("print"), "tokens.css sollte @media print enthalten")
   assert.ok(known.has("(min-width: 768px)"), "tokens.css sollte Breakpoints enthalten")
   const used = []
-  for (const file of collect(join(root, "src/styles"), (n) => /^neu.*\.css$/.test(n))) {
+  for (const file of [...collect(join(root, "src/styles"), (n) => /^neu.*\.css$/.test(n)), ...WERKZEUG_CSS]) {
     for (const c of mediaConditions(readFileSync(file, "utf8"))) used.push([file, c])
   }
   const astroFiles = [
@@ -193,6 +199,7 @@ test("@media-Bedingungen der Komponenten stammen alle aus tokens.css", () => {
     join(root, "src/pages/404.astro"),
     ...collect(join(root, "src/pages/blog"), (n) => n.endsWith(".astro")),
     ...collect(join(root, "src/pages/projects"), (n) => n.endsWith(".astro")),
+    ...WERKZEUG_ASTRO,
   ]
   for (const file of astroFiles) {
     for (const b of styleBlocks(readFileSync(file, "utf8"))) {
