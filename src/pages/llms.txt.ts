@@ -17,9 +17,9 @@ export const GET: APIRoute = async () => {
   })
 
   const lines: string[] = [
-    `# Patrick Schröder — UI Designer & Developer`,
+    `# Patrick Schrödter — UI Designer & Developer`,
     ``,
-    `> Patrick Schröder ist UI Designer und Frontend Developer.`,
+    `> Patrick Schrödter ist UI Designer und Frontend Developer.`,
     `> Diese Site zeigt ausgewählte Projekte und einen Blog zu den Themen`,
     `> Interface Design, Frontend-Entwicklung und Design Systems.`,
     `> Vollständige Inhalte: ${SITE}/llms-full.txt`,

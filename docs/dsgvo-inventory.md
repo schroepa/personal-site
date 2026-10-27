@@ -9,7 +9,7 @@
 
 ## Verantwortlicher (von dir ausfüllen)
 
-- Name: Patrick Schröder
+- Name: Patrick Schrödter
 - Adresse: `[PLZ Ort, Straße]`
 - E-Mail: kontakt@ptrckschrdtr.de
 
@@ -35,7 +35,7 @@
 |---|---|
 | **Zweck** | Einwilligungsverwaltung, Script-Blocking |
 | **Cookie-ID** | `302ab2a4-6e4a-43b3-82b6-f1d58c3f19f8` |
-| **Quelle** | `src/layouts/BaseLayout.astro` — `consent.cookiebot.com/uc.js`, `data-blockingmode="auto"` |
+| **Quelle** | `src/layouts/SiteLayout.astro` — `consent.cookiebot.com/uc.js`, `data-blockingmode="auto"` |
 | **Footer** | Button „Cookie-Einstellungen“ → `Cookiebot.renew()` |
 | **Rechtsgrundlage (typisch)** | Art. 6 Abs. 1 lit. c (Consent-Pflicht) / lit. f |
 
@@ -48,7 +48,7 @@
 | | |
 |---|---|
 | **ID** | `G-3SFN6YV6W9` |
-| **Quelle** | `BaseLayout.astro` — direktes `gtag.js` |
+| **Quelle** | entfernt (stand im alten `BaseLayout.astro`, seit dem Redesign nicht mehr im Code) |
 | **Consent** | Google Consent Mode v2 Defaults = `denied`; Update über Cookiebot prüfen |
 | **Rechtsgrundlage (typisch)** | Art. 6 Abs. 1 lit. a (Einwilligung) |
 
@@ -59,7 +59,7 @@
 | | |
 |---|---|
 | **Container** | `GTM-T4HLWZWZ` |
-| **Quelle** | `BaseLayout.astro` (Script + noscript-iframe) |
+| **Quelle** | entfernt (stand im alten `BaseLayout.astro`, seit dem Redesign nicht mehr im Code) |
 | **Hinweis** | GA4 läuft **zusätzlich** direkt — Doppelung vermeiden oder in Datenschutz erklären |
 
 ---
@@ -71,10 +71,10 @@
 | **Quelle** | `src/components/posthog.astro` |
 | **Env-Variablen** | `PUBLIC_POSTHOG_PROJECT_TOKEN`, `PUBLIC_POSTHOG_HOST` |
 | **Consent** | Lädt nur bei `Cookiebot.consent.statistics` |
-| **Events (Auszug)** | `project_clicked`, `blog_post_clicked`, `cv_downloaded`, `theme_toggled`, `contact_email_clicked`, `article_shared`, `ai_link_clicked` |
+| **Events** | nur Seitenaufrufe (`capture_pageview: "history_change"`); keine eigenen `posthog.capture(`-Aufrufe im Code (Test `tests/e2e/rechtliches.spec.ts`) |
 | **Rechtsgrundlage (typisch)** | Art. 6 Abs. 1 lit. a |
 
-**Deine Aufgabe:** AVV mit PostHog; EU-Hosting bestätigen; Retention in PostHog-Projekt setzen; **keine E-Mail-Adressen** in Events (Code prüfen: `contact_email_clicked`).
+**Deine Aufgabe:** AVV mit PostHog; EU-Hosting bestätigen; Retention in PostHog-Projekt setzen; keine eigenen Events mit personenbezogenen Daten ergänzen.
 
 ---
 
@@ -94,7 +94,7 @@
 | | |
 |---|---|
 | **Schlüssel** | `theme` (`dark` / `light`) |
-| **Quelle** | `BaseLayout.astro` — Dark-Mode-Toggle |
+| **Quelle** | `src/scripts/theme.ts`, `src/components/site/ThemeToggle.astro` — Dark-Mode-Toggle |
 | **Rechtsgrundlage (typisch)** | Art. 6 Abs. 1 lit. f — UX-Präferenz, kein Tracking |
 
 ---
@@ -103,9 +103,8 @@
 
 | Dienst | Wo |
 |--------|-----|
-| LinkedIn, Instagram, GitHub | Footer `BaseLayout.astro` |
-| LinkedIn Share | `ArticleFooter.astro` |
-| Claude, ChatGPT, Perplexity | `ArticleFooter.astro` — URL/Titel nur bei Klick in Query-String |
+| LinkedIn, Instagram, GitHub | Footer `src/components/site/SiteFooter.astro` |
+| LinkedIn Share, Claude, ChatGPT, Perplexity | entfallen (der alte `ArticleFooter.astro` ist mit dem Redesign entfernt) |
 
 ---
 

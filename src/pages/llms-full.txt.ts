@@ -26,11 +26,11 @@ export const GET: APIRoute = async () => {
   const separator = `\n${'─'.repeat(72)}\n`
 
   const lines: string[] = [
-    `# Patrick Schröder — UI Designer & Developer`,
+    `# Patrick Schrödter — UI Designer & Developer`,
     `# Vollständige Inhalte (llms-full.txt)`,
     `# ${SITE}`,
     ``,
-    `> Patrick Schröder ist UI Designer und Frontend Developer.`,
+    `> Patrick Schrödter ist UI Designer und Frontend Developer.`,
     `> Interface Design, Frontend-Entwicklung und Design Systems.`,
     ``,
     separator,
