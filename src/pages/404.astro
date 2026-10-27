@@ -1,70 +1,71 @@
 ---
-import BaseLayout from '@/layouts/BaseLayout.astro'
+// Fehlerseite im neuen Design (Figma „Fehlerseite“ 270:1113, Screen seite-404 270:1410): Seitenkopf mit drei Wegen,
+// darunter „Zuletzt geschrieben“ mit den zwei neuesten Artikeln (weniger Artikel: zeigen, was da ist; keiner: Block entfällt). noindex.
+import { getCollection } from "astro:content"
+import SiteLayout from "@/layouts/SiteLayout.astro"
+import Abschnitt from "@/components/site/Abschnitt.astro"
+import ArtikelZeile from "@/components/site/ArtikelZeile.astro"
+import Knopf from "@/components/site/Knopf.astro"
+import Seitenkopf from "@/components/site/Seitenkopf.astro"
+import { NAME } from "@/data/rechtliches"
+import { slugVon, zeilenMeta } from "@/lib/blog"
+import { coverThumbSrc } from "@/lib/cover-image"
+import { zuletztGeschrieben } from "@/lib/fehlerseite"
+
+const beitraege = zuletztGeschrieben(await getCollection("blog"))
 ---
 
-<BaseLayout
-  title="Seite nicht gefunden — Patrick Schröder"
-  description="Diese Seite existiert nicht oder wurde verschoben."
+<SiteLayout
+  title={`Seite nicht gefunden — ${NAME}`}
+  description="Diese Seite gibt es nicht. Vielleicht hat sich die Adresse geändert."
+  blatt="01/01 Fehler"
+  noindex
 >
-  <div class="page-grid not-found">
-    <span class="t-label text-muted-foreground not-found-eyebrow">404</span>
-    <h1 class="t-hero not-found-heading">Seite nicht gefunden.</h1>
-    <p class="t-lead text-muted-foreground not-found-text">
-      Die Seite existiert nicht oder wurde verschoben.
-    </p>
-    <div class="not-found-links">
-      <a href="/" class="not-found-link" data-cursor="link">Zur Startseite →</a>
-      <a href="/projects" class="not-found-link" data-cursor="link">Projekte ansehen →</a>
-      <a href="/blog" class="not-found-link" data-cursor="link">Blog lesen →</a>
+  <Seitenkopf
+    art="seite"
+    label="Fehler 404"
+    titel="Diese Seite gibt es nicht."
+    einleitung="Vielleicht hat sich die Adresse geändert, oder sie war nie da. Hier geht es weiter:"
+  >
+    <div slot="zusatz" class="wege">
+      <Knopf art="primary" href="/">Zur Startseite</Knopf>
+      <Knopf art="ghost" href="/projects">Arbeit</Knopf>
+      <Knopf art="ghost" href="/blog">Gedanken</Knopf>
     </div>
-  </div>
-</BaseLayout>
+  </Seitenkopf>
+
+  {
+    beitraege.length > 0 && (
+      <Abschnitt id="zuletzt-geschrieben" label="Zuletzt geschrieben">
+        <div class="zeilen">
+          {beitraege.map((b) => (
+            <ArtikelZeile
+              groesse="klein"
+              auszugAnzeigen={false}
+              meta={zeilenMeta(b.data.tags, b.data.date)}
+              titel={b.data.title}
+              bild={coverThumbSrc(b.data.coverImage)}
+              href={`/blog/${slugVon(b.id)}`}
+            />
+          ))}
+        </div>
+      </Abschnitt>
+    )
+  }
+</SiteLayout>
 
 <style>
-  .not-found {
-    min-height: 100dvh;
+  .wege {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--global-size-8);
+  }
+  .zeilen {
     display: flex;
     flex-direction: column;
-    justify-content: flex-end;
-    padding-bottom: 5rem;
+    gap: var(--global-size-40);
   }
-
-  .not-found-eyebrow {
-    margin-bottom: 1.5rem;
-  }
-
-  .not-found-heading {
-    line-height: 0.95;
-    margin-bottom: 1rem;
-  }
-
-  .not-found-text {
-    margin-bottom: 2.5rem;
-  }
-
-  .not-found-links {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-    align-items: flex-start;
-  }
-
-  .not-found-link {
-    color: var(--foreground);
-    text-decoration: none;
-    border-bottom: 1px solid color-mix(in oklch, var(--foreground) 25%, transparent);
-    padding-bottom: 0.125rem;
-    transition: border-color 200ms ease, opacity 200ms ease;
-  }
-
-  .not-found-link:hover {
-    border-color: var(--foreground);
-    opacity: 0.7;
-  }
-
-  @media (max-width: 640px) {
-    .not-found-links {
-      gap: 1rem;
-    }
+  .zeilen > :global(*) {
+    min-width: 0;
   }
 </style>

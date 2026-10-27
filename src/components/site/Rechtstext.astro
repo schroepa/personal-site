@@ -1,0 +1,81 @@
+---
+// Fließtext der Rechtsseiten (Figma „Rechtliches“ 243:24): Absätze, Adresszeilen und Listen aus src/data/rechtliches.ts.
+// Höchstens 7 der 9 Spalten wie die übrigen Abschnitte; Links erscheinen im Fließtext unterstrichen.
+import type { Block, Teil } from "@/data/rechtliches"
+
+interface Props {
+  bloecke: Block[]
+}
+const { bloecke } = Astro.props
+const istLink = (t: Teil): t is { text: string; href: string } => typeof t !== "string"
+const extern = (href: string) => /^https?:/.test(href)
+---
+
+<div class="rechtstext">
+  {
+    bloecke.map((b) => {
+      if (b.typ === "absatz") {
+        return (
+          <p class="text-body">
+            {b.kopf && <strong>{b.kopf} </strong>}
+            {b.teile.map((t) =>
+              istLink(t) ? (
+                <a href={t.href} {...(extern(t.href) ? { target: "_blank", rel: "noopener noreferrer" } : {})}>
+                  {t.text}
+                </a>
+              ) : (
+                t
+              )
+            )}
+          </p>
+        )
+      }
+      if (b.typ === "zeilen") {
+        return (
+          <p class="text-body">
+            {b.zeilen.map((zeile, i) => (
+              <>
+                {i > 0 && <br />}
+                {zeile.map((t) => (istLink(t) ? <a href={t.href}>{t.text}</a> : t))}
+              </>
+            ))}
+          </p>
+        )
+      }
+      return (
+        <ul class="text-body">
+          {b.eintraege.map((t) => (
+            <li>{istLink(t) ? <a href={t.href}>{t.text}</a> : t}</li>
+          ))}
+        </ul>
+      )
+    })
+  }
+</div>
+
+<style>
+  .rechtstext {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-stack-paragraph);
+    color: var(--theme-text-default);
+  }
+  p,
+  ul {
+    margin: 0;
+    overflow-wrap: anywhere;
+  }
+  ul {
+    padding-inline-start: var(--global-size-24);
+  }
+  a {
+    color: inherit;
+  }
+
+  /* Fließtext höchstens 7 der 9 Spalten (wie in den übrigen Abschnitten) */
+  @media (min-width: 1024px) {
+    .rechtstext {
+      grid-column: 1 / span 7;
+    }
+  }
+</style>
