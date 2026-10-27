@@ -14,6 +14,7 @@ import { gateAus, notfall, wachtStoppen } from "./gate"
 import { initHeroWoerter } from "./hero-woerter"
 import { initLabels } from "./labels"
 import { initLenis } from "./lenis"
+import { initLichtbandModul } from "./lichtband"
 import { initMagnet } from "./magnet"
 import { initRasterAufbau } from "./raster-aufbau"
 import { initRasterSpalte } from "./raster-spalte"
@@ -37,6 +38,7 @@ export const MODULES: Array<() => () => void> = [
   initMagnet,
   initBegleiter,
   initBildZoom,
+  initLichtbandModul,
 ]
 
 /** Alle Module einzeln abgesichert starten; gibt das gesammelte Teardown zurück. */
