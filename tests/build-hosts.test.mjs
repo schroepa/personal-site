@@ -38,3 +38,15 @@ test("gebaute Seiten des neuen Layers laden nur Ressourcen von der eigenen Domai
   }
   assert.deepEqual(probleme, [])
 })
+
+test("eigene Skriptdateien unter dist/js/ (früher Inline-Skripte) nennen nur erlaubte Hosts", { skip: vorhanden ? false : grund }, () => {
+  const ordner = join(dist, "js")
+  const probleme = []
+  for (const n of readdirSync(ordner)) {
+    for (const m of readFileSync(join(ordner, n), "utf8").matchAll(/https?:\/\/([a-zA-Z0-9.-]+)/g)) {
+      const h = m[1].toLowerCase()
+      if (!ERLAUBT.has(h) && !EIGENE.has(h)) probleme.push(`js/${n}: ${h}`)
+    }
+  }
+  assert.deepEqual(probleme, [])
+})

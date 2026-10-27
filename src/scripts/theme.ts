@@ -1,6 +1,6 @@
 /**
  * Theme: gespeichert ('light' | 'dark' in localStorage.theme) oder System.
- * `applyStoredTheme` läuft inline im <head> vor dem ersten Paint (siehe SiteLayout),
+ * `applyStoredTheme` läuft im Kopf-Skript /js/kopf.js vor dem ersten Paint (siehe kopf-skript.ts, SiteLayout),
  * deshalb muss die Funktion in sich geschlossen sein (keine Importe, keine Außenbezüge).
  */
 export function applyStoredTheme(): void {

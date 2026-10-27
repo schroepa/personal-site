@@ -11,8 +11,7 @@ import SiteHead from "@/components/site/SiteHead.astro"
 import SiteFooter from "@/components/site/SiteFooter.astro"
 import Suche from "@/components/site/Suche.astro"
 import { jsonLd } from "@/lib/jsonld"
-import { applyStoredTheme } from "@/scripts/theme"
-import { gateAn, MOTION_WATCHDOG_MS } from "@/scripts/motion/gate"
+import { KOPF_SKRIPT_PFAD } from "@/scripts/kopf-skript.ts"
 import "@/styles/neu.css"
 
 interface Props {
@@ -64,9 +63,6 @@ const personSchema = {
   jobTitle: "UI Designer & Frontend Developer",
 }
 
-// Vor dem ersten Paint: gespeichertes oder System-Theme setzen (kein Hell-Blitz), data-js setzen (kein offenes Menü beim Laden)
-// und das Bewegungs-Gate data-motion öffnen (nur mit JS und ohne reduzierte Bewegung; Watchdog siehe motion/gate.ts)
-const themeInline = `(${applyStoredTheme.toString()})();document.documentElement.setAttribute("data-js","");(${gateAn.toString()})(${MOTION_WATCHDOG_MS});`
 ---
 
 <!doctype html>
@@ -82,7 +78,9 @@ const themeInline = `(${applyStoredTheme.toString()})();document.documentElement
       is:inline></script>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <script is:inline data-cookieconsent="ignore" set:html={themeInline} />
+    <!-- Vor dem ersten Paint (klassisch, blockierend): Theme (kein Hell-Blitz), data-js und Bewegungs-Gate samt Watchdog.
+         Eigene Datei statt Inline-Skript, damit die CSP ohne 'unsafe-inline' auskommt (src/scripts/kopf-skript.ts). -->
+    <script is:inline src={KOPF_SKRIPT_PFAD} data-cookieconsent="ignore"></script>
     <meta name="generator" content={Astro.generator} />
     {noindex && <meta name="robots" content="noindex" />}
 

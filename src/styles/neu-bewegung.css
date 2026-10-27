@@ -1,5 +1,5 @@
 /*
- * Startzustände der Animationen. Sie gelten NUR unter html[data-motion], das ein Inline-Skript im Kopf
+ * Startzustände der Animationen. Sie gelten NUR unter html[data-motion], das das Kopf-Skript /js/kopf.js
  * setzt (nur mit JavaScript, nie bei reduzierter Bewegung; nach Ablauf des Watchdogs entfernt, siehe
  * src/scripts/motion/gate.ts). Ohne JS und bei reduzierter Bewegung steht alles sofort im Endzustand.
  * Die Module geben jedes Element mit data-anim-fertig frei, sobald es fertig ist.

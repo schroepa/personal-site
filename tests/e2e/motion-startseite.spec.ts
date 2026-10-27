@@ -2,6 +2,7 @@ import AxeBuilder from "@axe-core/playwright"
 import { warteAufRuhe } from "../helpers"
 import { expect, test, type Page } from "@playwright/test"
 import { MOTION_WATCHDOG_MS } from "../../src/scripts/motion/gate"
+import { KOPF_SKRIPT_PFAD } from "../../src/scripts/kopf-skript.ts"
 
 // Startseiten-Animationen (Task 12). Erwartungswerte kommen aus den Tokens der Seite (getComputedStyle),
 // nie als Zahl im Test; nur Verhaltenswerte (Toleranzen, Wartezeiten) stehen hier.
@@ -362,7 +363,10 @@ test.describe("mit Bewegung", () => {
 
   test("Watchdog: scheitert das Bündel, wird der Inhalt nach der Wartezeit sichtbar", async ({ page }) => {
     test.setTimeout(MOTION_WATCHDOG_MS + 30_000)
-    await page.route("**/*", (route) => (route.request().resourceType() === "script" ? route.abort() : route.continue()))
+    // Nur das Bündel scheitert; das Kopf-Skript (/js/kopf.js, früher inline) setzt Gate und Watchdog wie bisher
+    await page.route("**/*", (route) =>
+      route.request().resourceType() === "script" && !route.request().url().endsWith(KOPF_SKRIPT_PFAD) ? route.abort() : route.continue()
+    )
     await page.goto("/", { waitUntil: "domcontentloaded" })
     await expect(page.locator("html")).toHaveAttribute("data-motion", "")
     await expect(page.locator("[data-anim='wort']").first()).toHaveCSS("opacity", "0")

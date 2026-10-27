@@ -1,4 +1,5 @@
 import { expect, test, type Page } from "@playwright/test"
+import { KOPF_SKRIPT_PFAD } from "../../src/scripts/kopf-skript.ts"
 
 // Nachträge zu Task 12 (Task 13, Teil A): Ausfallsicherung, Laufzeitwechsel der Systemeinstellung, Gate vor dem
 // ersten Paint, Layoutverschiebung, Akkordeon ohne Sprung, Rasterspalte (Drossel, Live-Zeiger), Durchstreichen.
@@ -197,7 +198,11 @@ test.describe("Galerie-Akkordeon", () => {
     const gate = async (ohneSkripte: boolean) => {
       const kontext = await browser.newContext({ viewport: { width: 1440, height: 900 }, reducedMotion: "no-preference" })
       const seite = await kontext.newPage()
-      if (ohneSkripte) await seite.route("**/*", (r) => (r.request().resourceType() === "script" ? r.abort() : r.continue()))
+      // Bündel blockiert; das Kopf-Skript (/js/kopf.js, früher inline) läuft wie bisher
+      if (ohneSkripte)
+        await seite.route("**/*", (r) =>
+          r.request().resourceType() === "script" && !r.request().url().endsWith(KOPF_SKRIPT_PFAD) ? r.abort() : r.continue()
+        )
       await seite.goto("/", { waitUntil: ohneSkripte ? "domcontentloaded" : "load" })
       if (!ohneSkripte) await seite.waitForSelector("body[data-bereit]")
       // der Watchdog (4 s) ist noch nicht abgelaufen; Zustand sofort lesen
