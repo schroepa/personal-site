@@ -1,0 +1,41 @@
+---
+// Papierkorn: SVG-feTurbulence-Kachel (Technik aus docs/reference/atmosphaere.js, Prototyp v14).
+// Zwei Ebenen, weil die Fasern im hellen Modus dunkel (Farbe 0) und im dunklen hell (Farbe 1) sind.
+// Welche sichtbar ist, entscheidet nur das Token (--effekt-papierkorn-hell / -dunkel, 1 oder 0).
+const KACHEL = 260
+const kachel = (farbe: 0 | 1) =>
+  `<svg xmlns='http://www.w3.org/2000/svg' width='${KACHEL}' height='${KACHEL}'><filter id='k' x='0' y='0'><feTurbulence type='fractalNoise' baseFrequency='.68' numOctaves='4' seed='1' stitchTiles='stitch'/><feColorMatrix type='matrix' values='0 0 0 0 ${farbe} 0 0 0 0 ${farbe} 0 0 0 0 ${farbe} 1.6 0 0 0 -.62'/></filter><rect width='100%' height='100%' filter='url(#k)'/></svg>`
+const bild = (farbe: 0 | 1) => `url("data:image/svg+xml,${encodeURIComponent(kachel(farbe))}")`
+const stil = `--korn-hell:${bild(0)};--korn-dunkel:${bild(1)}`
+---
+
+<div data-papierkorn aria-hidden="true" style={stil}></div>
+
+<style>
+  [data-papierkorn] {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+  }
+
+  [data-papierkorn]::before,
+  [data-papierkorn]::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-repeat: repeat;
+    /* Kachel im Prototyp 260; nächste Token-Größe ist 256 (--global-size-256) */
+    background-size: var(--global-size-256);
+  }
+
+  [data-papierkorn]::before {
+    background-image: var(--korn-hell);
+    opacity: calc(var(--papierkorn-deckkraft) * var(--effekt-papierkorn-hell));
+  }
+
+  [data-papierkorn]::after {
+    background-image: var(--korn-dunkel);
+    opacity: calc(var(--papierkorn-deckkraft) * var(--effekt-papierkorn-dunkel));
+  }
+</style>

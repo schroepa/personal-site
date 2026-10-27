@@ -1,0 +1,50 @@
+---
+// Layout-Raster: 12 Spaltenelemente, sichtbar sind so viele, wie --layout-columns vorgibt.
+// Die übrigen landen in einer implizit angelegten Zeile der Höhe 0 und werden abgeschnitten.
+const SPALTEN = 12
+---
+
+<div data-raster aria-hidden="true">
+  {Array.from({ length: SPALTEN }, () => <div class="spalte" />)}
+</div>
+
+<style>
+  [data-raster] {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+    display: grid;
+    grid-template-columns: repeat(var(--layout-columns), minmax(0, 1fr));
+    grid-template-rows: 100%;
+    grid-auto-rows: 0;
+    column-gap: var(--layout-raster-spaltenabstand);
+    row-gap: 0;
+    padding-inline: var(--layout-raster-rand);
+    max-width: var(--layout-raster-breite);
+    margin-inline: auto;
+  }
+
+  /* Gepunktete Kanten: Punkt = --global-size-2, Lücke = --global-size-8 */
+  .spalte {
+    min-height: 0;
+    background-image:
+      repeating-linear-gradient(
+        to bottom,
+        var(--layout-raster-linie-spalte) 0 var(--global-size-2),
+        transparent var(--global-size-2) calc(var(--global-size-2) + var(--global-size-8))
+      ),
+      repeating-linear-gradient(
+        to bottom,
+        var(--layout-raster-linie-spalte) 0 var(--global-size-2),
+        transparent var(--global-size-2) calc(var(--global-size-2) + var(--global-size-8))
+      );
+    background-size:
+      var(--layout-raster-linie-staerke) 100%,
+      var(--layout-raster-linie-staerke) 100%;
+    background-position:
+      left top,
+      right top;
+    background-repeat: no-repeat;
+  }
+</style>

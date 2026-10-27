@@ -1,0 +1,18 @@
+---
+// Prüfseite für SiteLayout — noindex, nicht in der Sitemap (siehe astro.config.mjs).
+import SiteLayout from "@/layouts/SiteLayout.astro"
+---
+
+<SiteLayout
+  title="Prüfseite Layout"
+  description="Interne Prüfseite für das neue Basislayout."
+  blatt="Prüfblatt"
+  noindex
+>
+  <h1 class="text-h1">Prüfseite für das Layout</h1>
+  <p class="text-body">
+    Dies ist eine Prüfseite für das neue Basislayout mit Papierkorn, Raster und Schriftfeld. Der
+    Text ist lang genug, um mehrere Zeilen zu füllen und das Verhalten bei schmalen Breiten zu
+    zeigen, auch bei sehr langen deutschen Wörtern wie Donaudampfschifffahrtsgesellschaft.
+  </p>
+</SiteLayout>

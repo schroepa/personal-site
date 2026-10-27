@@ -1,0 +1,215 @@
+---
+// Suche: Auslöser im Site-Head (Figma search-trigger) und natives <dialog> (⌘K / Strg+K).
+// Der Dialog liegt außerhalb des Menüs, damit er auch bei geschlossenem Menü aufgeht;
+// deshalb zwei Teile: <Suche teil="ausloeser" /> im Kopf, <Suche teil="dialog" /> im Layout.
+// Index und Treffer wie bisher (Seiten, Projekte, Blog); Logik in src/scripts/suche.ts.
+import { getCollection } from "astro:content"
+import { icons } from "./icons"
+import { navigation } from "./navigation"
+
+interface Props {
+  teil: "ausloeser" | "dialog"
+}
+const { teil } = Astro.props
+
+let daten = ""
+if (teil === "dialog") {
+  const blog = (await getCollection("blog", ({ data }) => !data.draft))
+    .sort((a, b) => b.data.date.getTime() - a.data.date.getTime())
+    .map((post) => ({
+      title: post.data.title,
+      description: post.data.description,
+      href: `/blog/${post.id.replace(/\.md$/, "")}`,
+    }))
+  const projekte = (await getCollection("projects"))
+    .sort((a, b) => b.data.date.getTime() - a.data.date.getTime())
+    .map((projekt) => ({
+      title: projekt.data.title,
+      description: projekt.data.description,
+      href: `/projects/${projekt.id.replace(/\.md$/, "")}`,
+    }))
+  const index = {
+    staticPages: [{ title: "Start", href: "/" }, ...navigation.map((n) => ({ title: n.label, href: n.href }))],
+    projects: projekte,
+    posts: blog,
+  }
+  daten = JSON.stringify(index).replace(/</g, "\\u003c")
+}
+---
+
+{
+  teil === "ausloeser" && (
+    <button
+      type="button"
+      class="ausloeser"
+      data-suche-trigger
+      aria-keyshortcuts="Meta+K Control+K"
+      aria-haspopup="dialog"
+      aria-expanded="false"
+    >
+      <span class="beschriftung text-small">
+        <Fragment set:html={icons.magnifyingGlass} />
+        Suche
+      </span>
+      <kbd class="kbd text-small" aria-hidden="true">
+        <Fragment set:html={icons.command} />
+        K
+      </kbd>
+    </button>
+  )
+}
+
+{
+  teil === "dialog" && (
+    <>
+      <dialog class="suche" data-suche aria-label="Suche">
+        <div class="eingabezeile">
+          <input
+            type="text"
+            class="eingabe text-body"
+            data-suche-eingabe
+            placeholder="Seiten, Projekte, Blog durchsuchen…"
+            aria-label="Suche"
+            role="combobox"
+            aria-expanded="true"
+            aria-controls="suche-treffer"
+            autocomplete="off"
+            spellcheck="false"
+          />
+        </div>
+        <div class="treffer" id="suche-treffer" role="listbox" aria-label="Suchergebnisse" data-suche-treffer />
+        <div class="fuss text-small">
+          <span>
+            <kbd class="kbd">↵</kbd> Auswählen
+          </span>
+          <span>
+            <kbd class="kbd">Esc</kbd> Schließen
+          </span>
+        </div>
+      </dialog>
+      <script is:inline type="application/json" data-suche-daten set:html={daten} />
+    </>
+  )
+}
+
+<style is:global>
+  /* Auslöser */
+  .ausloeser {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--search-trigger-gap);
+    padding: var(--search-trigger-spacing-y) var(--search-trigger-spacing-x);
+    border: 0;
+    border-radius: var(--search-trigger-radius);
+    background: transparent;
+    color: var(--search-trigger-color);
+    font-family: inherit;
+    cursor: pointer;
+  }
+  .ausloeser:hover {
+    background: var(--search-trigger-background-hover);
+  }
+  .ausloeser:focus-visible {
+    outline: var(--search-trigger-border-width-focus) solid var(--search-trigger-border-focus);
+  }
+  .ausloeser .beschriftung {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--search-trigger-gap-inner);
+  }
+  .ausloeser svg {
+    width: var(--global-size-24);
+    height: var(--global-size-24);
+  }
+  .kbd {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--kbd-gap);
+    padding: var(--kbd-padding);
+    border-radius: var(--kbd-radius);
+    background: var(--kbd-background);
+    color: var(--kbd-color);
+    font-family: inherit;
+  }
+  .kbd svg {
+    width: var(--kbd-icon-size);
+    height: var(--kbd-icon-size);
+  }
+
+  /* Dialog */
+  .suche {
+    width: 100%;
+    max-width: var(--dialog-width);
+    margin-top: var(--global-size-96);
+    padding: 0;
+    border: var(--global-border-1) solid var(--theme-border-default);
+    border-radius: var(--dialog-radius);
+    background: var(--dialog-background);
+    color: var(--dialog-text);
+    overflow: hidden;
+  }
+  .suche[open] {
+    display: flex;
+    flex-direction: column;
+  }
+  .suche::backdrop {
+    backdrop-filter: blur(var(--global-size-4));
+  }
+  .suche .eingabezeile {
+    padding: var(--component-input-spacing-y) var(--component-input-spacing-x);
+    border-bottom: var(--global-border-1) solid var(--theme-border-default);
+  }
+  .suche .eingabe {
+    width: 100%;
+    padding: var(--component-input-spacing-y) 0;
+    border: 0;
+    background: transparent;
+    color: var(--input-text-value);
+    font-family: inherit;
+  }
+  .suche .eingabe::placeholder {
+    color: var(--input-text-placeholder);
+  }
+  .suche .treffer {
+    max-height: var(--global-size-320);
+    overflow-y: auto;
+    padding: var(--global-size-8);
+  }
+  .suche .suche-leer {
+    margin: 0;
+    padding: var(--global-size-24) var(--global-size-8);
+    text-align: center;
+    color: var(--theme-text-muted);
+  }
+  .suche .suche-gruppenkopf {
+    margin: 0;
+    padding: var(--global-size-4) var(--global-size-8);
+    color: var(--theme-text-muted);
+  }
+  .suche .suche-treffer {
+    display: flex;
+    flex-direction: column;
+    gap: var(--global-size-2);
+    padding: var(--global-size-8);
+    border-radius: var(--global-radius-8);
+    color: var(--theme-text-default);
+    text-decoration: none;
+  }
+  .suche .suche-treffer[aria-selected="true"] {
+    background: var(--theme-surface-muted);
+    color: var(--theme-text-strong);
+  }
+  .suche .suche-beschreibung {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    color: var(--theme-text-muted);
+  }
+  .suche .fuss {
+    display: flex;
+    gap: var(--global-size-16);
+    padding: var(--global-size-8) var(--global-size-16);
+    border-top: var(--global-border-1) solid var(--theme-border-default);
+    color: var(--theme-text-muted);
+  }
+</style>

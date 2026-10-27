@@ -1,0 +1,46 @@
+---
+// Theme-Toggle (Figma 97:2): Pille mit zwei Segmenten (Sonne, Mond), Gruppe „Farbschema“.
+// Vanilla: src/scripts/theme.ts hängt die Klicks an und pflegt aria-pressed.
+import { icons } from "./icons"
+---
+
+<div class="toggle" role="group" aria-label="Farbschema">
+  <button type="button" class="segment segment-hell" data-theme-wahl="light" aria-pressed="false" aria-label="Hell">
+    <Fragment set:html={icons.sun} />
+  </button>
+  <button type="button" class="segment segment-dunkel" data-theme-wahl="dark" aria-pressed="false" aria-label="Dunkel">
+    <Fragment set:html={icons.moon} />
+  </button>
+</div>
+
+<style>
+  .toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--theme-toggle-padding);
+    padding: var(--theme-toggle-padding);
+    background: var(--theme-toggle-background);
+    border-radius: var(--theme-toggle-radius);
+  }
+
+  .segment {
+    display: inline-flex;
+    padding: var(--theme-toggle-segment-y) var(--theme-toggle-segment-x);
+    border: 0;
+    border-radius: var(--theme-toggle-radius);
+    background: transparent;
+    color: var(--theme-text-default);
+    cursor: pointer;
+  }
+
+  .segment :global(svg) {
+    width: var(--theme-toggle-icon-size);
+    height: var(--theme-toggle-icon-size);
+  }
+
+  /* Gewähltes Segment: aus data-theme (steht schon vor dem ersten Paint), nicht erst aus aria-pressed */
+  :global(html:not([data-theme="dark"])) .segment-hell,
+  :global(html[data-theme="dark"]) .segment-dunkel {
+    background: var(--theme-toggle-selected);
+  }
+</style>

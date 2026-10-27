@@ -1,0 +1,93 @@
+---
+// Schriftfeld (Figma 224:229): fest unten, aria-hidden, drei Felder Blatt · Raster · Ort.
+// Die Werte füllt src/scripts/schriftfeld.ts; ohne JavaScript bleiben die Bezeichnungen und der Blattname.
+interface Props {
+  blatt: string
+}
+const { blatt } = Astro.props
+---
+
+<div data-schriftfeld aria-hidden="true">
+  <div class="feld feld-blatt">
+    <p class="text-label bezeichnung">Blatt</p>
+    <p class="text-mono wert" data-blatt-wert>{blatt}</p>
+  </div>
+  <div class="feld feld-raster">
+    <p class="text-label bezeichnung">Raster</p>
+    <p class="text-mono wert" data-raster-wert>&nbsp;</p>
+  </div>
+  <div class="feld feld-ort">
+    <p class="text-label bezeichnung">Berlin</p>
+    <p class="text-mono wert" data-zeit>&nbsp;</p>
+  </div>
+</div>
+
+<style>
+  /* Höhe und Abstand zum Rand stehen als --site-schriftfeld-* in SiteLayout (auch für den Cookie-Banner). */
+  [data-schriftfeld] {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: calc(var(--site-schriftfeld-versatz) + env(safe-area-inset-bottom));
+    pointer-events: none;
+    display: grid;
+    grid-template-columns: repeat(var(--layout-columns), minmax(0, 1fr));
+    column-gap: var(--schriftfeld-spaltenabstand);
+    padding-inline: var(--schriftfeld-rand);
+    max-width: var(--schriftfeld-breite);
+    margin-inline: auto;
+  }
+
+  .feld {
+    display: flex;
+    flex-direction: column;
+    gap: var(--schriftfeld-abstand);
+    align-self: start;
+    min-width: 0;
+    padding: var(--schriftfeld-innenabstand-y) var(--schriftfeld-innenabstand-x);
+    background: var(--schriftfeld-flaeche);
+    border: var(--schriftfeld-linie-staerke) solid var(--schriftfeld-linie);
+    border-radius: var(--schriftfeld-radius);
+    backdrop-filter: blur(var(--size-1));
+  }
+
+  .bezeichnung,
+  .wert {
+    margin: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  .bezeichnung {
+    color: var(--schriftfeld-bezeichnung-farbe);
+  }
+
+  .wert {
+    color: var(--schriftfeld-wert-farbe);
+  }
+
+  /* Felder ab Spalte 7 (Figma): Ort rechts, davor Raster, davor Blatt */
+  .feld-ort {
+    grid-column: -3 / span 2;
+  }
+  .feld-raster {
+    grid-column: -5 / span 2;
+  }
+  .feld-blatt {
+    grid-column: -8 / span 3;
+  }
+
+  /* Mobil (4 Spalten): Blatt und Ort, ohne Raster */
+  @container style(--layout-columns: 4) {
+    .feld-raster {
+      display: none;
+    }
+    .feld-blatt {
+      grid-column: 1 / span 2;
+    }
+    .feld-ort {
+      grid-column: 3 / span 2;
+    }
+  }
+</style>

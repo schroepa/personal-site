@@ -100,7 +100,12 @@ test("neue Styles (neu*.css, components/site) enthalten keine Literalwerte", () 
       problems.push(`${file}:${f.line} [${f.rule}] ${f.snippet}`)
     }
   }
-  for (const file of collect(join(root, "src/components/site"), (n) => n.endsWith(".astro"))) {
+  const astroFiles = [
+    ...collect(join(root, "src/components/site"), (n) => n.endsWith(".astro")),
+    join(root, "src/layouts/SiteLayout.astro"),
+  ]
+  assert.ok(astroFiles.length >= 8, "Layout und Site-Komponenten erwartet")
+  for (const file of astroFiles) {
     for (const b of styleBlocks(readFileSync(file, "utf8"))) {
       for (const f of scanCss(b.css)) {
         problems.push(`${file}:${b.offset + f.line} [${f.rule}] ${f.snippet}`)

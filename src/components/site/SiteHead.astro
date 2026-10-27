@@ -1,0 +1,141 @@
+---
+// Site-Head (Figma 103:2): Logo links; rechts Navigation, Farbschema, Suche.
+// Breit (12 Spalten): alles in einer Zeile. Schmal: Logo und Menü-Knopf, der Rest im Menü.
+// Ohne JavaScript bleibt das Menü offen (der Knopf erscheint erst mit html[data-js]).
+import ThemeToggle from "./ThemeToggle.astro"
+import Suche from "./Suche.astro"
+import { navigation } from "./navigation"
+
+const pfad = Astro.url.pathname.replace(/\/$/, "") || "/"
+---
+
+<header class="kopf">
+  <a class="logo" href="/" aria-label="PTRCKSCHRDTR, Startseite" aria-current={pfad === "/" ? "page" : undefined}>PTRCKSCHRDTR</a>
+
+  <button type="button" class="menue-knopf text-body" data-menue-knopf aria-expanded="false" aria-controls="site-menue">
+    Menü
+  </button>
+
+  <div class="rechts" id="site-menue" data-menue>
+    <nav class="navigation" aria-label="Hauptnavigation">
+      <ul>
+        {
+          navigation.map((punkt) => (
+            <li>
+              <a
+                class="punkt text-body"
+                href={punkt.href}
+                aria-current={pfad === punkt.href || pfad.startsWith(`${punkt.href}/`) ? "page" : undefined}
+              >
+                {punkt.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+    <ThemeToggle />
+    <Suche teil="ausloeser" />
+  </div>
+</header>
+
+<style>
+  .kopf {
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--mobile-menu-gap-tools);
+    width: 100%;
+    max-width: var(--layout-page-width);
+    margin-inline: auto;
+    padding: var(--site-head-spacing-y) var(--site-head-spacing-x);
+  }
+
+  .logo {
+    font-size: var(--text-wordmark-size);
+    line-height: var(--text-wordmark-line-height);
+    letter-spacing: var(--text-wordmark-letter-spacing);
+    font-weight: var(--global-font-weight-black);
+    color: var(--logo-color-default);
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .menue-knopf {
+    display: none;
+    padding: var(--search-trigger-spacing-y) var(--nav-item-spacing-x);
+    border: 0;
+    border-radius: var(--nav-item-radius);
+    background: var(--nav-item-background-hover);
+    color: var(--nav-item-color-default);
+    font-family: inherit;
+    cursor: pointer;
+  }
+
+  .rechts {
+    display: flex;
+    flex-basis: 100%;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--mobile-menu-gap-tools);
+  }
+
+  /* Mit JavaScript: Menü zu, bis der Knopf es öffnet */
+  :global(html[data-js]) .menue-knopf {
+    display: inline-flex;
+  }
+  :global(html[data-js]) .rechts {
+    display: none;
+  }
+  :global(html[data-js]) .rechts[data-offen] {
+    display: flex;
+  }
+
+  ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--navigation-gap);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .punkt {
+    display: inline-flex;
+    align-items: center;
+    padding: 0 var(--nav-item-spacing-x);
+    border-radius: var(--nav-item-radius);
+    color: var(--nav-item-color-default);
+    text-decoration: none;
+  }
+
+  .punkt:hover {
+    background: var(--nav-item-background-hover);
+  }
+
+  .punkt[aria-current="page"] {
+    color: var(--nav-item-color-active);
+    text-decoration: underline;
+  }
+
+  /* Breit: eine Zeile, Menü-Knopf weg */
+  @container style(--layout-columns: 12) {
+    .kopf {
+      flex-wrap: nowrap;
+    }
+    .menue-knopf,
+    :global(html[data-js]) .menue-knopf {
+      display: none;
+    }
+    .rechts,
+    :global(html[data-js]) .rechts {
+      display: flex;
+      flex-basis: auto;
+      flex-direction: row;
+      align-items: center;
+      gap: var(--site-head-gap-group);
+    }
+  }
+</style>

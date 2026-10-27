@@ -1,0 +1,235 @@
+---
+// Neues Basislayout (löst BaseLayout.astro seitenweise ab). Lädt ausschließlich neu.css.
+// Reihenfolge der Ebenen: Papierkorn und Raster (absolut, unter dem Inhalt), Kopf, Inhalt, Fuß,
+// danach das feste Schriftfeld und der Suchdialog.
+import { ClientRouter } from "astro:transitions"
+import PostHog from "@/components/posthog.astro"
+import Papierkorn from "@/components/site/Papierkorn.astro"
+import LayoutRaster from "@/components/site/LayoutRaster.astro"
+import Schriftfeld from "@/components/site/Schriftfeld.astro"
+import SiteHead from "@/components/site/SiteHead.astro"
+import SiteFooter from "@/components/site/SiteFooter.astro"
+import Suche from "@/components/site/Suche.astro"
+import { applyStoredTheme } from "@/scripts/theme"
+import "@/styles/neu.css"
+
+interface Props {
+  title: string
+  description?: string
+  canonical?: string
+  ogImage?: string
+  /** Name der Seite für das Schriftfeld */
+  blatt: string
+  noindex?: boolean
+}
+
+const {
+  title,
+  description = "Personal site of Patrick Schröder, UI Designer and Frontend Developer.",
+  canonical = Astro.url.href,
+  ogImage,
+  blatt,
+  noindex = false,
+} = Astro.props
+
+const siteName = "ptrckschrdtr.de"
+const siteUrl = "https://www.ptrckschrdtr.de"
+const ogImageURL = ogImage ? new URL(ogImage, siteUrl).toString() : `${siteUrl}/og-default.png`
+const ogImageWidth = ogImage ? 1200 : 1920
+const ogImageHeight = ogImage ? 630 : 1080
+
+// <title> auf ~60 Zeichen kürzen; die volle Überschrift bleibt die h1 der Seite
+function truncateTitle(value: string, max = 60): string {
+  if (value.length <= max) return value
+  return `${value.slice(0, max).replace(/\s+\S*$/, "")}…`
+}
+const metaTitle = truncateTitle(title)
+
+const personSchema = {
+  "@context": "https://schema.org",
+  "@type": "Person",
+  name: "Patrick Schröder",
+  url: siteUrl,
+  jobTitle: "UI Designer & Frontend Developer",
+}
+
+// Vor dem ersten Paint: gespeichertes oder System-Theme setzen (kein Hell-Blitz), JS-Marker setzen
+const themeInline = `(${applyStoredTheme.toString()})();document.documentElement.setAttribute("data-js","");`
+---
+
+<!doctype html>
+<html lang="de">
+  <head>
+    <!-- Cookiebot ZUERST: blockiert alle anderen Skripte bis zur Einwilligung -->
+    <script
+      id="Cookiebot"
+      src="https://consent.cookiebot.com/uc.js"
+      data-cbid="302ab2a4-6e4a-43b3-82b6-f1d58c3f19f8"
+      data-blockingmode="auto"
+      type="text/javascript"
+      is:inline></script>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script is:inline data-cookieconsent="ignore" set:html={themeInline} />
+    <meta name="generator" content={Astro.generator} />
+    {noindex && <meta name="robots" content="noindex" />}
+
+    <link rel="preload" href="/fonts/geist-latin.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/geist-mono-latin.woff2" as="font" type="font/woff2" crossorigin />
+
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <meta name="theme-color" content="#F4F2F0" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#24211F" media="(prefers-color-scheme: dark)" />
+
+    <title>{metaTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:site_name" content={siteName} />
+    <meta property="og:title" content={metaTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={ogImageURL} />
+    <meta property="og:image:width" content={String(ogImageWidth)} />
+    <meta property="og:image:height" content={String(ogImageHeight)} />
+    <meta property="og:image:alt" content={metaTitle} />
+    <meta property="og:locale" content="de_DE" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content="@fertone" />
+    <meta name="twitter:title" content={metaTitle} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImageURL} />
+    <meta name="twitter:image:alt" content={metaTitle} />
+
+    <script is:inline type="application/ld+json" set:html={JSON.stringify(personSchema)} />
+
+    <slot name="head" />
+
+    <ClientRouter />
+    <PostHog />
+  </head>
+  <body>
+    <a class="skip-link text-body" href="#inhalt">Zum Inhalt springen</a>
+
+    <div class="seite">
+      <Papierkorn />
+      <LayoutRaster />
+      <SiteHead />
+      <main id="inhalt">
+        <slot />
+      </main>
+      <SiteFooter />
+    </div>
+
+    <Schriftfeld blatt={blatt} />
+    <Suche teil="dialog" />
+
+    <script>
+      import { initThemeToggle, applyStoredTheme } from "@/scripts/theme"
+      import { initSchriftfeld } from "@/scripts/schriftfeld"
+      import { initSuche } from "@/scripts/suche"
+      import { initMenue } from "@/scripts/menue"
+
+      // Skripte starten nach jedem Seitenwechsel (ClientRouter) neu und räumen vorher auf,
+      // damit keine doppelten Listener entstehen.
+      let aufraeumen: Array<() => void> = []
+      const stop = () => {
+        aufraeumen.forEach((fn) => fn())
+        aufraeumen = []
+      }
+      // Sofort starten (das Modul läuft erst nach dem Parsen), nach jedem Seitenwechsel erneut.
+      // body[data-bereit] markiert ein fertig verdrahtetes Dokument und verhindert doppelten Start.
+      const start = () => {
+        if (document.body.hasAttribute("data-bereit")) return
+        stop()
+        aufraeumen = [initThemeToggle(), initSchriftfeld(), initSuche(), initMenue()]
+        document.body.setAttribute("data-bereit", "")
+      }
+      start()
+      document.addEventListener("astro:page-load", start)
+      document.addEventListener("astro:before-swap", (e) => {
+        stop()
+        // Theme und JS-Marker auf das eingehende Dokument übertragen
+        const neu = (e as unknown as { newDocument: Document }).newDocument.documentElement
+        neu.setAttribute("data-theme", document.documentElement.getAttribute("data-theme") ?? "light")
+        neu.setAttribute("data-js", "")
+      })
+      document.addEventListener("astro:after-swap", applyStoredTheme)
+    </script>
+  </body>
+</html>
+
+<style is:global>
+  html {
+    height: 100%;
+  }
+
+  body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100%;
+  }
+
+  :root {
+    /* Schriftfeld: Abstand zum unteren Rand (kein eigenes Token; nächste Größe) und Höhe aus den
+       Schriftfeld-Tokens: 2 × Linie + 2 × Innenabstand + Bezeichnung + Abstand + Wert */
+    --site-schriftfeld-versatz: var(--global-size-16);
+    --site-schriftfeld-hoehe: calc(
+      var(--schriftfeld-linie-staerke) + var(--schriftfeld-linie-staerke) + var(--schriftfeld-innenabstand-y) +
+        var(--schriftfeld-innenabstand-y) + var(--text-label-line-height) + var(--schriftfeld-abstand) +
+        var(--text-mono-line-height)
+    );
+  }
+
+  .seite {
+    position: relative;
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+  }
+
+  .seite > header,
+  .seite > main,
+  .seite > footer {
+    position: relative;
+  }
+
+  .seite > main {
+    flex: 1;
+    width: 100%;
+    max-width: var(--layout-page-width);
+    margin-inline: auto;
+    padding-inline: var(--layout-margin);
+    padding-block: var(--layout-section-gap);
+  }
+
+  .skip-link {
+    position: fixed;
+    z-index: 1;
+    top: var(--global-size-8);
+    left: var(--global-size-8);
+    padding: var(--global-size-12) var(--global-size-16);
+    border-radius: var(--global-radius-8);
+    background: var(--theme-surface-primary);
+    color: var(--theme-text-on-primary);
+    transform: translateY(-200%);
+  }
+
+  .skip-link:focus {
+    transform: none;
+  }
+
+  /* Cookie-Banner über dem Schriftfeld halten: Schriftfeldhöhe + Versatz oben drauf */
+  #CybotCookiebotDialog {
+    bottom: calc(
+      var(--site-schriftfeld-versatz) + var(--site-schriftfeld-hoehe) + var(--site-schriftfeld-versatz) +
+        env(safe-area-inset-bottom)
+    ) !important;
+  }
+</style>

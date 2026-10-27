@@ -1,0 +1,114 @@
+---
+// Site-Footer (Figma 116:605): Logo und Navigation, Trennlinie, Urheberhinweis und Rechtliches.
+// Dazu der Link „Cookie-Einstellungen“ (öffnet den Cookiebot-Dialog erneut).
+import { navigation } from "./navigation"
+
+const jahr = new Date().getFullYear()
+---
+
+<footer class="fuss">
+  <div class="oben">
+    <a class="logo" href="/" aria-label="PTRCKSCHRDTR, Startseite">PTRCKSCHRDTR</a>
+    <nav aria-label="Footer-Navigation">
+      <ul>
+        {navigation.map((punkt) => <li><a class="text-body" href={punkt.href}>{punkt.label}</a></li>)}
+      </ul>
+    </nav>
+  </div>
+  <hr class="trennlinie" />
+  <div class="unten">
+    <p class="urheber text-small">© {jahr} Patrick Schrödter, Berlin</p>
+    <nav aria-label="Rechtliches">
+      <ul>
+        <li><a class="text-body" href="/impressum">Impressum</a></li>
+        <li><a class="text-body" href="/datenschutz">Datenschutz</a></li>
+        <li>
+          <button type="button" class="text-body" data-cookie-einstellungen onclick="window.Cookiebot && window.Cookiebot.renew()">
+            Cookie-Einstellungen
+          </button>
+        </li>
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+<style>
+  .fuss {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: var(--site-footer-gap);
+    width: 100%;
+    max-width: var(--layout-page-width);
+    margin-inline: auto;
+    padding: var(--site-footer-spacing-y) var(--site-footer-spacing-x);
+    /* Platz, damit das feste Schriftfeld den Footer nicht verdeckt */
+    padding-bottom: calc(var(--site-footer-spacing-y) + var(--site-schriftfeld-hoehe) + var(--site-schriftfeld-versatz));
+  }
+
+  .oben,
+  .unten {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--site-footer-gap-links);
+  }
+
+  .logo {
+    font-size: var(--text-wordmark-size);
+    line-height: var(--text-wordmark-line-height);
+    letter-spacing: var(--text-wordmark-letter-spacing);
+    font-weight: var(--global-font-weight-black);
+    color: var(--logo-color-default);
+    text-decoration: none;
+  }
+
+  ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--global-size-24);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  a,
+  button {
+    color: var(--nav-item-color-default);
+    text-decoration: none;
+  }
+
+  button {
+    padding: 0;
+    border: 0;
+    background: none;
+    font-family: inherit;
+    cursor: pointer;
+  }
+
+  a:hover,
+  button:hover {
+    color: var(--nav-item-color-active);
+    text-decoration: underline;
+  }
+
+  .trennlinie {
+    width: var(--global-size-96);
+    height: var(--divider-thickness);
+    margin: 0;
+    border: 0;
+    background: var(--site-footer-divider);
+  }
+
+  .urheber {
+    margin: 0;
+    color: var(--site-footer-text);
+  }
+
+  @container style(--layout-columns: 4) {
+    .fuss {
+      padding-inline: var(--site-footer-spacing-x-mobil);
+    }
+  }
+</style>
