@@ -12,6 +12,9 @@
  */
 export const HOVER_ABSICHT_MS = 90
 
+/** Ereignis am Wurzelelement, wenn der offene Streifen wechselt (detail: von, nach). */
+export const WECHSEL = "galerie-akkordeon:wechsel"
+
 export function initGalerieAkkordeon(root: HTMLElement): () => void {
   const streifen = [...root.querySelectorAll<HTMLAnchorElement>(":scope > a")]
   if (streifen.length === 0) return () => {}
@@ -21,6 +24,7 @@ export function initGalerieAkkordeon(root: HTMLElement): () => void {
   let timer: ReturnType<typeof setTimeout> | undefined
 
   const setzen = (index: number) => {
+    const von = aktiv
     aktiv = index
     root.dataset.aktiv = String(index)
     streifen.forEach((s, i) => {
@@ -28,6 +32,8 @@ export function initGalerieAkkordeon(root: HTMLElement): () => void {
       if (i === index) s.setAttribute("aria-current", "true")
       else s.removeAttribute("aria-current")
     })
+    // Zustandswechsel melden (die Bewegung in motion/akkordeon.ts hängt sich hier an); der Start ist keiner
+    if (von !== index) root.dispatchEvent(new CustomEvent(WECHSEL, { detail: { von, nach: index } }))
   }
   setzen(aktiv)
 

@@ -5,7 +5,7 @@ const SPALTEN = 12
 ---
 
 <div data-raster aria-hidden="true">
-  {Array.from({ length: SPALTEN }, () => <div class="spalte" />)}
+  {Array.from({ length: SPALTEN }, () => <div class="spalte" data-anim="spalte" />)}
 </div>
 
 <style>
@@ -27,6 +27,7 @@ const SPALTEN = 12
 
   /* Gepunktete Kanten: Punkt = --global-size-2, Lücke = --global-size-8 */
   .spalte {
+    position: relative;
     min-height: 0;
     background-image:
       repeating-linear-gradient(
@@ -37,6 +38,33 @@ const SPALTEN = 12
       repeating-linear-gradient(
         to bottom,
         var(--layout-raster-linie-spalte) 0 var(--global-size-2),
+        transparent var(--global-size-2) calc(var(--global-size-2) + var(--global-size-8))
+      );
+    background-size:
+      var(--layout-raster-linie-staerke) 100%,
+      var(--layout-raster-linie-staerke) 100%;
+    background-position:
+      left top,
+      right top;
+    background-repeat: no-repeat;
+  }
+
+  /* Hervorhebung unter dem Zeiger: eigene Ebene mit denselben Kanten in kräftigerer Farbe. Ihre Deckkraft
+     (--spalte-an) treibt eine Feder in motion/raster-spalte.ts; ohne das Skript bleibt sie 0. */
+  .spalte::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    opacity: var(--spalte-an, 0);
+    background-image:
+      repeating-linear-gradient(
+        to bottom,
+        var(--theme-text-default) 0 var(--global-size-2),
+        transparent var(--global-size-2) calc(var(--global-size-2) + var(--global-size-8))
+      ),
+      repeating-linear-gradient(
+        to bottom,
+        var(--theme-text-default) 0 var(--global-size-2),
         transparent var(--global-size-2) calc(var(--global-size-2) + var(--global-size-8))
       );
     background-size:

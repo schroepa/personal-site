@@ -1,5 +1,6 @@
 @import "./tokens.css";
 @import "./neu-fonts.css";
+@import "./neu-bewegung.css";
 
 /* Basis der neuen Seiten: nur Figma-Tokens (tokens.css), kein Tailwind. */
 

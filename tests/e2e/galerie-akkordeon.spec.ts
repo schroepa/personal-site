@@ -127,6 +127,10 @@ test.describe("Galerie-Akkordeon", () => {
     expect(Math.abs((await bildBreite(2)) - imgVorher)).toBeLessThanOrEqual(1)
     await s.nth(0).focus()
     await page.keyboard.press("ArrowRight")
+    // Die Breiten laufen jetzt mit Feder (Task 12): messen, sobald der Streifen zur Ruhe gekommen ist (Inline-flex-grow entfernt)
+    await expect
+      .poll(() => s.evaluateAll((els) => els.every((e) => (e as HTMLElement).style.flexGrow === "")), { timeout: 6000 })
+      .toBe(true)
     const nachher = await offenBild(1)
     expect(Math.abs(nachher.width - vorher.width)).toBeLessThanOrEqual(1)
     expect(Math.abs((await bildBreite(1)) - imgVorher)).toBeLessThanOrEqual(1)

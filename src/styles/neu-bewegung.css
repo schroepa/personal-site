@@ -1,0 +1,24 @@
+/*
+ * Startzustände der Animationen. Sie gelten NUR unter html[data-motion], das ein Inline-Skript im Kopf
+ * setzt (nur mit JavaScript, nie bei reduzierter Bewegung; nach Ablauf des Watchdogs entfernt, siehe
+ * src/scripts/motion/gate.ts). Ohne JS und bei reduzierter Bewegung steht alles sofort im Endzustand.
+ * Die Module geben jedes Element mit data-anim-fertig frei, sobald es fertig ist.
+ * Die Bewegung selbst (Dauer, Feder, Versatz, Easing) kommt aus den Tokens und steht nicht hier.
+ */
+
+html[data-motion] [data-anim]:not([data-anim-fertig]) {
+  opacity: 0;
+}
+
+/* Rasterspalten bauen sich von oben auf (Beschnitt statt Deckkraft) */
+html[data-motion] [data-anim="spalte"]:not([data-anim-fertig]) {
+  opacity: 1;
+  clip-path: inset(0 0 100% 0);
+}
+
+/* Abschnittslinien zeichnen sich von links */
+html[data-motion] [data-anim="linie"]:not([data-anim-fertig]) {
+  opacity: 1;
+  transform: scaleX(0);
+  transform-origin: left;
+}

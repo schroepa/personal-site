@@ -48,13 +48,24 @@ const kapitel = DIGITAL_ART_KAPITEL
 >
   <div class="einstieg" id="einstieg">
     <Lichtband />
-    <p class="text-label kopfzeile">
+    <p class="text-label kopfzeile" data-anim="kicker">
       <span aria-hidden="true">→ </span>Design Engineer<span aria-hidden="true"> → </span>Berlin
     </p>
     <div class="aussage">
+      <!-- Der Name der h1 ist immer der Endtext. Die Wörter sind für die Animation einzeln gefasst
+           (data-anim). „Screens“ steht nicht im HTML: motion/durchstreichen.ts fügt es als aria-hidden-
+           Dekoration ein (data-alt), nur mit Bewegung. -->
       <h1 class="text-hero titel">
-        <span class="zeile">Ich entwerfe Systeme.</span>
-        <span class="zeile">Ich baue sie auch.</span>
+        <span class="zeile"
+          ><span class="wort" data-anim="wort">Ich</span> <span class="wort" data-anim="wort">entwerfe</span>
+          <span class="ersatz" data-ersatz data-alt="Screens"
+            ><span class="wort neu" data-anim="ersatz" data-neu>Systeme.</span></span
+          ></span
+        >
+        <span class="zeile"
+          ><span class="wort" data-anim="wort">Ich</span> <span class="wort" data-anim="wort">baue</span>
+          <span class="wort" data-anim="wort">sie</span> <span class="wort" data-anim="wort">auch.</span></span
+        >
       </h1>
       <p class="text-label scrollen" aria-hidden="true">Scrollen ↓</p>
     </div>
@@ -62,10 +73,10 @@ const kapitel = DIGITAL_ART_KAPITEL
 
   <Abschnitt id="ueber-mich" nummer="02" label="Über mich" layout="oben">
     <div class="ueber">
-      <p class="text-signatur signatur">
-        <span class="zeile">Design Engineer.</span>
-        <span class="zeile">Berlin.</span>
-        <span class="zeile">15+ Jahre.</span>
+      <p class="text-signatur signatur" data-signatur>
+        <span class="zeile"><span class="zeile-text" data-anim="zeile">Design Engineer.</span></span>
+        <span class="zeile"><span class="zeile-text" data-anim="zeile">Berlin.</span></span>
+        <span class="zeile"><span class="zeile-text" data-anim="zeile">15+ Jahre.</span></span>
       </p>
       <div class="text">
         <p class="text-body">
@@ -142,7 +153,7 @@ const kapitel = DIGITAL_ART_KAPITEL
     </div>
   </Abschnitt>
 
-  <div class="kontakt">
+  <div class="kontakt" id="kontakt">
     <KontaktPanel label="06 Kontakt" email={KONTAKT_EMAIL}>
       <Knopf slot="aktionen" art="ghost" href="/cv">Lebenslauf</Knopf>
     </KontaktPanel>
@@ -183,6 +194,38 @@ const kapitel = DIGITAL_ART_KAPITEL
   }
   .zeile {
     display: block;
+  }
+  /* Wörter und Signatur-Zeilen sind einzeln beweglich (Transform braucht ein Box-Element) */
+  .wort,
+  .zeile-text {
+    display: inline-block;
+  }
+  /* „Systeme.“ reserviert den Platz im Textfluss; das eingefügte „Screens“ (aria-hidden, nur mit Bewegung)
+     liegt darüber, bis es ersetzt wird. Vom Skript erzeugte Elemente tragen nicht die Scope-Klasse, daher :global. */
+  .ersatz {
+    position: relative;
+    display: inline-block;
+  }
+  .ersatz :global(.alt) {
+    position: absolute;
+    inset-block-start: 0;
+    inset-inline-start: 0;
+    display: inline-block;
+    white-space: nowrap;
+    color: var(--theme-text-default);
+  }
+  .ersatz :global(.alt-inhalt) {
+    position: relative;
+    display: inline-block;
+  }
+  /* Durchstreichen-Linie: mittig, Stärke aus dem Rahmen-Token */
+  .ersatz :global(.strich) {
+    position: absolute;
+    inset-inline: 0;
+    inset-block-start: 50%;
+    height: var(--global-border-2);
+    background: currentColor;
+    transform-origin: left;
   }
   .scrollen {
     color: var(--theme-text-default);
