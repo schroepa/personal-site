@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test"
-import { setTheme } from "../helpers"
+import { ROUTES, setTheme } from "../helpers"
 
 const URL = "/prototypes/tokens"
 
@@ -175,33 +175,34 @@ test("Fokusring: 2px solid, Offset 4px (--global-size-4), Farbe aus --theme-bord
   expect(o.color).toBe(o.token)
 })
 
-test("alte Seite rendert weiter mit Tailwind: kein data-site, Hintergrund = --background", async ({
-  browser,
-}) => {
-  const ctx = await browser.newContext({ colorScheme: "light" })
-  const page = await ctx.newPage()
-  // Muss eine Seite sein, die noch ein Legacy-Layout (Tailwind) nutzt: das Tool gradient-generator (ToolLayout). Entfällt mit Task 15.
-  await page.goto("/tools/gradient-generator")
-  const r = await page.evaluate(() => {
-    const probe = document.createElement("span")
-    document.body.appendChild(probe)
-    probe.style.color = getComputedStyle(document.documentElement)
-      .getPropertyValue("--background")
-      .trim()
-    const expected = getComputedStyle(probe).color
-    probe.remove()
-    return {
-      site: document.body.getAttribute("data-site"),
-      bg: getComputedStyle(document.body).backgroundColor,
-      expected,
-      tw: getComputedStyle(document.documentElement).getPropertyValue("--tw-border-style").trim(),
-    }
+// Seit Task 15b gibt es kein Tailwind mehr: keine Route (auch nicht das Tool) darf --tw-*-Eigenschaften
+// oder Stylesheet-Text mit „tailwindcss“ ausliefern.
+for (const route of [...ROUTES, "/tools/gradient-generator"]) {
+  test(`${route}: kein Tailwind (keine --tw-* auf :root, kein „tailwindcss“ in Stylesheets)`, async ({ page }) => {
+    await page.goto(route)
+    const r = await page.evaluate(() => {
+      const rootStyle = getComputedStyle(document.documentElement)
+      const twVars: string[] = []
+      for (let i = 0; i < rootStyle.length; i++) {
+        if (rootStyle[i].startsWith("--tw-")) twVars.push(rootStyle[i])
+      }
+      let text = ""
+      for (const sheet of Array.from(document.styleSheets)) {
+        try {
+          for (const rule of Array.from(sheet.cssRules)) text += rule.cssText
+        } catch {
+          // fremdes Stylesheet (z. B. Cookiebot) ohne Zugriff
+        }
+      }
+      const inline = Array.from(document.querySelectorAll("style"))
+        .map((n) => n.textContent)
+        .join("")
+      return { twVars, hasBanner: /tailwindcss/i.test(text + inline) }
+    })
+    expect(r.twVars).toEqual([])
+    expect(r.hasBanner).toBe(false)
   })
-  expect(r.site).toBeNull()
-  expect(r.bg).not.toBe("rgb(244, 242, 240)")
-  expect(r.bg).toBe(r.expected)
-  await ctx.close()
-})
+}
 
 test("neue Testseite lädt kein Tailwind", async ({ page }) => {
   await page.goto(URL)
@@ -215,7 +216,9 @@ test("neue Testseite lädt kein Tailwind", async ({ page }) => {
     for (const sheet of Array.from(document.styleSheets)) {
       try {
         for (const rule of Array.from(sheet.cssRules)) text += rule.cssText
-      } catch {}
+      } catch {
+        // kein Zugriff
+      }
     }
     const inline = Array.from(document.querySelectorAll("style"))
       .map((n) => n.textContent)
