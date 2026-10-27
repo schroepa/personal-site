@@ -1,0 +1,327 @@
+/*
+ * Grainy Gradient Generator: Vanilla-CSS auf den Figma-Tokens (tokens.css), kein Tailwind.
+ * Es gibt kein eigenes Figma-Design für das Tool. Bausteine kommen aus den vorhandenen Komponenten-Tokens:
+ *   Knopf  -> --component-button-primary-*, --component-button-sm-*, --component-button-radius-pill
+ *   Felder -> --input-*, --select-*, --component-input-*
+ *   Regler -> --theme-surface-primary / --theme-surface-muted (Figma kennt keinen Slider), Griff aus --switch-knob-size
+ *   Orbs   -> --objekt-* (Fläche, Radius), Trennlinien --theme-border-default
+ * Dynamische Werte (Kugelposition, Farbe, Füllstand der Regler) setzt das Skript inline; hier stehen keine Literale.
+ */
+
+/* Ohne JavaScript ist das Tool nutzlos: die Seite zeigt dann nur den Hinweis im <noscript> */
+html:not([data-js]) [data-gradient-generator] {
+  display: none;
+}
+
+.gg {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--layout-block-gap);
+  align-items: start;
+}
+
+@media (min-width: 1024px) {
+  .gg {
+    grid-template-columns: minmax(0, 1fr) var(--global-size-320);
+    gap: var(--layout-gutter);
+  }
+  .gg-vorschau {
+    position: sticky;
+    top: var(--global-size-96);
+  }
+}
+
+/* Vorschau */
+.gg-vorschau {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  block-size: var(--global-size-320);
+  border-radius: var(--objekt-radius);
+  corner-shape: squircle;
+}
+@media (min-width: 768px) {
+  .gg-vorschau {
+    block-size: var(--global-size-480);
+  }
+}
+@media (min-width: 1024px) {
+  .gg-vorschau {
+    block-size: var(--global-size-640);
+  }
+}
+
+.gg-flaeche {
+  position: absolute;
+  inset: 0;
+}
+.gg-kugel {
+  position: absolute;
+  border-radius: var(--global-radius-full);
+  pointer-events: none;
+}
+.gg-korn {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* Bedienfeld */
+.gg-felder {
+  display: flex;
+  flex-direction: column;
+  gap: var(--layout-block-gap);
+  min-width: 0;
+  padding: var(--global-size-16);
+  border-radius: var(--objekt-radius);
+  corner-shape: squircle;
+  background: var(--objekt-flaeche);
+  color: var(--theme-text-on-container);
+}
+
+.gg-gruppe {
+  display: flex;
+  flex-direction: column;
+  gap: var(--global-size-8);
+  min-width: 0;
+}
+.gg-gruppe + .gg-gruppe {
+  padding-top: var(--layout-block-gap);
+  border-top: var(--global-border-1) solid var(--theme-border-default);
+}
+.gg-titel {
+  margin: 0;
+  color: var(--theme-text-muted);
+}
+
+/* Presets */
+.gg-presets {
+  display: flex;
+  gap: var(--global-size-12);
+  padding-bottom: var(--global-size-4);
+  overflow-x: auto;
+}
+.gg-preset {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--global-size-4);
+  padding: var(--global-size-4);
+  border: 0;
+  border-radius: var(--objekt-radius-verschachtelt);
+  background: transparent;
+  color: var(--theme-text-muted);
+  font-family: inherit;
+  cursor: pointer;
+}
+.gg-vorschaubild {
+  display: block;
+  inline-size: var(--global-size-64);
+  block-size: var(--global-size-40);
+  border-radius: var(--objekt-radius-klein);
+  border: var(--input-border-width) solid var(--input-border-default);
+}
+.gg-presetname {
+  max-inline-size: var(--global-size-80);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.gg-preset:hover .gg-vorschaubild {
+  border-color: var(--input-border-hover);
+}
+.gg-preset[aria-pressed="true"] {
+  color: var(--theme-text-strong);
+}
+.gg-preset[aria-pressed="true"] .gg-vorschaubild {
+  border-color: var(--theme-surface-primary);
+  outline: var(--input-border-width-focus) solid var(--theme-surface-primary);
+}
+
+/* Orbs: native <details name> (immer nur einer offen) */
+.gg-orb {
+  border-bottom: var(--global-border-1) solid var(--theme-border-default);
+}
+.gg-orbkopf {
+  display: flex;
+  align-items: center;
+  gap: var(--global-size-12);
+  padding-block: var(--global-size-12);
+  list-style: none;
+  cursor: pointer;
+  color: var(--theme-text-strong);
+}
+.gg-orbkopf::-webkit-details-marker {
+  display: none;
+}
+.gg-orbkopf::after {
+  content: "+" / "";
+  margin-inline-start: auto;
+  color: var(--theme-text-muted);
+}
+.gg-orb[open] > .gg-orbkopf::after {
+  content: "–" / "";
+}
+.gg-punkt {
+  flex: none;
+  inline-size: var(--global-size-16);
+  block-size: var(--global-size-16);
+  border-radius: var(--global-radius-full);
+  border: var(--global-border-1) solid var(--theme-border-default);
+}
+.gg-orbinhalt {
+  display: flex;
+  flex-direction: column;
+  gap: var(--global-size-4);
+  padding-bottom: var(--global-size-16);
+}
+
+/* Zeilen: Bezeichnung, Regler/Farbfeld, Wert */
+.gg-zeile {
+  display: grid;
+  grid-template-columns: var(--global-size-80) minmax(0, 1fr) var(--global-size-56);
+  align-items: center;
+  gap: var(--global-size-8);
+  padding-block: var(--global-size-4);
+}
+.gg-zeile-farbe {
+  grid-template-columns: var(--global-size-80) var(--global-size-40) minmax(0, 1fr);
+}
+.gg-bezeichnung {
+  color: var(--theme-text-muted);
+  overflow-wrap: anywhere;
+}
+.gg-wert {
+  color: var(--theme-text-muted);
+  text-align: end;
+}
+.gg-zeile-farbe .gg-wert {
+  text-align: start;
+}
+
+.gg-farbe {
+  appearance: none;
+  inline-size: var(--global-size-40);
+  block-size: var(--global-size-28);
+  padding: 0;
+  border: var(--input-border-width) solid var(--input-border-default);
+  border-radius: var(--component-input-radius);
+  background: var(--input-background-default);
+  cursor: pointer;
+}
+.gg-farbe::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+.gg-farbe::-webkit-color-swatch {
+  border: 0;
+  border-radius: var(--component-input-radius);
+}
+.gg-farbe::-moz-color-swatch {
+  border: 0;
+  border-radius: var(--component-input-radius);
+}
+
+/* Regler: Spur = surface/muted, Füllung = surface/primary (Anteil in --fuellung vom Skript), Griff = Schalter-Knauf */
+.gg-regler {
+  appearance: none;
+  inline-size: 100%;
+  block-size: var(--switch-knob-size);
+  margin: 0;
+  background: transparent;
+  cursor: pointer;
+}
+.gg-regler::-webkit-slider-runnable-track {
+  block-size: var(--global-size-4);
+  border-radius: var(--global-radius-full);
+  background: linear-gradient(to right, var(--theme-surface-primary) var(--fuellung), var(--theme-surface-muted) var(--fuellung));
+}
+.gg-regler::-moz-range-track {
+  block-size: var(--global-size-4);
+  border-radius: var(--global-radius-full);
+  background: var(--theme-surface-muted);
+}
+.gg-regler::-moz-range-progress {
+  block-size: var(--global-size-4);
+  border-radius: var(--global-radius-full);
+  background: var(--theme-surface-primary);
+}
+.gg-regler::-webkit-slider-thumb {
+  appearance: none;
+  inline-size: var(--switch-knob-size);
+  block-size: var(--switch-knob-size);
+  /* Griff (20) auf der Spur (4) zentrieren: (4 - 20) / 2 = -8 */
+  margin-top: calc(var(--global-size-8) * -1);
+  border: var(--global-border-2) solid var(--theme-surface-container);
+  border-radius: var(--global-radius-full);
+  background: var(--theme-surface-primary);
+}
+.gg-regler::-moz-range-thumb {
+  inline-size: var(--switch-knob-size);
+  block-size: var(--switch-knob-size);
+  box-sizing: border-box;
+  border: var(--global-border-2) solid var(--theme-surface-container);
+  border-radius: var(--global-radius-full);
+  background: var(--theme-surface-primary);
+}
+.gg-regler:hover::-webkit-slider-thumb {
+  background: var(--theme-surface-primary-hover);
+}
+.gg-regler:hover::-moz-range-thumb {
+  background: var(--theme-surface-primary-hover);
+}
+
+/* Export */
+.gg-exportzeile {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--global-size-8);
+}
+.gg-auswahl {
+  flex: 1;
+  min-inline-size: 0;
+  padding: var(--select-spacing-y) var(--select-spacing-x);
+  border: var(--select-border-width) solid var(--select-border-default);
+  border-radius: var(--select-radius);
+  background: var(--select-background-default);
+  color: var(--select-text-value);
+  font-family: inherit;
+}
+.gg-auswahl:hover {
+  border-color: var(--select-border-hover);
+}
+.gg-auswahl:focus-visible {
+  border-color: var(--select-border-focus);
+}
+.gg-knopf {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--component-button-sm-gap);
+  min-block-size: var(--component-button-sm-height);
+  padding-inline: var(--component-button-sm-spacing-x);
+  border: 0;
+  border-radius: var(--component-button-radius-pill);
+  background: var(--component-button-primary-background-default);
+  color: var(--component-button-primary-text-default);
+  font-family: inherit;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.gg-knopf:hover {
+  background: var(--component-button-primary-background-hover);
+}
+.gg-knopf:active {
+  background: var(--component-button-primary-background-pressed);
+}
+.gg-meldung {
+  margin: 0;
+  color: var(--theme-text-muted);
+  overflow-wrap: anywhere;
+}
+.gg-meldung:empty {
+  display: none;
+}

@@ -1,19 +1,5 @@
-import React, { useState, useRef, useCallback } from 'react'
-import { Slider } from '@/components/ui/slider'
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from '@/components/ui/sheet'
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from '@/components/ui/accordion'
-import { cn } from '@/lib/utils'
+import React, { useCallback, useId, useRef, useState } from 'react'
+import './gradient-generator.css'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -127,11 +113,9 @@ function presetThumbnailStyle(p: PresetDef): React.CSSProperties {
   return { background: `${stops}, ${p.bg}` }
 }
 
-// ─── Grain data URL (static, avoids SSR mismatch) ────────────────────────────
-
-const GRAIN_SVG = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E")`
-
 // ─── Sub-components ───────────────────────────────────────────────────────────
+// Native Bedienelemente (input[type=range], details/summary, input[type=color], select, button),
+// gestaltet in gradient-generator.css ausschließlich mit Figma-Tokens.
 
 interface SliderRowProps {
   label: string
@@ -143,176 +127,40 @@ interface SliderRowProps {
 }
 
 function SliderRow({ label, value, min, max, unit, onChange }: SliderRowProps) {
+  const id = useId()
+  const fuellung = `${((value - min) / (max - min)) * 100}%`
   return (
-    <div className="grid grid-cols-[4rem_1fr_2.5rem] items-center gap-2 py-1.5">
-      <span className="t-label text-muted-foreground truncate">{label}</span>
-      <Slider
+    <div className="gg-zeile">
+      <label className="text-small gg-bezeichnung" htmlFor={id}>{label}</label>
+      <input
+        id={id}
+        className="gg-regler"
+        type="range"
         min={min}
         max={max}
         step={1}
-        value={[value]}
-        onValueChange={([v]: number[]) => onChange(v)}
+        value={value}
+        style={{ '--fuellung': fuellung } as React.CSSProperties}
+        onChange={(e) => onChange(Number(e.target.value))}
       />
-      <span className="t-label text-muted-foreground text-right tabular-nums">
-        {value}{unit}
-      </span>
+      <output className="text-mono gg-wert" htmlFor={id} aria-live="off">{value}{unit}</output>
     </div>
   )
 }
 
-// ─── Controls Panel (proper component, not JSX variable) ─────────────────────
-
-interface ControlsPanelProps {
-  state: State
-  currentPreset: number
-  exportSize: string
-  onLoadPreset: (i: number) => void
-  onUpdateOrb: (i: number, key: keyof Orb, v: number | string) => void
-  onUpdateGlobal: (key: keyof Omit<State, 'orbs'>, v: number | string) => void
-  onExportSizeChange: (v: string) => void
-  onExport: () => void
+interface FarbfeldProps {
+  label: string
+  value: string
+  onChange: (v: string) => void
 }
 
-function ControlsPanel({
-  state,
-  currentPreset,
-  exportSize,
-  onLoadPreset,
-  onUpdateOrb,
-  onUpdateGlobal,
-  onExportSizeChange,
-  onExport,
-}: ControlsPanelProps) {
+function Farbfeld({ label, value, onChange }: FarbfeldProps) {
+  const id = useId()
   return (
-    <div className="flex flex-col h-full overflow-hidden">
-
-      {/* Preset Strip */}
-      <div className="shrink-0 border-b border-border px-3 pt-3 pb-3">
-        <p className="t-label text-muted-foreground mb-2 uppercase tracking-widest">Preset</p>
-        <div className="flex gap-2 overflow-x-auto pb-1" style={{ scrollbarWidth: 'none' }}>
-          {PRESETS.map((p, i) => (
-            <button
-              key={i}
-              type="button"
-              onClick={() => onLoadPreset(i)}
-              title={p.name}
-              className={cn(
-                'flex-none flex flex-col items-center gap-1 focus:outline-none',
-              )}
-            >
-              <div
-                className={cn(
-                  'w-16 h-10 rounded-md transition-all duration-150',
-                  currentPreset === i
-                    ? 'ring-2 ring-foreground ring-offset-2 ring-offset-card'
-                    : 'ring-1 ring-border hover:ring-foreground/40',
-                )}
-                style={presetThumbnailStyle(p)}
-              />
-              <span className="t-label text-muted-foreground w-16 truncate text-center">
-                {p.name}
-              </span>
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Orb Accordion */}
-      <div className="flex-1 overflow-y-auto min-h-0">
-        <Accordion type="single" collapsible className="px-3">
-          {state.orbs.map((orb, i) => (
-            <AccordionItem key={i} value={`orb-${i}`}>
-              <AccordionTrigger className="py-3 hover:no-underline">
-                <div className="flex items-center gap-2.5">
-                  <span
-                    className="w-3.5 h-3.5 rounded-full border border-border shrink-0"
-                    style={{ background: orb.color }}
-                  />
-                  <span className="t-label text-foreground">Orb {i + 1}</span>
-                </div>
-              </AccordionTrigger>
-              <AccordionContent className="pb-4">
-                {/* Color picker */}
-                <div className="grid grid-cols-[4rem_1fr] items-center gap-2 py-1.5 mb-1">
-                  <span className="t-label text-muted-foreground">Farbe</span>
-                  <div className="flex items-center gap-2">
-                    <label className="cursor-pointer flex items-center gap-2">
-                      <span
-                        className="w-6 h-6 rounded border border-border relative overflow-hidden block"
-                        style={{ background: orb.color }}
-                      >
-                        <input
-                          type="color"
-                          value={orb.color}
-                          onChange={(e) => onUpdateOrb(i, 'color', e.target.value)}
-                          className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
-                        />
-                      </span>
-                      <span className="t-mono text-muted-foreground">{orb.color}</span>
-                    </label>
-                  </div>
-                </div>
-                <SliderRow label="Deckkraft" value={orb.op}   min={0}   max={100} unit="%" onChange={(v) => onUpdateOrb(i, 'op',   v)} />
-                <SliderRow label="Weichheit" value={orb.blur} min={0}   max={150} unit="px" onChange={(v) => onUpdateOrb(i, 'blur', v)} />
-                <SliderRow label="X"         value={orb.x}   min={-30} max={130} unit="%" onChange={(v) => onUpdateOrb(i, 'x',    v)} />
-                <SliderRow label="Y"         value={orb.y}   min={-30} max={130} unit="%" onChange={(v) => onUpdateOrb(i, 'y',    v)} />
-                <SliderRow label="Breite"    value={orb.w}   min={10}  max={150} unit="%" onChange={(v) => onUpdateOrb(i, 'w',    v)} />
-                <SliderRow label="Höhe"      value={orb.h}   min={10}  max={150} unit="%" onChange={(v) => onUpdateOrb(i, 'h',    v)} />
-              </AccordionContent>
-            </AccordionItem>
-          ))}
-        </Accordion>
-
-        {/* Global */}
-        <div className="px-3 pt-3 pb-4 border-t border-border mx-3">
-          <p className="t-label text-muted-foreground uppercase tracking-widest mb-3">Global</p>
-          <div className="grid grid-cols-[4rem_1fr] items-center gap-2 py-1.5 mb-1">
-            <span className="t-label text-muted-foreground">Hintergrund</span>
-            <label className="cursor-pointer flex items-center gap-2">
-              <span
-                className="w-6 h-6 rounded border border-border relative overflow-hidden block"
-                style={{ background: state.bg }}
-              >
-                <input
-                  type="color"
-                  value={state.bg}
-                  onChange={(e) => onUpdateGlobal('bg', e.target.value)}
-                  className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
-                />
-              </span>
-              <span className="t-mono text-muted-foreground">{state.bg}</span>
-            </label>
-          </div>
-          <SliderRow
-            label="Grain"
-            value={state.grain}
-            min={0}
-            max={25}
-            unit="%"
-            onChange={(v) => onUpdateGlobal('grain', v)}
-          />
-        </div>
-      </div>
-
-      {/* Export */}
-      <div className="shrink-0 border-t border-border p-3 flex gap-2 items-center">
-        <select
-          value={exportSize}
-          onChange={(e) => onExportSizeChange(e.target.value)}
-          className="flex-1 min-w-0 bg-muted border border-border text-foreground rounded-md px-2 py-2 t-small focus:outline-none focus:ring-1 focus:ring-ring"
-        >
-          {EXPORT_SIZES.map((s) => (
-            <option key={s.value} value={s.value}>{s.label}</option>
-          ))}
-        </select>
-        <button
-          type="button"
-          onClick={onExport}
-          className="shrink-0 bg-foreground text-background px-4 py-2 rounded-md t-small font-medium hover:opacity-80 active:opacity-60 transition-opacity"
-        >
-          ↓ PNG
-        </button>
-      </div>
+    <div className="gg-zeile gg-zeile-farbe">
+      <label className="text-small gg-bezeichnung" htmlFor={id}>{label}</label>
+      <input id={id} className="gg-farbe" type="color" value={value} onChange={(e) => onChange(e.target.value)} />
+      <span className="text-mono gg-wert">{value}</span>
     </div>
   )
 }
@@ -325,8 +173,9 @@ export default function GradientGenerator() {
   )
   const [currentPreset, setCurrentPreset] = useState(0)
   const [exportSize, setExportSize] = useState('2100,900')
-  const [flashing, setFlashing] = useState(false)
+  const [meldung, setMeldung] = useState('')
   const previewRef = useRef<HTMLDivElement>(null)
+  const sizeId = useId()
 
   const loadPreset = useCallback((i: number) => {
     setCurrentPreset(i)
@@ -388,143 +237,105 @@ export default function GradientGenerator() {
     }
     ctx.putImageData(imgData, 0, 0)
 
-    setFlashing(true)
-    setTimeout(() => setFlashing(false), 120)
-
     cnv.toBlob((blob) => {
       if (!blob) return
       const name = PRESETS[currentPreset].name.toLowerCase().replace(/\s+/g, '-')
+      const file = `gradient-${name}-${W}x${H}.png`
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
-      a.href = url; a.download = `gradient-${name}-${W}x${H}.png`
+      a.href = url; a.download = file
       a.click()
       setTimeout(() => URL.revokeObjectURL(url), 1000)
+      // Rückmeldung für alle (ersetzt den kurzen Aufblitzer der alten Fassung, der bei reduzierter Bewegung nicht erwünscht ist)
+      setMeldung(`PNG exportiert: ${file}`)
     }, 'image/png')
   }, [state, exportSize, currentPreset])
 
-  const panelProps: ControlsPanelProps = {
-    state, currentPreset, exportSize,
-    onLoadPreset: loadPreset,
-    onUpdateOrb: updateOrb,
-    onUpdateGlobal: updateGlobal,
-    onExportSizeChange: setExportSize,
-    onExport: handleExport,
-  }
-
   return (
-    <div className="flex h-full w-full overflow-hidden">
-
-      {/* Flash */}
-      {flashing && (
-        <div className="fixed inset-0 bg-background opacity-50 pointer-events-none z-[9999]" />
-      )}
-
-      {/* Gradient Preview */}
-      <div className="relative flex-1 overflow-hidden" ref={previewRef}>
-        {/* Background */}
-        <div className="absolute inset-0" style={{ background: state.bg }}>
+    <div className="gg" data-gradient-generator>
+      {/* Vorschau */}
+      <div className="gg-vorschau" ref={previewRef}>
+        <div className="gg-flaeche" style={{ background: state.bg }}>
           {state.orbs.map((orb, i) => (
             <div
               key={i}
+              className="gg-kugel"
               aria-hidden="true"
               style={{
-                position: 'absolute',
                 left: `${orb.x}%`, top: `${orb.y}%`,
                 width: `${orb.w}%`, height: `${orb.h}%`,
-                borderRadius: '50%',
                 background: orb.color,
                 filter: `blur(${orb.blur}px)`,
                 opacity: orb.op / 100,
-                pointerEvents: 'none',
               }}
             />
           ))}
         </div>
+        <div className="gg-korn" aria-hidden="true" style={{ opacity: state.grain / 100 }} />
+      </div>
 
-        {/* Grain */}
-        <div
-          aria-hidden="true"
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            backgroundImage: GRAIN_SVG,
-            backgroundSize: '200px 200px',
-            opacity: state.grain / 100,
-            mixBlendMode: 'overlay',
-            zIndex: 5,
-          }}
-        />
-
-        {/* Mobile Bottom Bar */}
-        <div
-          className="md:hidden absolute bottom-0 left-0 right-0 bg-background/90 backdrop-blur-xl border-t border-border"
-          style={{ zIndex: 10 }}
-        >
-          {/* Mini Preset Strip */}
-          <div className="flex gap-2 px-4 pt-3 pb-2 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
+      {/* Bedienfeld */}
+      <div className="gg-felder">
+        <section className="gg-gruppe" aria-labelledby="gg-preset-titel">
+          <h2 id="gg-preset-titel" className="text-label gg-titel">Preset</h2>
+          <div className="gg-presets">
             {PRESETS.map((p, i) => (
               <button
-                key={i}
+                key={p.name}
                 type="button"
+                className="gg-preset"
+                aria-pressed={currentPreset === i}
                 onClick={() => loadPreset(i)}
-                className={cn(
-                  'flex-none w-12 h-7 rounded transition-all duration-150',
-                  currentPreset === i
-                    ? 'ring-2 ring-foreground ring-offset-1 ring-offset-background'
-                    : 'ring-1 ring-border',
-                )}
-                style={presetThumbnailStyle(p)}
-                title={p.name}
-              />
+              >
+                <span className="gg-vorschaubild" style={presetThumbnailStyle(p)} aria-hidden="true" />
+                <span className="text-small gg-presetname">{p.name}</span>
+              </button>
             ))}
           </div>
+        </section>
 
-          {/* Sheet trigger + Export */}
-          <div className="flex gap-2 px-4 pb-3 pt-1">
-            <Sheet>
-              <SheetTrigger asChild>
-                <button
-                  type="button"
-                  className="flex-1 flex items-center justify-center gap-2 bg-muted border border-border rounded-md py-2 t-small text-foreground hover:bg-muted/80 transition-colors"
-                >
-                  <svg width="14" height="10" viewBox="0 0 14 10" fill="none" aria-hidden="true">
-                    <path d="M1 1h12M1 5h12M1 9h12" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/>
-                  </svg>
-                  Controls
-                </button>
-              </SheetTrigger>
-              <SheetContent side="bottom" className="h-[80vh] p-0 flex flex-col">
-                <SheetHeader className="shrink-0 px-4 py-3 border-b border-border">
-                  <SheetTitle className="t-label text-foreground">Gradient Controls</SheetTitle>
-                </SheetHeader>
-                <div className="flex-1 min-h-0">
-                  <ControlsPanel {...panelProps} />
-                </div>
-              </SheetContent>
-            </Sheet>
+        <section className="gg-gruppe" aria-labelledby="gg-orbs-titel">
+          <h2 id="gg-orbs-titel" className="text-label gg-titel">Orbs</h2>
+          {state.orbs.map((orb, i) => (
+            <details key={i} className="gg-orb" name="gg-orb">
+              <summary className="gg-orbkopf text-small">
+                <span className="gg-punkt" style={{ background: orb.color }} aria-hidden="true" />
+                <span>Orb {i + 1}</span>
+              </summary>
+              <div className="gg-orbinhalt" role="group" aria-label={`Orb ${i + 1}`}>
+                <Farbfeld label="Farbe" value={orb.color} onChange={(v) => updateOrb(i, 'color', v)} />
+                <SliderRow label="Deckkraft" value={orb.op}   min={0}   max={100} unit="%" onChange={(v) => updateOrb(i, 'op',   v)} />
+                <SliderRow label="Weichheit" value={orb.blur} min={0}   max={150} unit="px" onChange={(v) => updateOrb(i, 'blur', v)} />
+                <SliderRow label="X"         value={orb.x}    min={-30} max={130} unit="%" onChange={(v) => updateOrb(i, 'x',    v)} />
+                <SliderRow label="Y"         value={orb.y}    min={-30} max={130} unit="%" onChange={(v) => updateOrb(i, 'y',    v)} />
+                <SliderRow label="Breite"    value={orb.w}    min={10}  max={150} unit="%" onChange={(v) => updateOrb(i, 'w',    v)} />
+                <SliderRow label="Höhe"      value={orb.h}    min={10}  max={150} unit="%" onChange={(v) => updateOrb(i, 'h',    v)} />
+              </div>
+            </details>
+          ))}
+        </section>
 
-            <select
-              value={exportSize}
-              onChange={(e) => setExportSize(e.target.value)}
-              className="bg-muted border border-border text-foreground rounded-md px-2 py-2 t-small focus:outline-none"
-            >
+        <section className="gg-gruppe" aria-labelledby="gg-global-titel">
+          <h2 id="gg-global-titel" className="text-label gg-titel">Global</h2>
+          <Farbfeld label="Hintergrund" value={state.bg} onChange={(v) => updateGlobal('bg', v)} />
+          <SliderRow label="Grain" value={state.grain} min={0} max={25} unit="%" onChange={(v) => updateGlobal('grain', v)} />
+        </section>
+
+        <section className="gg-gruppe gg-export" aria-labelledby="gg-export-titel">
+          <h2 id="gg-export-titel" className="text-label gg-titel">Export</h2>
+          <div className="gg-exportzeile">
+            <label className="nur-vorlesen" htmlFor={sizeId}>Exportgröße</label>
+            <select id={sizeId} className="gg-auswahl text-small" value={exportSize} onChange={(e) => setExportSize(e.target.value)}>
               {EXPORT_SIZES.map((s) => (
                 <option key={s.value} value={s.value}>{s.label}</option>
               ))}
             </select>
-            <button
-              type="button"
-              onClick={handleExport}
-              className="shrink-0 bg-foreground text-background px-3 py-2 rounded-md t-small font-medium hover:opacity-80 transition-opacity"
-            >
-              ↓ PNG
+            <button type="button" className="gg-knopf text-label" onClick={handleExport}>
+              <span aria-hidden="true">↓ </span>PNG
             </button>
           </div>
-        </div>
-      </div>
-
-      {/* Desktop Side Panel */}
-      <div className="hidden md:flex w-72 shrink-0 flex-col border-l border-border bg-card overflow-hidden">
-        <ControlsPanel {...panelProps} />
+          <p className="text-small gg-meldung" role="status" aria-live="polite">{meldung}</p>
+        </section>
       </div>
     </div>
   )
