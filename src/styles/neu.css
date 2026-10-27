@@ -111,3 +111,13 @@ svg {
   font-weight: var(--text-code-weight); /* Figma kennt für Mono nur den Code-Text-Stil, kein --text-mono-weight */
   font-variant-numeric: tabular-nums;
 }
+
+/* Nur für Screenreader (z. B. „Level 4 von 5“): aus dem Fluss genommen, aber im Accessibility-Tree */
+.nur-vorlesen {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}

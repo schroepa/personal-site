@@ -1,6 +1,6 @@
 ---
-// Nummern-Liste (Figma „liste“ in Kompetenzen, Stationen, Werkzeuge, Wofür, Ablauf): Meta (Nummer, Zeitraum oder
-// Kategorie), Titel, Beschreibung. Eine <ol>; Titel optional als Überschrift (ebene 3 oder 4), sonst als Absatz.
+// Nummern-Liste (Figma „liste“ in Kompetenzen, Stationen, Werkzeuge, Wofür, Ablauf, Lebenslauf): Meta (Nummer, Zeitraum oder
+// Kategorie), Titel, Beschreibung; optional Zusatzzeile und Punkte (Lebenslauf) sowie ein Lesetext nur für Screenreader. Eine <ol>; Titel optional als Überschrift (ebene 3 oder 4), sonst als Absatz.
 // Desktop: 9 Spalten (Meta 2, Titel 3, Beschreibung 4); darunter Raster der Seite, mobil gestapelt.
 import type { ListenEintrag } from "../../data/liste.ts"
 
@@ -17,8 +17,22 @@ const Titel = (ebene ? `h${ebene}` : "p") as "h3" | "h4" | "p"
     eintraege.map((e) => (
       <li class="eintrag">
         {e.nummer && <p class="text-label nummer">{e.nummer}</p>}
-        <Titel class="text-h3 titel">{e.titel}</Titel>
-        {e.beschreibung && <p class="text-small beschreibung">{e.beschreibung}</p>}
+        <Titel class="text-h3 titel">
+          {e.titel}
+          {e.lesetext && <span class="nur-vorlesen">, {e.lesetext}</span>}
+        </Titel>
+        {e.beschreibung && !e.zusatz && !e.punkte?.length && <p class="text-small beschreibung">{e.beschreibung}</p>}
+        {(e.zusatz || e.punkte?.length) && (
+          <div class="text-small beschreibung">
+            {e.beschreibung && <p class="zeile">{e.beschreibung}</p>}
+            {e.zusatz && <p class="zeile">{e.zusatz}</p>}
+            {e.punkte?.length ? (
+              <ul class="punkte">
+                {e.punkte.map((p) => <li>{p}</li>)}
+              </ul>
+            ) : null}
+          </div>
+        )}
       </li>
     ))
   }
@@ -53,6 +67,19 @@ const Titel = (ebene ? `h${ebene}` : "p") as "h3" | "h4" | "p"
 
   .nummer {
     color: var(--theme-text-default);
+  }
+  .zeile {
+    margin: 0;
+  }
+  .punkte {
+    margin: 0;
+    padding-left: var(--global-size-16);
+    display: flex;
+    flex-direction: column;
+    gap: var(--global-size-4);
+  }
+  .zeile + .punkte {
+    margin-top: var(--global-size-8);
   }
   .titel {
     color: var(--theme-text-strong);
