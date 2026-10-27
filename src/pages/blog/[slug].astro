@@ -25,7 +25,6 @@ export async function getStaticPaths() {
 }
 
 type Props = InferGetStaticPropsType<typeof getStaticPaths>
-const slugVon = (id: string) => id.replace(/\.md$/, "")
 const { post, weiter } = Astro.props as Props
 const { Content, headings } = await render(post)
 ---

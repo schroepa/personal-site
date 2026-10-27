@@ -15,7 +15,6 @@ import { coverMittel, coverThumbSrc } from "@/lib/cover-image"
 import { readingTime } from "@/lib/reading-time"
 import { artikelMeta } from "@/lib/startseite"
 
-const slugVon = (id: string) => id.replace(/\.md$/, "")
 
 const sortiert = veroeffentlichte(await getCollection("blog"))
 const [neu, ...rest] = sortiert
