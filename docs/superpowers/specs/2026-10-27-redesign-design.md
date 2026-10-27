@@ -38,7 +38,7 @@ Erfolg heißt:
 
 ## 3. Rahmenbedingungen
 
-- **Stack (bleibt):** Astro 5, React 19, TypeScript, Tailwind CSS 4 (über `@tailwindcss/postcss`, nicht über das Vite-Plugin, siehe README), shadcn/ui, statischer Export (`output: 'static'`).
+- **Stack:** Astro 5, TypeScript, statischer Export (`output: 'static'`). **Kein Tailwind und kein shadcn im neuen Layer** (Entscheidung Patrick, 2026-10-27): handgeschriebenes Vanilla-CSS, das ausschließlich die Figma-Tokens (`tokens.css`) verwendet; keine hart gesetzten Werte. Tailwind, shadcn und die zugehörigen Abhängigkeiten bleiben nur für die alten Seiten bis zum Aufräumen (Phase 7) und werden dann entfernt. React bleibt nur für das Tool `gradient-generator`, falls es nicht ohnehin in Vanilla umgeschrieben wird.
 - **Schriften:** Geist variabel (100–900) und Geist Mono, lokal ausgeliefert. Die bisherige PP Editorial New entfällt, sofern das Design sie nicht verwendet.
 - **Bibliotheken neu:** `motion`, `lenis` (npm, gebündelt, kein CDN).
 - **Hosting:** Vercel (bestätigt von Patrick, 2026-10-27).
@@ -99,7 +99,7 @@ Rechtliche Punkte bitte prüfen lassen; das ist keine Rechtsberatung.
 
 ## 9. Risiken
 
-- **Tailwind 4 über PostCSS** statt Vite-Plugin (Build-Hänger laut README): Token-Anbindung zuerst in einem kleinen Test absichern.
+- **Tailwind-Ausbau (Phase 7)** berührt Suche, Gradient-Generator, ToolLayout und Prose-Styles: diese werden in Vanilla neu gestylt; Funktion bleibt, Aussehen folgt den Tokens.
 - **Lichtband-Shader** kostet Leistung auf schwachen Geräten: 25 fps, pausiert außerhalb des Viewports, bei Reduziert statisches Bild.
 - **View Transitions** und `lenis` können sich beim Seitenwechsel stören: früh zusammen testen.
 - **Figma-Daten sind die Quelle:** Wenn sich Variablen in Figma ändern, muss `tokens.css` neu erzeugt werden. Das Exportskript wird deshalb als Skript im Repo abgelegt, nicht von Hand gepflegt.
