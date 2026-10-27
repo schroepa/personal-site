@@ -373,7 +373,8 @@ test.describe("Galerie gesamt", () => {
 
   test("Tab-Reihenfolge der Inhalte folgt der Dokumentreihenfolge", async ({ page }) => {
     await laden(page)
-    const ziele = "main a[href], main button"
+    // Roving-Tabindex (Galerie-Akkordeon): Streifen mit tabindex=-1 sind nicht per Tab erreichbar
+    const ziele = "main a[href]:not([tabindex='-1']), main button"
     const erwartet = await page.locator(ziele).evaluateAll((els) => els.map((el, i) => (el.setAttribute("data-tab", String(i)), i)))
     expect(erwartet.length).toBeGreaterThan(10)
     await page.locator(ziele).first().focus()

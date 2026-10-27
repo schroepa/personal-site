@@ -1,0 +1,246 @@
+---
+// Galerie-Akkordeon (Figma 213:199): 1 bis 5 Streifen, einer offen, die übrigen als schmale Streifen.
+// Ohne JavaScript ist der erste Streifen offen (data-aktiv="0" vom Server); alle Streifen sind Links.
+// Breiten: flex-grow aus dem Zustand (offen = Gewicht 8, zu = 1, wie 8fr/1fr in Figma). Das Bild hat die
+// feste Breite des offenen Streifens und wird vom Streifen nur beschnitten (Fenster, kein Gummiband).
+import { assertKapitel, type Kapitel } from "@/lib/galerie-akkordeon"
+
+interface Props {
+  kapitel: Kapitel[]
+  /** Zugänglicher Name der Gruppe */
+  label?: string
+}
+const { kapitel, label = "Galerie" } = Astro.props
+assertKapitel(kapitel)
+const nummer = (i: number) => String(i + 1).padStart(2, "0")
+---
+
+<div
+  class="galerie"
+  role="group"
+  aria-label={label}
+  data-galerie-akkordeon
+  data-aktiv="0"
+  style={`--galerie-anzahl: ${kapitel.length}`}
+>
+  {
+    kapitel.map((k, i) => (
+      <a class="streifen" href={k.href}>
+        <span class="bild">
+          <img src={k.bild} alt="" loading="lazy" decoding="async" />
+          <span class="seite">
+            <span class="nummer text-mono" aria-hidden="true">
+              {nummer(i)}
+            </span>
+            <span class="schmal text-label">{k.titel}</span>
+          </span>
+          <span class="beschriftung">
+            <span class="text">
+              <span class="titel text-h3">{k.titel}</span>
+              <span class="hinweis text-label">Galerie ansehen</span>
+            </span>
+            <span class="pfeil text-h3" aria-hidden="true">
+              →
+            </span>
+          </span>
+        </span>
+      </a>
+    ))
+  }
+</div>
+
+<style>
+  .galerie {
+    /* Verhältniswerte (keine Maße): Gewicht des offenen Streifens gegenüber 1 je geschlossenem */
+    --galerie-gewicht: 8;
+    /* Breite des Containers (Wurzel), damit das Bild sie unabhängig vom Streifen kennt */
+    --galerie-gesamt: 100cqw;
+    /* Breite des offenen Bildfensters: verteilbarer Platz (ohne Abstände und die Innenabstände aller Streifen,
+       die zur Flex-Basis zählen) × Gewicht / Summe der Gewichte */
+    --galerie-offen: calc(
+      (
+          var(--galerie-gesamt) - (var(--galerie-anzahl) - 1) * var(--galerie-akkordeon-abstand) - var(--galerie-anzahl) *
+            (var(--galerie-akkordeon-innenabstand) + var(--galerie-akkordeon-innenabstand))
+        ) * var(--galerie-gewicht) / (var(--galerie-anzahl) + var(--galerie-gewicht) - 1)
+    );
+    container-type: inline-size;
+    display: flex;
+    gap: var(--galerie-akkordeon-abstand);
+  }
+
+  .streifen {
+    position: relative;
+    display: flex;
+    flex: 1 1 0;
+    min-width: 0;
+    padding: var(--galerie-akkordeon-innenabstand);
+    border-radius: var(--galerie-akkordeon-radius);
+    corner-shape: squircle;
+    background: var(--galerie-akkordeon-flaeche);
+    color: var(--galerie-akkordeon-text);
+    text-decoration: none;
+  }
+
+  .bild {
+    position: relative;
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    justify-content: flex-end;
+    min-width: 0;
+    overflow: hidden;
+    border-radius: var(--galerie-akkordeon-radius-bild);
+    corner-shape: squircle;
+  }
+
+  .bild img {
+    position: absolute;
+    inset-block: 0;
+    inset-inline: 0;
+    justify-self: center;
+    block-size: 100%;
+    inline-size: var(--galerie-offen);
+    max-inline-size: none;
+    object-fit: cover;
+    pointer-events: none;
+  }
+
+  /* Geschlossener Streifen: Nummer oben, Titel senkrecht unten */
+  .seite {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    padding-block: var(--global-size-16);
+    background: linear-gradient(to bottom, transparent, var(--galerie-akkordeon-abdunklung));
+  }
+  .nummer {
+    flex: none;
+  }
+  .schmal {
+    min-height: 0;
+    max-height: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    writing-mode: vertical-rl;
+    text-transform: uppercase;
+  }
+  @supports (writing-mode: sideways-lr) {
+    .schmal {
+      writing-mode: sideways-lr;
+    }
+  }
+
+  /* Offener Streifen: Beschriftung unten */
+  .beschriftung {
+    position: relative;
+    display: none;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: var(--global-size-16);
+    padding: var(--global-size-80) var(--global-size-24) var(--global-size-24);
+    background: linear-gradient(to bottom, transparent, var(--galerie-akkordeon-abdunklung));
+  }
+  .text {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: var(--global-size-4);
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+  .hinweis {
+    text-transform: uppercase;
+  }
+
+  /* Schmal (unter 768): Wisch-Streifen, alle Karten gleich breit mit Beschriftung (Figma 268:1198) */
+  .galerie {
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    padding-block: var(--global-size-8);
+    margin-block: calc(-1 * var(--global-size-8));
+  }
+  .streifen {
+    flex: 0 0 var(--global-size-256);
+    block-size: var(--global-size-320);
+    scroll-snap-align: start;
+  }
+  .bild img {
+    inline-size: 100%;
+  }
+  .seite {
+    display: none;
+  }
+  .beschriftung {
+    display: flex;
+  }
+
+  @media (min-width: 768px) {
+    .galerie {
+      overflow-x: visible;
+      scroll-snap-type: none;
+      padding-block: 0;
+      margin-block: 0;
+      block-size: var(--galerie-akkordeon-hoehe);
+    }
+    .streifen {
+      flex: 1 1 0;
+      block-size: auto;
+    }
+    .bild img {
+      inline-size: var(--galerie-offen);
+      /* geschlossen: Bild entsättigt (Figma −70 % Sättigung, −6 % Belichtung; kein Token, nächste Stufe) */
+      filter: grayscale(1);
+    }
+    .seite {
+      display: flex;
+    }
+    .beschriftung {
+      display: none;
+    }
+
+    /* Offener Streifen (Zustand data-aktiv am Wurzelelement) */
+    :is(
+        .galerie[data-aktiv="0"] > .streifen:nth-child(1),
+        .galerie[data-aktiv="1"] > .streifen:nth-child(2),
+        .galerie[data-aktiv="2"] > .streifen:nth-child(3),
+        .galerie[data-aktiv="3"] > .streifen:nth-child(4),
+        .galerie[data-aktiv="4"] > .streifen:nth-child(5)
+      ) {
+      flex-grow: var(--galerie-gewicht);
+    }
+    :is(
+        .galerie[data-aktiv="0"] > .streifen:nth-child(1),
+        .galerie[data-aktiv="1"] > .streifen:nth-child(2),
+        .galerie[data-aktiv="2"] > .streifen:nth-child(3),
+        .galerie[data-aktiv="3"] > .streifen:nth-child(4),
+        .galerie[data-aktiv="4"] > .streifen:nth-child(5)
+      )
+      .bild img {
+      filter: none;
+    }
+    :is(
+        .galerie[data-aktiv="0"] > .streifen:nth-child(1),
+        .galerie[data-aktiv="1"] > .streifen:nth-child(2),
+        .galerie[data-aktiv="2"] > .streifen:nth-child(3),
+        .galerie[data-aktiv="3"] > .streifen:nth-child(4),
+        .galerie[data-aktiv="4"] > .streifen:nth-child(5)
+      )
+      .seite {
+      display: none;
+    }
+    :is(
+        .galerie[data-aktiv="0"] > .streifen:nth-child(1),
+        .galerie[data-aktiv="1"] > .streifen:nth-child(2),
+        .galerie[data-aktiv="2"] > .streifen:nth-child(3),
+        .galerie[data-aktiv="3"] > .streifen:nth-child(4),
+        .galerie[data-aktiv="4"] > .streifen:nth-child(5)
+      )
+      .beschriftung {
+      display: flex;
+    }
+  }
+</style>

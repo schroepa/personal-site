@@ -10,6 +10,7 @@ import ProjektKarte from "@/components/site/ProjektKarte.astro"
 import ArtikelZeile from "@/components/site/ArtikelZeile.astro"
 import Inhaltsverzeichnis from "@/components/site/Inhaltsverzeichnis.astro"
 import Faktenzeile from "@/components/site/Faktenzeile.astro"
+import GalerieAkkordeon from "@/components/site/GalerieAkkordeon.astro"
 
 const lang = "Datenschutzerklärungsüberarbeitungsvorbereitungsarbeitsgruppenleitungsstellvertretung"
 const fakten: [{ label: string; wert: string }, { label: string; wert: string }, { label: string; wert: string }] = [
@@ -17,6 +18,22 @@ const fakten: [{ label: string; wert: string }, { label: string; wert: string },
   { label: "Jahr", wert: "2026" },
   { label: "Stack", wert: "Astro, React, TypeScript" },
 ]
+const galerieBilder = [
+  "/images/gallery/digital-graffiti/IMG_0094.webp",
+  "/images/gallery/digital-graffiti/IMG_0128.webp",
+  "/images/gallery/digital-graffiti/IMG_0132.webp",
+  "/images/gallery/digital-graffiti/IMG_0133.webp",
+  "/images/gallery/digital-graffiti/IMG_0138.webp",
+]
+const galerieTitel = [
+  "Digital Art – Lettering, Graffiti, Tags & Styles",
+  "Lettering – Buchstaben von Hand",
+  "Skizzen",
+  "Mode",
+  "Archiv",
+]
+const kapitel = (n: number) =>
+  galerieTitel.slice(0, n).map((titel, i) => ({ titel, bild: galerieBilder[i], href: `/projects/galerie-${i + 1}` }))
 const eintraege = [
   { id: "verz-eins", text: "Die drei Wahrheiten" },
   { id: "verz-zwei", text: "Warum die Lücke strukturell ist" },
@@ -125,6 +142,16 @@ const eintraege = [
   </Abschnitt>
 
   <KontaktPanel email="patrick@ptrckschrdtr.de" />
+
+  <Abschnitt id="galerie-1" nummer="11" label="Galerie, 1 Kapitel" layout="oben">
+    <GalerieAkkordeon kapitel={kapitel(1)} label="Galerie mit einem Kapitel" />
+  </Abschnitt>
+  <Abschnitt id="galerie-3" nummer="12" label="Galerie, 3 Kapitel" layout="oben">
+    <GalerieAkkordeon kapitel={kapitel(3)} label="Galerie mit drei Kapiteln" />
+  </Abschnitt>
+  <Abschnitt id="galerie-5" nummer="13" label="Galerie, 5 Kapitel" layout="oben">
+    <GalerieAkkordeon kapitel={kapitel(5)} label="Digital Art" />
+  </Abschnitt>
 </SiteLayout>
 
 <style>
