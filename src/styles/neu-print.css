@@ -1,0 +1,92 @@
+/* Druckansicht des Lebenslaufs (nur /cv): daraus entsteht dist/cv.pdf (scripts/generate-cv-pdf.mjs).
+   Nur Figma-Tokens. Seitenformat und Ränder: in @page gibt es keine Tokens (var() greift dort nicht), deshalb steht
+   hier nur `size: A4`; das PDF-Skript setzt Format und Ränder (scripts/cv-pdf-options.mjs).
+   Gedruckt wird im hellen Theme (das Skript erzwingt es). */
+
+@page {
+  size: A4;
+}
+
+@media print {
+  /* Seitenrahmen weg: Kopf, Fuß, Schriftfeld, Papierkorn, Raster, Skip-Link, Suche, Cookie-Dialog, Aktionen im Seitenkopf */
+  header,
+  footer,
+  [data-papierkorn],
+  [data-raster],
+  [data-schriftfeld],
+  .skip-link,
+  dialog,
+  #CybotCookiebotDialog,
+  [data-zusatz] {
+    display: none !important;
+  }
+
+  body {
+    background: none;
+  }
+
+  .seite > main {
+    max-width: none;
+    padding: 0;
+  }
+
+  /* Seitenkopf kompakt. „main “ vorn: die Selektoren müssen die Scoped-Styles der Komponenten (Klasse + Attribut) überstimmen
+     (Klasse + Attribut = 0,2,0); die Wurzelklassen stehen deshalb doppelt. */
+  main .seitenkopf.seitenkopf {
+    padding-top: 0;
+    padding-bottom: var(--global-size-24);
+    gap: var(--global-size-8);
+  }
+  main .seitenkopf .titel {
+    font-size: var(--text-h1-size);
+    line-height: var(--text-h1-line-height);
+    letter-spacing: var(--text-h1-letter-spacing);
+  }
+  main .seitenkopf .einleitung {
+    font-size: var(--text-body-size);
+    line-height: var(--text-body-line-height);
+  }
+
+  /* Abschnitt: Label links, Inhalt rechts wie am Desktop, enger gesetzt */
+  main .abschnitt.abschnitt {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    row-gap: var(--global-size-16);
+    padding-bottom: var(--global-size-16);
+  }
+  main .abschnitt > .label {
+    grid-column: 1 / span 3;
+    break-after: avoid;
+  }
+  /* Kein Subgrid im Druck: Chromium bricht verschachtelte Subgrids an Seitengrenzen fehlerhaft um (Texte überlappen) */
+  main .abschnitt > .inhalt {
+    grid-column: 4 / span 9;
+    display: block;
+  }
+
+  /* Einträge: Meta oben links, Titel daneben, Beschreibung darunter; ein Eintrag bricht nie mitten durch */
+  main ol > li {
+    break-inside: avoid;
+  }
+  main .nummern-liste.nummern-liste {
+    gap: var(--global-size-16);
+  }
+  main .nummern-liste .eintrag {
+    grid-template-columns: repeat(9, minmax(0, 1fr));
+    row-gap: var(--global-size-4);
+  }
+  main .nummern-liste .nummer {
+    grid-column: 1 / span 3;
+    grid-row: 1;
+  }
+  main .nummern-liste .titel {
+    grid-column: 4 / -1;
+    grid-row: 1;
+    font-size: var(--text-body-size);
+    line-height: var(--text-body-line-height);
+    letter-spacing: var(--text-body-letter-spacing);
+  }
+  main .nummern-liste .beschreibung {
+    grid-column: 4 / -1;
+    grid-row: 2;
+  }
+}

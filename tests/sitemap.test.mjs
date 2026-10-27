@@ -10,7 +10,7 @@ const vorhanden = existsSync(dist)
 if (!vorhanden && process.env.CI) throw new Error("dist/ fehlt: in CI vor test:scripts `npm run build` ausführen")
 const grund = "dist/ fehlt: übersprungen (lokal). Zum Prüfen erst `npm run build`, in CI ist das Pflicht."
 
-test("Sitemap enthält /kontakt und nicht /cv", { skip: vorhanden ? false : grund }, () => {
+test("Sitemap enthält /kontakt und /cv", { skip: vorhanden ? false : grund }, () => {
   const xml = readdirSync(dist)
     .filter((n) => /^sitemap-\d+\.xml$/.test(n))
     .map((n) => readFileSync(join(dist, n), "utf8"))
@@ -18,5 +18,5 @@ test("Sitemap enthält /kontakt und nicht /cv", { skip: vorhanden ? false : grun
   const urls = [...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => new URL(m[1]).pathname)
   assert.ok(urls.includes("/kontakt/") || urls.includes("/kontakt"), `/kontakt fehlt: ${urls.join(" ")}`)
   assert.ok(urls.includes("/about/") || urls.includes("/about"))
-  assert.ok(!urls.some((u) => /^\/cv\/?$/.test(u)))
+  assert.ok(urls.some((u) => /^\/cv\/?$/.test(u)), `/cv fehlt: ${urls.join(" ")}`)
 })

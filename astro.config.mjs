@@ -15,8 +15,7 @@ export default defineConfig({
       // Rein interne Rendering-Hilfsseiten (noindex) — gehören nicht in die Sitemap
       filter: (page) =>
         !page.includes('/og-render/') &&
-        !page.includes('/prototypes/') &&
-        !/\/cv\/?$/.test(new URL(page).pathname),
+        !page.includes('/prototypes/'),
     }),
   ],
 })

@@ -4,6 +4,7 @@ import { spawn } from 'node:child_process'
 import { setTimeout as sleep } from 'node:timers/promises'
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
+import { buildInitScript, buildPdfOptions } from './cv-pdf-options.mjs'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const projectRoot = path.resolve(__dirname, '..')
@@ -76,13 +77,11 @@ async function main() {
     const browser = await launchBrowser()
     try {
       const page = await browser.newPage()
+      // Gedruckt wird die Webseite /cv mit ihrem @media-print-Stylesheet, immer im hellen Theme
+      await page.addInitScript(buildInitScript())
       await page.goto(`${BASE_URL}/cv`, { waitUntil: 'networkidle' })
-      await page.emulateMedia({ media: 'print' })
-      await page.pdf({
-        path: OUTPUT_PATH,
-        printBackground: true,
-        preferCSSPageSize: true,
-      })
+      await page.emulateMedia({ media: 'print', colorScheme: 'light' })
+      await page.pdf({ path: OUTPUT_PATH, ...buildPdfOptions() })
       console.log(`[cv-pdf] PDF geschrieben nach ${OUTPUT_PATH}`)
     } finally {
       await browser.close()

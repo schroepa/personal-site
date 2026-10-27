@@ -11,6 +11,8 @@ export const ALLOWED_MEDIA = [
   "(min-width: 1440px)",
   "(min-width: 1920px)",
   "(orientation: landscape) and (max-height: 500px)",
+  // Medientyp ohne Wert: kein Designwert, nötig für die Druckansicht des Lebenslaufs (neu-print.css, PDF aus der Webseite)
+  "print",
 ]
 
 const normMedia = (s) => s.replace(/\s+/g, " ").trim()
@@ -115,6 +117,10 @@ test("scanCss: Literale nur in erlaubten @media-Bedingungen", () => {
   // Die Erlaubnis gilt nur für die Bedingung, nicht für den Rumpf
   assert.deepEqual(rules("@media (min-width: 768px) { a { margin: 12px; } }"), ["unit-literal"])
   assert.deepEqual(rules("@media (prefers-reduced-motion: reduce) { a { margin: 0; } }"), [])
+  // print ist ein Medientyp ohne Zahlenwert; im Rumpf gelten dieselben Regeln
+  assert.deepEqual(rules("@media print { a { margin: 0; display: none; } }"), [])
+  assert.deepEqual(rules("@media print { a { margin: 12px; } }"), ["unit-literal"])
+  assert.deepEqual(rules("@media print and (min-width: 700px) { a { margin: 0; } }"), ["unit-literal"])
 })
 
 test("scanCss: meldet Zeilennummern", () => {
@@ -141,6 +147,7 @@ test("neue Styles (neu*.css, components/site) enthalten keine Literalwerte", () 
     join(root, "src/pages/index.astro"),
     join(root, "src/pages/about.astro"),
     join(root, "src/pages/kontakt.astro"),
+    join(root, "src/pages/cv.astro"),
     ...collect(join(root, "src/pages/blog"), (n) => n.endsWith(".astro")),
     ...collect(join(root, "src/pages/projects"), (n) => n.endsWith(".astro")),
   ]
@@ -162,6 +169,8 @@ function mediaConditions(css) {
 
 test("@media-Bedingungen der Komponenten stammen alle aus tokens.css", () => {
   const known = new Set(mediaConditions(readFileSync(join(root, "src/styles/tokens.css"), "utf8")))
+  // Einzige Bedingung außerhalb von tokens.css: der Medientyp print (kein Wert, siehe ALLOWED_MEDIA)
+  known.add("print")
   assert.ok(known.has("(min-width: 768px)"), "tokens.css sollte Breakpoints enthalten")
   const used = []
   for (const file of collect(join(root, "src/styles"), (n) => /^neu.*\.css$/.test(n))) {
@@ -175,6 +184,7 @@ test("@media-Bedingungen der Komponenten stammen alle aus tokens.css", () => {
     join(root, "src/pages/index.astro"),
     join(root, "src/pages/about.astro"),
     join(root, "src/pages/kontakt.astro"),
+    join(root, "src/pages/cv.astro"),
     ...collect(join(root, "src/pages/blog"), (n) => n.endsWith(".astro")),
     ...collect(join(root, "src/pages/projects"), (n) => n.endsWith(".astro")),
   ]
