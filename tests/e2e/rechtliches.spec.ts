@@ -193,20 +193,26 @@ test.describe("Platzhalter vor dem Livegang", () => {
     }
   })
 
-  // Wird in Task 15/17 scharf (test.fixme -> test): Die Aussagen „keine eigenen Ereignisse“ und „Externe Hosts sind nur diese“ im Datenschutztext
-  // stimmen erst, wenn die Legacy-Seiten entfernt sind. Der Test prüft die echte Bedingung und läuft dann ohne Änderung.
-  test.fixme("keine eigenen PostHog-Ereignisse im Code und keine Fremdhosts auf gebauten Seiten außer EXTERNE_RESSOURCEN", async () => {
-    const quellen = (dir: string): string[] =>
+  // Die Aussagen „keine eigenen Ereignisse“ und „Externe Hosts sind nur diese“ im Datenschutztext prüft dieser Test gegen Code und gebaute Seiten.
+  // Er braucht ein frisches dist/: in CI Pflicht (fehlt es, schlägt er fehl), lokal wird bei fehlendem oder veraltetem dist/ übersprungen.
+  test("keine eigenen PostHog-Ereignisse im Code und keine Fremdhosts auf gebauten Seiten außer EXTERNE_RESSOURCEN", async () => {
+    const quellen = (dir: string, muster: RegExp): string[] =>
       readdirSync(dir).flatMap((n) => {
         const p = join(dir, n)
-        if (statSync(p).isDirectory()) return quellen(p)
-        return /\.(astro|ts|tsx|js|mjs)$/.test(n) ? [p] : []
+        if (statSync(p).isDirectory()) return quellen(p, muster)
+        return muster.test(n) ? [p] : []
       })
-    const mitCapture = quellen(join(process.cwd(), "src")).filter((p) => /posthog\??\.capture\(/.test(readFileSync(p, "utf8")))
+    const dist = join(process.cwd(), "dist")
+    const einstieg = join(dist, "index.html")
+    const neuesteQuelle = Math.max(...quellen(join(process.cwd(), "src"), /./).map((p) => statSync(p).mtimeMs))
+    const frisch = existsSync(einstieg) && statSync(einstieg).mtimeMs >= neuesteQuelle
+    if (!process.env.CI) test.skip(!frisch, "dist/ fehlt oder ist älter als src/: erst `npm run build`")
+
+    const mitCapture = quellen(join(process.cwd(), "src"), /\.(astro|ts|tsx|js|mjs)$/).filter((p) => /posthog\??\.capture\(/.test(readFileSync(p, "utf8")))
     expect(mitCapture, "posthog.capture( im Code").toEqual([])
 
-    const dist = join(process.cwd(), "dist")
-    expect(existsSync(dist), "dist/ fehlt: erst `npm run build`").toBe(true)
+    expect(existsSync(dist), "dist/ fehlt: in CI vor den Tests `npm run build` ausführen").toBe(true)
+    expect(frisch, "dist/ ist älter als src/: erst `npm run build`").toBe(true)
     const erlaubt = new Set([...EXTERNE_RESSOURCEN.map((r) => r.host), "www.ptrckschrdtr.de", "ptrckschrdtr.de", "www.w3.org"])
     const probleme: string[] = []
     for (const datei of htmlDateien(dist)) {

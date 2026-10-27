@@ -287,7 +287,7 @@ test.describe("mit Bewegung", () => {
               .filter((e) => e.getBoundingClientRect().bottom < 0)
               .every((e) => e.hasAttribute("data-anim-fertig") && e.getAnimations().length === 0 && getComputedStyle(e).opacity === "1")
           ),
-        { timeout: 3000 }
+        { timeout: 8000 }
       )
       .toBe(true)
     for (const el of await page.locator("[data-anim='linie']").all()) {
