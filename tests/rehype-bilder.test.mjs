@@ -2,6 +2,8 @@ import { test } from "node:test"
 import assert from "node:assert/strict"
 import { markdownConfig } from "../markdown.config.mjs"
 import { createMarkdownProcessor } from "@astrojs/markdown-remark"
+import { rmSync, writeFileSync } from "node:fs"
+import { join } from "node:path"
 
 test("Markdown-Bilder bekommen loading=lazy, decoding=async und width/height aus der Datei", async () => {
   const p = await createMarkdownProcessor(markdownConfig)
@@ -33,4 +35,18 @@ test("Randfälle: kaputte %-Kodierung, Verzeichnis, Pfad aus public/ heraus, feh
   const eigene = (await p.render('<img src="/images/gallery/proman/proman-board.jpg" width="10" height="5" loading="eager">')).code
   assert.match(eigene, /width="10"/)
   assert.match(eigene, /loading="eager"/)
+})
+
+test("Datei unter /images/, die kein Bild ist: sharp wirft, das Bild bleibt ohne Maße, der Build läuft weiter", async () => {
+  const fixture = join(process.cwd(), "public/images/__qa-keine-bilddatei.jpg")
+  writeFileSync(fixture, "das ist kein JPEG")
+  try {
+    const p = await createMarkdownProcessor(markdownConfig)
+    const html = (await p.render("![x](/images/__qa-keine-bilddatei.jpg)")).code
+    const tag = html.match(/<img[^>]*>/)[0]
+    assert.match(tag, /loading="lazy"/)
+    assert.doesNotMatch(tag, /width=|height=/)
+  } finally {
+    rmSync(fixture, { force: true })
+  }
 })
