@@ -20,7 +20,8 @@
     "test:scripts": "node --test \"scripts/**/*.test.mjs\" \"src/lib/**/*.test.ts\" \"src/scripts/**/*.test.mjs\" \"tests/*.test.mjs\"",
     "test": "npm run test:scripts && npm run test:e2e",
     "lighthouse": "node scripts/lighthouse.mjs",
-    "test:cross-browser": "CROSS_BROWSER=1 playwright test --project=firefox --project=webkit"
+    "test:cross-browser": "CROSS_BROWSER=1 playwright test --project=firefox --project=webkit",
+    "qa": "npm run lint && npm run typecheck && npm run build && npm run test:scripts && npx playwright test"
   },
   "dependencies": {
     "@astrojs/react": "^4.4.2",
