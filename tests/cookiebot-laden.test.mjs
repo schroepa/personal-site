@@ -96,3 +96,51 @@ test("Gate: Widerruf nach dem Laden schaltet PostHog aus, erneute Einwilligung w
   u.w.dispatch("CookiebotOnDecline")
   assert.equal(u.aufrufe().filter((n) => n === "opt_out_capturing").length, 2)
 })
+
+test("Gate: dieselbe Einwilligung als ConsentReady und Accept löst nie opt_in_capturing aus (uc.js früh und spät)", () => {
+  for (const frueh of [true, false]) {
+    const u = umgebung(frueh ? { vorher: { statistics: true } } : undefined)
+    u.consent(true)
+    u.w.dispatch("CookiebotOnConsentReady")
+    u.w.dispatch("CookiebotOnAccept")
+    assert.equal(u.eingefuegt.length, 1, frueh ? "früh" : "spät")
+    assert.equal(u.aufrufe().filter((n) => n === "opt_in_capturing").length, 0, `${frueh ? "früh" : "spät"}: kein opt_in`)
+  }
+})
+
+test("Gate: opt_in nach eigenem Widerruf immer ohne $opt_in-Ereignis (captureEventName: false)", () => {
+  const u = umgebung({ vorher: { statistics: true } })
+  u.consent(false)
+  u.w.dispatch("CookiebotOnDecline")
+  u.consent(true)
+  u.w.dispatch("CookiebotOnAccept")
+  const opt = u.w.posthog.filter((e) => Array.isArray(e) && e[0] === "opt_in_capturing")
+  assert.equal(opt.length, 1)
+  assert.equal(opt[0][1].captureEventName, false)
+})
+
+test("Gate: dauerhaftes Opt-out aus früherem Widerruf, Wiederzustimmung mit nur einem Ereignis: genau ein opt_in ohne Ereignis (loaded-Callback)", () => {
+  const u = umgebung()
+  u.consent(true)
+  u.w.dispatch("CookiebotOnConsentReady") // Cookiebot meldet nur dieses eine Ereignis
+  const konfig = u.w.posthog._i[0][1]
+  assert.equal(typeof konfig.loaded, "function")
+  const aufrufe = []
+  const ph = { has_opted_out_capturing: () => true, opt_in_capturing: (o) => aufrufe.push(o) }
+  konfig.loaded(ph) // die echte Bibliothek ruft das nach dem Laden auf und kennt das gespeicherte Opt-out
+  assert.equal(aufrufe.length, 1)
+  assert.equal(aufrufe[0].captureEventName, false)
+  // Nicht ausgeschaltet gespeichert: kein opt_in
+  const ph2 = { has_opted_out_capturing: () => false, opt_in_capturing: (o) => aufrufe.push(o) }
+  konfig.loaded(ph2)
+  assert.equal(aufrufe.length, 1)
+})
+
+test("Gate: loaded-Callback schaltet nicht ein, wenn die Statistik inzwischen aus ist", () => {
+  const u = umgebung({ vorher: { statistics: true } })
+  const konfig = u.w.posthog._i[0][1]
+  u.consent(false)
+  const aufrufe = []
+  konfig.loaded({ has_opted_out_capturing: () => true, opt_in_capturing: (o) => aufrufe.push(o) })
+  assert.equal(aufrufe.length, 0)
+})

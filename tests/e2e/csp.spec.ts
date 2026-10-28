@@ -378,6 +378,93 @@ test.describe("Cookiebot kommt spät (uc.js zurückgehalten, wie bei async)", ()
   })
 })
 
+/**
+ * Zeichnet jeden Aufruf von `opt_in_capturing` der echten PostHog-Bibliothek samt Argument auf (Stub-Umgebung, es gehen nie Daten raus).
+ * Der Haken sitzt in einem Setter auf window.posthog, damit er greift, sobald die Bibliothek das Stub ersetzt, also vor `loaded`.
+ * `opt_in_capturing()` ohne `captureEventName: false` würde in der Bibliothek ein `$opt_in`-Ereignis erzeugen; die Tests prüfen
+ * deshalb Aufrufanzahl und Argument. (Ereignisse selbst lassen sich unter dem Stub nicht beobachten: die Bibliothek legt ihre
+ * Sendewarteschlange erst nach der echten Remote-Konfiguration an und verwirft `capture` bis dahin.)
+ */
+async function optInAufzeichnen(page: Page) {
+  await page.addInitScript(() => {
+    let echt: unknown
+    const w = window as unknown as { __optIn: unknown[] }
+    w.__optIn = []
+    Object.defineProperty(window, "posthog", {
+      configurable: true,
+      get: () => echt,
+      set: (v: object) => {
+        echt = v
+        // am Prototyp: die Bibliothek übergibt `loaded` die Instanz, nicht zwingend dasselbe Objekt wie window.posthog
+        const proto = (v ? Object.getPrototypeOf(v) : null) as { opt_in_capturing?: (o?: unknown) => unknown; __qaHaken?: boolean } | null
+        if (proto && typeof proto.opt_in_capturing === "function" && !proto.__qaHaken) {
+          proto.__qaHaken = true
+          const orig = proto.opt_in_capturing
+          proto.opt_in_capturing = function (this: unknown, o?: unknown) {
+            w.__optIn.push(o ?? null)
+            return orig.call(this, o)
+          }
+        }
+      },
+    })
+  })
+}
+
+const optInAufrufe = (page: Page) => page.evaluate(() => (window as unknown as { __optIn: unknown[] }).__optIn)
+
+test.describe("Einwilligung und Opt-in/Opt-out von PostHog (nur Stub, keine echten Ereignisse)", () => {
+  // Token wie im gebauten Skript, damit der Test den Speicherschlüssel von PostHog kennt
+  const TOKEN = () => readFileSync(join(DIST, "js/posthog.js"), "utf8").match(/phc_[A-Za-z0-9]+/)![0]
+  const geladen = (page: Page) =>
+    page.waitForFunction(() => (window as unknown as { posthog?: { __loaded?: boolean } }).posthog?.__loaded === true, null, { timeout: 15_000 })
+
+  test("Einwilligung besteht, ConsentReady und Accept kommen nacheinander: kein opt_in_capturing-Aufruf", async ({ page, context }) => {
+    await netzAbschotten(context, true, { ereignisse: "bereit-und-accept" })
+    await optInAufzeichnen(page)
+    await page.goto("/about")
+    await geladen(page)
+    await page.waitForTimeout(800)
+    expect(await optInAufrufe(page)).toEqual([])
+  })
+
+  test("dauerhaftes Opt-out aus früherem Widerruf, Cookiebot meldet nur ConsentReady: PostHog ist danach wieder eingeschaltet", async ({ page, context }) => {
+    await netzAbschotten(context, true, { ereignisse: "nur-bereit" })
+    await optInAufzeichnen(page)
+    // früherer Widerruf: PostHog speichert Opt-out je nach Einstellung in localStorage oder Cookie, beides setzen
+    await page.addInitScript((t) => {
+      localStorage.setItem(`__ph_opt_in_out_${t}`, "0")
+      document.cookie = `__ph_opt_in_out_${t}=0; path=/`
+    }, TOKEN())
+    await page.goto("/about")
+    await geladen(page)
+    // Ergebnis: wieder eingeschaltet (Speicher „1“, kein Opt-out mehr). Dass dabei kein $opt_in entsteht (captureEventName: false), belegt der
+    // vm-Test in tests/cookiebot-laden.test.mjs am loaded-Callback; im Browser lassen sich Ereignisse unter dem Stub nicht beobachten
+    // (die Bibliothek verwirft capture, bis die Remote-Konfiguration echt eintrifft) und der Aufruf geschieht innerhalb der Bibliothek.
+    await expect
+      .poll(() => page.evaluate(() => (window as unknown as { posthog: { has_opted_out_capturing: () => boolean } }).posthog.has_opted_out_capturing()), { timeout: 10_000 })
+      .toBe(false)
+    expect(await page.evaluate((t) => localStorage.getItem(`__ph_opt_in_out_${t}`), TOKEN())).toBe("1")
+  })
+
+  test("Widerruf im Banner und erneute Einwilligung: ein opt_in_capturing, ohne Ereignis", async ({ page, context }) => {
+    await netzAbschotten(context, true, { ereignisse: "bereit-und-accept" })
+    await optInAufzeichnen(page)
+    await page.goto("/about")
+    await geladen(page)
+    await page.evaluate(() => {
+      const w = window as unknown as { Cookiebot: { consent: { statistics: boolean } } }
+      w.Cookiebot.consent.statistics = false
+      window.dispatchEvent(new Event("CookiebotOnAccept"))
+    })
+    await page.evaluate(() => {
+      const w = window as unknown as { Cookiebot: { consent: { statistics: boolean } } }
+      w.Cookiebot.consent.statistics = true
+      window.dispatchEvent(new Event("CookiebotOnAccept"))
+    })
+    expect(await optInAufrufe(page)).toEqual([{ captureEventName: false }])
+  })
+})
+
 test.describe("Funktionen unter der CSP", () => {
   test("Lichtband: WebGL-Kontext läuft, Canvas hat Größe", async ({ page, context }) => {
     await netzAbschotten(context, false)

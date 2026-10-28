@@ -4,7 +4,11 @@
  * damit die CSP ohne 'unsafe-inline' für Skripte auskommt. Verhalten unverändert:
  *  - PostHog lädt erst nach Statistik-Einwilligung (sofort, wenn sie schon besteht; sonst bei CookiebotOnConsentReady bzw. CookiebotOnAccept,
  *    auch wenn uc.js erst nach diesem Skript eintrifft).
- *  - Bei CookiebotOnDecline ohne Statistik: opt_out_capturing.
+ *  - Statistik aus (Widerruf, CookiebotOnDecline, ConsentReady/Accept ohne Statistik): ein bereits geladenes PostHog wird per
+ *    opt_out_capturing ausgeschaltet. Nicht geladen bleibt es ungeladen.
+ *  - Erneute Einwilligung: opt_in_capturing({ captureEventName: false }) nur, wenn PostHog zuvor ausgeschaltet war (von uns per
+ *    opt_out oder als dauerhaftes Opt-out aus dem Speicher, geprüft im loaded-Callback), und nie mit eigenem $opt_in-Ereignis.
+ *    Bei bloßem Wiederholen derselben Einwilligung (ConsentReady und Accept nacheinander) wird nichts aufgerufen.
  *  - Seitenaufrufe auch bei Seitenwechseln des Client-Routers (capture_pageview: "history_change").
  * Token und Host kommen beim Bauen aus PUBLIC_POSTHOG_PROJECT_TOKEN und PUBLIC_POSTHOG_HOST (der Token ist
  * öffentlich, er steht ohnehin im ausgelieferten Skript). JSON.stringify verhindert, dass ein Wert Code einschleust.
@@ -15,6 +19,21 @@ export function posthogSkript(apiKey: string | undefined, apiHost: string | unde
   return `(function () {
   var apiKey = ${JSON.stringify(apiKey ?? "")}
   var apiHost = ${JSON.stringify(apiHost ?? "")}
+
+  // Wir haben PostHog selbst ausgeschaltet (opt_out_capturing)? Nur dann ist beim nächsten Einwilligen ein opt_in nötig.
+  var ausgeschaltet = false
+
+  function statistikAn() {
+    var cb = window.Cookiebot
+    return !!(cb && cb.consent && cb.consent.statistics)
+  }
+
+  function ausschalten() {
+    if (window.posthog && window.posthog.opt_out_capturing) {
+      window.posthog.opt_out_capturing()
+      ausgeschaltet = true
+    }
+  }
 
   function initPostHog() {
     if (window.__posthog_initialized) return
@@ -67,27 +86,36 @@ export function posthogSkript(apiKey: string | undefined, apiHost: string | unde
       api_host: apiHost,
       defaults: "2026-01-30",
       capture_pageview: "history_change",
+      // Dauerhaftes Opt-out aus einem früheren Widerruf (PostHog speichert es im Browser): bei bestehender Einwilligung wieder einschalten,
+      // auch wenn Cookiebot nur ein einziges Ereignis meldet. Ohne $opt_in-Ereignis.
+      loaded: function (ph) {
+        if (statistikAn() && ph.has_opted_out_capturing && ph.has_opted_out_capturing()) {
+          ph.opt_in_capturing({ captureEventName: false })
+        }
+      },
     })
   }
 
   // Bereits zugestimmt (z. B. Folgebesuch): sofort laden
-  if (window.Cookiebot && window.Cookiebot.consent && window.Cookiebot.consent.statistics) {
+  if (statistikAn()) {
     initPostHog()
   }
 
   // Zustand der Statistik-Einwilligung auf PostHog abbilden. Gilt für Erstzustimmung (CookiebotOnAccept), den beim Laden gemeldeten
   // Zustand (CookiebotOnConsentReady, wichtig wenn uc.js erst nach diesem Skript eintrifft) und spätere Änderungen:
-  //  - Statistik an: PostHog laden; war es schon geladen und ausgeschaltet, wieder einschalten (opt_in_capturing).
-  //  - Statistik aus: ein bereits geladenes PostHog ausschalten (opt_out_capturing); nicht geladen bleibt es ungeladen.
+  //  - Statistik an: PostHog laden; war es von uns ausgeschaltet, wieder einschalten (ohne $opt_in-Ereignis).
+  //  - Statistik aus: ein bereits geladenes PostHog ausschalten; nicht geladen bleibt es ungeladen.
   function einwilligungAnwenden() {
     var cb = window.Cookiebot
     if (!cb || !cb.consent) return
     if (cb.consent.statistics) {
-      var warGeladen = !!window.__posthog_initialized
       initPostHog()
-      if (warGeladen && window.posthog && window.posthog.opt_in_capturing) window.posthog.opt_in_capturing()
-    } else if (window.posthog && window.posthog.opt_out_capturing) {
-      window.posthog.opt_out_capturing()
+      if (ausgeschaltet && window.posthog && window.posthog.opt_in_capturing) {
+        window.posthog.opt_in_capturing({ captureEventName: false })
+        ausgeschaltet = false
+      }
+    } else {
+      ausschalten()
     }
   }
   window.addEventListener("CookiebotOnConsentReady", einwilligungAnwenden)
@@ -96,9 +124,7 @@ export function posthogSkript(apiKey: string | undefined, apiHost: string | unde
   // Consent widerrufen: PostHog opt-out
   window.addEventListener("CookiebotOnDecline", function () {
     var cb = window.Cookiebot
-    if (cb && cb.consent && !cb.consent.statistics && window.posthog && window.posthog.opt_out_capturing) {
-      window.posthog.opt_out_capturing()
-    }
+    if (cb && cb.consent && !cb.consent.statistics) ausschalten()
   })
 })()
 `
