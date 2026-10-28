@@ -3,8 +3,11 @@
 //   node tests/helpers/serve-dist.mjs --port 4324 --compress &        # dist/ mit den echten Headern (+ Kompression wie Vercel)
 //   npm run lighthouse -- --base http://127.0.0.1:4324 --preset mobile --runs 3 --min-accessibility 100
 //
+// /404.html statt /404: der Dist-Server antwortet auf /404 mit Status 404 (Lighthouse bricht dann ab), die Datei selbst mit 200.
 // Optionen: --base <url> (Pflicht), --paths /,/blog (Standard: alle Routen), --preset mobile|desktop|both, --runs 3 (Median),
 // --label <name> (Unterordner in .baseline/lighthouse/), --block-cookiebot (Cookiebot wird blockiert statt echt geladen),
+// --host-map <host>=<ip:port> (Chrome löst <host> auf den lokalen Server auf; z. B. www.ptrckschrdtr.de=127.0.0.1:4324 mit
+//   --base http://www.ptrckschrdtr.de: Cookiebot prüft den Host gegen die im Konto eingetragene Domain, 127.0.0.1 kennt es nicht),
 // --min-performance|accessibility|best-practices|seo <0-100> (Exit-Code 1 bei Unterschreitung).
 // Berichte (JSON, HTML) landen in .baseline/lighthouse/<label>/ (gitignored). Chrome kommt von Playwright (chromium).
 import { mkdirSync, writeFileSync } from "node:fs"
@@ -17,7 +20,7 @@ import { medianVon, pruefeSchwellen, schwellenAusArgs, tabelle, zusammenfassen }
 
 const STANDARD_PFADE = [
   "/", "/blog", "/blog/design-tokens-in-der-praxis", "/projects", "/projects/tintfield", "/about", "/cv", "/kontakt",
-  "/impressum", "/datenschutz", "/tools/gradient-generator", "/404",
+  "/impressum", "/datenschutz", "/tools/gradient-generator", "/404.html",
 ]
 
 const argv = process.argv.slice(2)
@@ -35,13 +38,14 @@ const presets = arg("preset", "both") === "both" ? ["mobile", "desktop"] : [arg(
 const runs = Number(arg("runs", "3"))
 const label = arg("label", "neu")
 const blockCookiebot = argv.includes("--block-cookiebot")
+const hostMap = arg("host-map")
 const schwellen = schwellenAusArgs(argv)
 const out = join(process.cwd(), ".baseline/lighthouse", label)
 mkdirSync(out, { recursive: true })
 
 const chrome = await launch({
   chromePath: chromium.executablePath(),
-  chromeFlags: ["--headless=new", "--no-sandbox", "--disable-gpu"],
+  chromeFlags: ["--headless=new", "--no-sandbox", "--disable-gpu", ...(hostMap ? [`--host-resolver-rules=MAP ${hostMap.replace("=", " ")}`, "--disable-features=HttpsUpgrades,HttpsFirstBalancedModeAutoEnable"] : [])],
 })
 let verstoesse = 0
 try {

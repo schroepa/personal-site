@@ -7,7 +7,7 @@
 //   node tests/helpers/serve-dist.mjs [--port 4323] [--dist dist]
 import { createServer } from "node:http"
 import { existsSync, readFileSync, statSync } from "node:fs"
-import { extname, join, normalize, sep } from "node:path"
+import { extname, join, normalize, resolve, sep } from "node:path"
 import { fileURLToPath } from "node:url"
 import { brotliCompressSync, gzipSync } from "node:zlib"
 
@@ -131,7 +131,7 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
     return i > 0 ? process.argv[i + 1] : standard
   }
   const wurzel = join(fileURLToPath(new URL("../..", import.meta.url)))
-  const dist = join(wurzel, arg("dist", "dist"))
+  const dist = resolve(wurzel, arg("dist", "dist"))
   const port = Number(arg("port", "4323"))
   const regeln = JSON.parse(readFileSync(join(wurzel, "vercel.json"), "utf8")).headers ?? []
   erstelleServer({ dist: dist.replace(/[/\\]$/, ""), regeln, compress: process.argv.includes("--compress") }).listen(port, "127.0.0.1", () =>

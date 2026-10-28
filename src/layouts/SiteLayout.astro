@@ -68,13 +68,18 @@ const personSchema = {
 <!doctype html>
 <html lang="de">
   <head>
-    <!-- Cookiebot ZUERST: blockiert alle anderen Skripte bis zur Einwilligung -->
+    <!-- Cookiebot: async, damit uc.js (render-blockierend, ~1,1 s auf Mobil im Lighthouse-Lab) weder FCP noch LCP verzögert.
+         Auto-Blocking braucht ein synchrones Skript, ist hier aber nicht nötig: außer PostHog gibt es kein Drittanbieter-Skript, und PostHog
+         lädt unser Gate (src/scripts/posthog-skript.ts) erst nach Statistik-Einwilligung, auch wenn uc.js später eintrifft
+         (CookiebotOnConsentReady/-OnAccept). Messung und Tests: .superpowers/sdd/…/task-17-report.md, tests/e2e/csp.spec.ts „Cookiebot kommt spät“. -->
+    <link rel="preconnect" href="https://consent.cookiebot.com" />
     <script
       id="Cookiebot"
       src="https://consent.cookiebot.com/uc.js"
       data-cbid="302ab2a4-6e4a-43b3-82b6-f1d58c3f19f8"
       data-blockingmode="auto"
       type="text/javascript"
+      async
       is:inline></script>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />

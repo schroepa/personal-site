@@ -48,7 +48,7 @@ const PIXEL = Buffer.from("R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBR
  * die Freigaben der CSP geprüft werden: Konfiguration als Skript vom CDN, <style> ohne Nonce, Konsens-Iframe vom CDN,
  * Banner mit style-Attribut, Bild von imgsct, XHR an das CDN. Das echte Banner prüft Patrick auf der Vercel-Preview.
  */
-function falschesCookiebot(statistik: boolean): string {
+function falschesCookiebot(statistik: boolean, ereignisse = false): string {
   return `(function () {
   window.__cookiebotRenew = 0
   window.Cookiebot = window.CookieConsent = {
@@ -75,6 +75,11 @@ function falschesCookiebot(statistik: boolean): string {
     x.open("GET", "https://consentcdn.cookiebot.com/consentconfig/test.json")
     x.send()
     window.__cookiebotFertig = true
+    // Wie das echte uc.js (Cookiebot-Doku): ist bereits eingewilligt, kommen CookiebotOnConsentReady und CookiebotOnAccept beim Laden
+    ${ereignisse ? `setTimeout(function () {
+      window.dispatchEvent(new Event("CookiebotOnConsentReady"))
+      if (${statistik}) window.dispatchEvent(new Event("CookiebotOnAccept"))
+    }, 0)` : ""}
   }
   document.body ? imBody() : document.addEventListener("DOMContentLoaded", imBody)
 })()`
@@ -83,7 +88,7 @@ function falschesCookiebot(statistik: boolean): string {
 type Netz = { extern: string[]; unerwartet: string[]; posthog: string[] }
 
 /** Fängt jeden fremden Host ab (siehe Kopf). */
-async function netzAbschotten(context: BrowserContext, statistik: boolean): Promise<Netz> {
+async function netzAbschotten(context: BrowserContext, statistik: boolean, cookiebot: { verzoegerung?: number; ereignisse?: boolean } = {}): Promise<Netz> {
   const netz: Netz = { extern: [], unerwartet: [], posthog: [] }
   await context.route(
     (url) => url.hostname !== "127.0.0.1" && url.hostname !== "localhost",
@@ -103,7 +108,9 @@ async function netzAbschotten(context: BrowserContext, statistik: boolean): Prom
       if (POSTHOG_HOSTS.includes(url.hostname)) netz.posthog.push(url.href)
       switch (url.hostname) {
         case "consent.cookiebot.com":
-          return url.pathname === "/uc.js" ? js(falschesCookiebot(statistik)) : route.fulfill({ status: 204 })
+          if (url.pathname !== "/uc.js") return route.fulfill({ status: 204 })
+          if (cookiebot.verzoegerung) await new Promise((r) => setTimeout(r, cookiebot.verzoegerung))
+          return js(falschesCookiebot(statistik, cookiebot.ereignisse))
         case "consentcdn.cookiebot.com":
           if (url.pathname.endsWith(".js")) return js("")
           if (url.pathname.endsWith(".html")) return route.fulfill({ status: 200, contentType: "text/html", body: "<!doctype html><title>cb</title>" })
@@ -281,6 +288,48 @@ test.describe("PostHog unter der CSP (gestubbt, sendet nie echt)", () => {
     await page.waitForTimeout(500)
     expect(netz.posthog).toEqual([])
     expect(await b.verletzungen()).toEqual([])
+  })
+})
+
+test.describe("Cookiebot kommt spät (uc.js verzögert, wie bei async/defer)", () => {
+  const spaet = { verzoegerung: 4000, ereignisse: true }
+
+  test("Einwilligung besteht, uc.js trifft nach 4 s ein: PostHog startet erst dann, kein Fehler", async ({ page, context }) => {
+    const netz = await netzAbschotten(context, true, spaet)
+    const b = await beobachten(page)
+    await page.goto("/about", { waitUntil: "commit" })
+    // „load“ wartet auch auf async-Skripte: nur auf den Beginn der Navigation warten, uc.js ist noch unterwegs
+    await page.waitForSelector("body[data-bereit]")
+    expect(await page.evaluate(() => (window as unknown as { Cookiebot?: { consent?: unknown } }).Cookiebot?.consent), "uc.js ist noch nicht da").toBeUndefined()
+    expect(netz.posthog, "vor Eintreffen von Cookiebot nichts an PostHog").toEqual([])
+    await page.waitForFunction(() => (window as unknown as { posthog?: { __loaded?: boolean } }).posthog?.__loaded === true, null, { timeout: 15_000 })
+    expect(netz.posthog[0]).toBe("https://eu.i.posthog.com/static/array.js")
+    expect(b.fehler).toEqual([])
+  })
+
+  test("keine Einwilligung, uc.js spät: nie eine PostHog-Anfrage", async ({ page, context }) => {
+    const netz = await netzAbschotten(context, false, spaet)
+    const b = await beobachten(page)
+    await page.goto("/impressum", { waitUntil: "commit" })
+    await page.waitForSelector("body[data-bereit]")
+    await page.waitForFunction(() => (window as unknown as { __cookiebotFertig?: boolean }).__cookiebotFertig === true, null, { timeout: 15_000 })
+    await page.waitForTimeout(800)
+    expect(netz.posthog).toEqual([])
+    expect(b.fehler).toEqual([])
+  })
+
+  test("Zustimmung im Banner nach spätem uc.js: PostHog startet erst dann", async ({ page, context }) => {
+    const netz = await netzAbschotten(context, false, spaet)
+    await page.goto("/about", { waitUntil: "commit" })
+    await page.waitForFunction(() => (window as unknown as { __cookiebotFertig?: boolean }).__cookiebotFertig === true, null, { timeout: 15_000 })
+    expect(netz.posthog).toEqual([])
+    await page.evaluate(() => {
+      const w = window as unknown as { Cookiebot: { consent: { statistics: boolean } } }
+      w.Cookiebot.consent.statistics = true
+      window.dispatchEvent(new Event("CookiebotOnAccept"))
+    })
+    await page.waitForFunction(() => (window as unknown as { posthog?: { __loaded?: boolean } }).posthog?.__loaded === true)
+    expect(netz.posthog[0]).toBe("https://eu.i.posthog.com/static/array.js")
   })
 })
 

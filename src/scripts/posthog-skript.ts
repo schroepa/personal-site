@@ -2,7 +2,8 @@
  * PostHog-Snippet mit Cookiebot-Einwilligung (Statistik). Früher ein Inline-Skript mit define:vars in
  * src/components/posthog.astro; jetzt eine eigene Datei unter /js/posthog.js (Endpunkt src/pages/js/posthog.js.ts),
  * damit die CSP ohne 'unsafe-inline' für Skripte auskommt. Verhalten unverändert:
- *  - PostHog lädt erst nach Statistik-Einwilligung (sofort, wenn sie schon besteht; sonst bei CookiebotOnAccept).
+ *  - PostHog lädt erst nach Statistik-Einwilligung (sofort, wenn sie schon besteht; sonst bei CookiebotOnConsentReady bzw. CookiebotOnAccept,
+ *    auch wenn uc.js erst nach diesem Skript eintrifft).
  *  - Bei CookiebotOnDecline ohne Statistik: opt_out_capturing.
  *  - Seitenaufrufe auch bei Seitenwechseln des Client-Routers (capture_pageview: "history_change").
  * Token und Host kommen beim Bauen aus PUBLIC_POSTHOG_PROJECT_TOKEN und PUBLIC_POSTHOG_HOST (der Token ist
@@ -73,6 +74,13 @@ export function posthogSkript(apiKey: string | undefined, apiHost: string | unde
   if (window.Cookiebot && window.Cookiebot.consent && window.Cookiebot.consent.statistics) {
     initPostHog()
   }
+
+  // Bestehende Einwilligung, wenn uc.js erst nach diesem Skript eintrifft (Cookiebot meldet den Zustand beim Laden)
+  window.addEventListener("CookiebotOnConsentReady", function () {
+    if (window.Cookiebot && window.Cookiebot.consent && window.Cookiebot.consent.statistics) {
+      initPostHog()
+    }
+  })
 
   // Erstzustimmung im Banner
   window.addEventListener("CookiebotOnAccept", function () {
