@@ -55,6 +55,12 @@ const hatTag = Astro.slots.has("tag")
     color: var(--kontakt-panel-text-farbe);
   }
 
+  /* Auf der Fläche surface-secondary (orange) hat der globale Fokusring (neutral/550) nur 2,05:1 (hell) bzw. 1,69:1 (dunkel); gefordert sind 3:1.
+     text-on-secondary (neutral/950) erreicht dort 8,3:1 bzw. 6,8:1. */
+  .kontakt-panel :global(:focus-visible) {
+    outline-color: var(--kontakt-panel-text-farbe);
+  }
+
   .label,
   .inhalt,
   .tag {

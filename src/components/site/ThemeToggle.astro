@@ -33,6 +33,12 @@ import { icons } from "./icons"
     cursor: pointer;
   }
 
+  /* Der Ring liegt auf der Pille (toggle-background): der globale Fokusfarbton (neutral/550) hat dort nur 2,8:1 (hell) bzw. 2,5:1 (dunkel),
+     gefordert sind 3:1 (WCAG 1.4.11/2.4.11). Textfarbe der Pille erreicht über 6:1. */
+  .segment:focus-visible {
+    outline-color: var(--theme-text-default);
+  }
+
   .segment :global(svg) {
     width: var(--theme-toggle-icon-size);
     height: var(--theme-toggle-icon-size);

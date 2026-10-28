@@ -131,9 +131,9 @@ html:not([data-js]) [data-gradient-generator] {
 }
 .gg-presetname {
   max-inline-size: var(--global-size-80);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  /* umbrechen statt abschneiden: mit den Textabständen aus WCAG 1.4.12 geht sonst Text verloren */
+  overflow-wrap: anywhere;
+  text-align: center;
 }
 .gg-preset:hover .gg-vorschaubild {
   border-color: var(--input-border-hover);
