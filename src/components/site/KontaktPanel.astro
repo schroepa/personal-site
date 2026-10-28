@@ -1,6 +1,6 @@
 ---
 // Kontakt-Panel (Figma 262:2): Abschluss der Seite auf der Farbfläche. Label, Titel, Text, E-Mail (text/h1),
-// Aktionen und das Handschrift-Tag (Slot „tag“; ohne eigenen Inhalt die Handschrift aus /images/handschrift-tag.svg, als Maske in Textfarbe).
+// Aktionen und das Handschrift-Tag (Slot „tag“; ohne eigenen Inhalt die Handschrift aus /images/handschrift-tag.svg, als Maske in neutral/50).
 // data-abschnitt füttert das Blatt im Schriftfeld, data-objekt das Raster („Spalte a–b“, Hervorhebung).
 // Slot „aktionen“ nimmt weitere Knöpfe auf (z. B. Lebenslauf). Kopieren: src/scripts/kopieren.ts.
 import Knopf from "./Knopf.astro"
@@ -98,7 +98,8 @@ const {
     height: var(--kontakt-panel-tag-hoehe);
     max-width: 100%;
     aspect-ratio: 259 / 159;
-    background: var(--kontakt-panel-text-farbe);
+    /* Figma-Export: weiß. Kein eigenes Tag-Token vorhanden, daher die hellste Neutral-Stufe (neutral/50). */
+    background: var(--global-color-neutral-50);
     mask: url("/images/handschrift-tag.svg") no-repeat left center / contain;
   }
 
