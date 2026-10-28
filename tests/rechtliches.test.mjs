@@ -89,7 +89,7 @@ test("offeneStellen: findet [[…]] in beiden Seiten (Anschrift, Stand, PRÜFEN-
   for (const s of offen) assert.match(s, /^\[\[[^\[\]]+\]\]$/)
 })
 
-test("hostEintrag: findet Hosts unabhängig von der Reihenfolge, fehlender Host wirft verständlich", async () => {
+test("hostEintrag: liefert den Eintrag zu einem bekannten Host, ein fehlender Host wirft verständlich", async () => {
   const { hostEintrag } = await import("../src/data/rechtliches.ts")
   assert.equal(hostEintrag("imgsct.cookiebot.com"), "imgsct.cookiebot.com")
   assert.throws(() => hostEintrag("gibt-es-nicht.example"), /fehlt in src\/data\/externe-ressourcen\.json/)
