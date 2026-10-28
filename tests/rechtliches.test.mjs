@@ -101,3 +101,26 @@ test("imgsct.cookiebot.com: im Text nur belegte Aussage und PRÜFEN-Marker in of
   assert.ok(!text.includes("Bilder des Banners"))
   assert.ok(offeneStellen().some((s) => s.includes("imgsct.cookiebot.com")))
 })
+
+// Livegang-Probe: Der E2E-Test „kein [[…]] mehr“ (tests/e2e/rechtliches.spec.ts) bleibt bis zum Eintrag durch Patrick test.fixme.
+// Damit er nicht erst am Livegang zum ersten Mal läuft, spielt dieser Test den Zielzustand durch: dieselben Seitendaten, in
+// denen alle Marker ersetzt sind (Anschrift, Stand, PRÜFEN-Stellen entfernt), müssen durch die Textzusammenstellung (volltext) ohne
+// jeden Rest von „[[“ oder „]]“ laufen, ohne Doppel-Leerzeichen und ohne leere Absätze.
+test("Livegang-Probe: nach Ersetzen aller Marker bleibt kein [[ ]] und kein Textloch", async () => {
+  const ersetze = (s) =>
+    s
+      .replaceAll("[[ANSCHRIFT]]", "Musterweg 1, 10115 Berlin")
+      .replaceAll("[[STAND]]", "28. Oktober 2026")
+      .replace(/\s*\[\[PRÜFEN:[^\]]*\]\]/g, "")
+  for (const seite of [IMPRESSUM, DATENSCHUTZ]) {
+    const kopie = JSON.parse(ersetze(JSON.stringify(seite)))
+    const text = volltext(kopie)
+    assert.ok(!text.includes("[["), `[[ übrig in ${seite.label}`)
+    assert.ok(!text.includes("]]"), `]] übrig in ${seite.label}`)
+    assert.ok(!/ {2,}/.test(text), `Doppel-Leerzeichen in ${seite.label} nach Entfernen der Marker`)
+    assert.ok(!/\[\[[A-ZÄÖÜ]/.test(JSON.stringify(kopie)), "auch nicht in Links oder Köpfen (JSON-Verschachtelung [[ ist kein Marker)")
+  }
+  // Die Seiten rendern nur diese Daten: die Komponenten fügen selbst keine Marker ein
+  const komponente = readFileSync(join(process.cwd(), "src/components/site/Rechtstext.astro"), "utf8")
+  assert.ok(!komponente.includes("[["))
+})
