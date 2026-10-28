@@ -29,6 +29,9 @@ npm run dev
 | `npm run test:scripts` | `node:test`: Skripte, `src/lib/**`, `tests/*.test.mjs` (Token-Export, Daten, Rechtstexte, CSS-Hygiene, Namens-Test, Typecheck der neuen Dateien) |
 | `npm run test:e2e` / `npx playwright test` | E2E und axe-Prüfungen in drei Breiten (1440, 768, 390), dazu das Projekt `csp` gegen `dist/` |
 | `npm test` | beides nacheinander |
+| `npm run qa` | gesamter Prüflauf: lint, typecheck, build, `test:scripts`, `playwright test` (alle Projekte inkl. `csp`), siehe „QA“ |
+| `npm run test:cross-browser` | Rauchtest in Firefox und WebKit (`tests/e2e/cross-browser.spec.ts`); Browser vorher mit `npx playwright install firefox webkit` |
+| `npm run lighthouse -- --base <url>` | Lighthouse (mobil + Desktop, Median aus 3 Läufen) gegen einen laufenden Server, siehe „Lighthouse“ |
 | `npm run typecheck` | `astro check` |
 | `npm run lint` | ESLint |
 | `npm run format` | Prettier (ts, tsx, astro) |
@@ -85,6 +88,42 @@ Texte und Listen, die keine Markdown-Inhalte sind:
 ### Rechtstexte
 
 Alles Rechtliche liegt in `src/data/rechtliches.ts` (nicht in den `.astro`-Dateien). Offene Stellen stehen als Marker `[[…]]` im Text: `[[ANSCHRIFT]]`, `[[STAND]]` und `[[PRÜFEN: …]]`. `offeneStellen()` listet sie; der Test „kein [[…]] mehr“ in `tests/e2e/rechtliches.spec.ts` ist bis zum Livegang `test.fixme`. Das ist keine Rechtsberatung, die Texte lässt Patrick prüfen. Der Name schreibt sich **Schrödter**; `tests/name.test.mjs` schlägt bei der alten Schreibweise (ohne „t“) außerhalb einer kleinen Ausnahmeliste an.
+
+## QA
+
+**Alles in einem:** `npm run qa` (lint, `astro check`, `npm run build`, `test:scripts`, `npx playwright test`). Der Build steht vor den Skript-Tests, damit die Tests, die `dist/` brauchen (Sitemap, Fremdhosts, Cookiebot-Ladeart, `csp`), gegen einen frischen Build laufen. Vorher `lsof -nP -iTCP:4322 -sTCP:LISTEN` prüfen (der Test-Dev-Server braucht Port 4322 und Port 4323 für `dist/`).
+
+| Spec | Prüft |
+|---|---|
+| `tests/e2e/qa-alle-routen.spec.ts` | je Seite (alle Routen, Werkzeug, ein Artikel, eine Fallstudie, ein einfaches Projekt) × hell/dunkel × normale/reduzierte Bewegung × 3 Breiten: axe (WCAG 2.1 AA, 0 Verstöße), kein horizontaler Überlauf, eine h1 ohne Ebenensprung, Landmarken, `lang`, Titel, Bilder (alt, geladen, Maße, lazy), keine Konsolenfehler/-warnungen; Tab-Durchlauf mit sichtbarem Fokus (≥ 2 px, ≥ 3:1); Skip-Link, Suche, Menü; Kontrast der Token-Paare gegen die Übergabewerte; Reflow bei 320 px, Textabstände (WCAG 1.4.12), 200 %-Näherung |
+| `tests/e2e/qa-links.spec.ts` | nur Desktop: Linktexte, `rel=noopener`, Anker, alle internen Links 200 (Dev und Build), Sitemap = indexierbare Routen, `robots.txt`, `llms.txt`, Meta-Daten, Canonical, OG-/Twitter-Bilder, 404-Verhalten |
+| `tests/e2e/cross-browser.spec.ts` | Firefox/WebKit-Rauchtest (nicht im Standardlauf) |
+
+Bekannte, vom Browser selbst erzeugte Konsolenhinweise stehen mit Begründung in `tests/helpers/qa.ts` (`BEKANNTE_MELDUNGEN`); Cookiebot wird dort durch ein leeres Skript ersetzt, alle anderen Fremdhosts werden abgebrochen.
+
+**CI (noch keine Workflow-Datei, Entscheidung offen).** Ein Job würde ausführen:
+
+```sh
+npm ci
+npx playwright install --with-deps chromium     # postinstall holt Chromium bereits; Firefox/WebKit nur für den Rauchtest
+CI=1 npm run qa                                  # fehlendes dist/ ist mit CI=1 ein Fehler, nicht ein Überspringen
+# optional, getrennt: CROSS_BROWSER=1 npx playwright install --with-deps firefox webkit && npm run test:cross-browser
+```
+
+### Lighthouse
+
+`scripts/lighthouse.mjs` (Lighthouse 12.8.2, exakt gepinnt) baut nichts selbst. Es erwartet `dist/` hinter dem Dist-Server, der die echten Header aus `vercel.json` setzt; `--compress` komprimiert wie Vercel (br/gzip), nur für Messungen:
+
+```sh
+npm run build
+node tests/helpers/serve-dist.mjs --port 4324 --compress &
+npm run lighthouse -- --base http://127.0.0.1:4324 --preset both --runs 3 --label neu \
+  --min-accessibility 100 --min-best-practices 100 --min-seo 100     # Exit-Code 1 bei Unterschreitung
+# ohne Cookiebot (nur eigener Code):   … --block-cookiebot
+```
+
+Berichte (JSON, HTML) liegen unter `.baseline/lighthouse/<label>/` (nicht im Repo). `/404` wird als `/404.html` gemessen (Status 200); die Fehlerseite ist `noindex` und kann beim Punkt „Indexierung“ nie 100 erreichen. Mit dem echten Cookiebot auf `127.0.0.1` meldet Cookiebot einen 404 für die Domain-Konfiguration (Konsole, Best Practices 96); auf der eingetragenen Domain tritt das nicht auf.
+
 
 ## Aufbau
 

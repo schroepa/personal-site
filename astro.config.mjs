@@ -9,6 +9,8 @@ export default defineConfig({
   site: 'https://www.ptrckschrdtr.de',
   output: 'static',
   markdown: markdownConfig,
+  // Die Dev-Werkzeugleiste bringt eigene <h1> und Fokusziele in die Seite; der Test-Dev-Server (playwright.config.ts) schaltet sie ab.
+  devToolbar: { enabled: process.env.QA_OHNE_TOOLBAR !== "1" },
   vite: {
     // Der Gradient-Generator wird ohne Astro-Insel hydriert (CSP, Task 16) und importiert react-dom/client direkt.
     // Ohne Vorab-Bündelung entdeckt der Dev-Server das erst beim ersten Aufruf, bündelt neu und lädt die Seite neu;

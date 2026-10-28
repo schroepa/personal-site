@@ -8,6 +8,8 @@ import { QA_SEITEN, ladeSeite, stubExterne } from "../helpers/qa"
 //  - Dev-Server (baseURL): Links und Anker der Seiten, wie sie im Browser aussehen.
 //  - gebautes dist/ über tests/helpers/serve-dist.mjs (Port 4323, Projekt „csp“ nutzt ihn auch): Sitemap, Meta-Daten,
 //    OG-Bilder, robots.txt, llms.txt, 404. Dort stimmen Canonical und Sitemap, weil Astro `site` nur im Build einsetzt.
+// Playwright verlangt hier das Destrukturierungsmuster für die Fixtures
+// eslint-disable-next-line no-empty-pattern
 test.beforeEach(({}, info) => {
   test.skip(info.project.name !== "desktop", "Crawl-Prüfungen laufen nur im Desktop-Projekt")
 })

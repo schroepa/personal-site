@@ -62,7 +62,7 @@ export default defineConfig({
   ],
   webServer: [
     {
-      command: `npm run dev -- --port ${PORT}`,
+      command: `QA_OHNE_TOOLBAR=1 npm run dev -- --port ${PORT}`,
       url: `http://localhost:${PORT}`,
       reuseExistingServer: true,
       timeout: 180_000,

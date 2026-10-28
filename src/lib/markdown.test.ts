@@ -16,5 +16,6 @@ test("markdownZuHtml: Codeblock wird wie bei Astro mit Shiki gesetzt", async () 
 
 test("markdownZuHtml: Bild mit Titel behält den Titel (Meta für Einblicke)", async () => {
   const html = await markdownZuHtml('![Alt](/a.jpg "Generator")\n')
-  assert.match(html, /<img src="\/a\.jpg" alt="Alt" title="Generator">/)
+  // rehype-bilder (markdown.config.mjs) ergänzt loading und decoding; width/height nur bei Dateien unter public/images
+  assert.match(html, /<img src="\/a\.jpg" alt="Alt" title="Generator" loading="lazy" decoding="async">/)
 })

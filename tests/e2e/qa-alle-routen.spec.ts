@@ -234,6 +234,8 @@ for (const theme of THEMES) {
 // ---------------------------------------------------------------------------------------------
 // (7) Reflow und Textabstände (nur Desktop- und Mobil-Projekt, die Breite wird im Test selbst gesetzt)
 test.describe("Reflow und Textabstände", () => {
+  // Playwright verlangt hier das Destrukturierungsmuster für die Fixtures
+  // eslint-disable-next-line no-empty-pattern
   test.beforeEach(({}, info) => {
     test.skip(info.project.name === "tablet", "Breite wird im Test gesetzt, Tablet-Projekt wäre doppelt")
   })
