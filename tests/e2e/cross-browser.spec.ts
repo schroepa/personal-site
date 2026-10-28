@@ -43,7 +43,8 @@ for (const [name, url] of SEITEN) {
     const konsole = sammleKonsole(page)
     await ladeSeite(page, url)
     await warteAufRuhe(page)
-    await expect(page.locator("h1")).toHaveCount(1)
+    // Dev-Werkzeugleiste (Shadow-DOM) hat eigene h1: nur die Seite zählt
+    expect(await page.locator("h1").evaluateAll((l) => l.filter((h) => !(h.getRootNode() instanceof ShadowRoot)).length)).toBe(1)
     await expect(page.locator("main h1")).toBeVisible()
     await expectNoHorizontalOverflow(page)
     await layoutInnerhalb(page)
