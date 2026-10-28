@@ -69,15 +69,17 @@ const personSchema = {
 <html lang="de">
   <head>
     <!-- Cookiebot: async, damit uc.js (render-blockierend, ~1,1 s auf Mobil im Lighthouse-Lab) weder FCP noch LCP verzögert.
-         Auto-Blocking braucht ein synchrones Skript, ist hier aber nicht nötig: außer PostHog gibt es kein Drittanbieter-Skript, und PostHog
-         lädt unser Gate (src/scripts/posthog-skript.ts) erst nach Statistik-Einwilligung, auch wenn uc.js später eintrifft
-         (CookiebotOnConsentReady/-OnAccept). Messung und Tests: .superpowers/sdd/…/task-17-report.md, tests/e2e/csp.spec.ts „Cookiebot kommt spät“. -->
+         data-blockingmode="manual": Cookiebot blockiert von sich aus nichts. Das ist hier bewusst und deterministisch: Auto-Blocking
+         braucht ein synchrones, zuerst laufendes Skript und wäre mit async nicht verlässlich. Es gibt außer PostHog kein Fremdskript, und
+         PostHog schützt unser Gate selbst (src/scripts/posthog-skript.ts): Start erst nach Statistik-Einwilligung, auch wenn uc.js später
+         eintrifft (CookiebotOnConsentReady/-OnAccept), Opt-out bei Widerruf. Kommt ein weiteres Fremdskript hinzu, muss es hinter ein
+         eigenes Gate (oder `type="text/plain" data-cookieconsent="statistics"`). Messung und Tests: task-17-report.md, csp.spec.ts „Cookiebot kommt spät“. -->
     <link rel="preconnect" href="https://consent.cookiebot.com" />
     <script
       id="Cookiebot"
       src="https://consent.cookiebot.com/uc.js"
       data-cbid="302ab2a4-6e4a-43b3-82b6-f1d58c3f19f8"
-      data-blockingmode="auto"
+      data-blockingmode="manual"
       type="text/javascript"
       async
       is:inline></script>
