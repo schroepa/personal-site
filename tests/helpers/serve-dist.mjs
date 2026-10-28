@@ -9,6 +9,7 @@ import { createServer } from "node:http"
 import { existsSync, readFileSync, statSync } from "node:fs"
 import { extname, join, normalize, sep } from "node:path"
 import { fileURLToPath } from "node:url"
+import { brotliCompressSync, gzipSync } from "node:zlib"
 
 export const TYPEN = {
   ".html": "text/html; charset=utf-8",
@@ -93,15 +94,33 @@ export function aufloesen(dist, pfad) {
   return fehlt
 }
 
-export function erstelleServer({ dist, regeln }) {
+const KOMPRIMIERBAR = new Set([".html", ".js", ".mjs", ".css", ".json", ".webmanifest", ".xml", ".txt", ".svg"])
+
+/**
+ * `compress: true` komprimiert Text-Antworten (br, sonst gzip) wie Vercel es in der Produktion tut. Nur für Lab-Messungen
+ * (scripts/lighthouse.mjs, `--compress`); die Header-/CSP-Tests laufen unkomprimiert.
+ */
+export function erstelleServer({ dist, regeln, compress = false }) {
+  const cache = new Map()
   return createServer((req, res) => {
     const pfad = new URL(req.url ?? "/", "http://localhost").pathname
     const { datei, status } = aufloesen(dist, pfad)
-    const inhalt = existsSync(datei) ? readFileSync(datei) : Buffer.from("Not Found")
+    let inhalt = existsSync(datei) ? readFileSync(datei) : Buffer.from("Not Found")
     res.statusCode = status
     res.setHeader("Content-Type", TYPEN[extname(datei)] ?? "application/octet-stream")
-    res.setHeader("Content-Length", inhalt.length)
     for (const h of headerFuer(regeln, pfad)) res.setHeader(h.key, h.value)
+    if (compress && KOMPRIMIERBAR.has(extname(datei))) {
+      const akzeptiert = String(req.headers["accept-encoding"] ?? "")
+      const art = /\bbr\b/.test(akzeptiert) ? "br" : /\bgzip\b/.test(akzeptiert) ? "gzip" : null
+      if (art) {
+        const key = `${art}:${datei}`
+        if (!cache.has(key)) cache.set(key, art === "br" ? brotliCompressSync(inhalt) : gzipSync(inhalt))
+        inhalt = cache.get(key)
+        res.setHeader("Content-Encoding", art)
+        res.setHeader("Vary", "Accept-Encoding")
+      }
+    }
+    res.setHeader("Content-Length", inhalt.length)
     res.end(req.method === "HEAD" ? undefined : inhalt)
   })
 }
@@ -115,7 +134,7 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
   const dist = join(wurzel, arg("dist", "dist"))
   const port = Number(arg("port", "4323"))
   const regeln = JSON.parse(readFileSync(join(wurzel, "vercel.json"), "utf8")).headers ?? []
-  erstelleServer({ dist: dist.replace(/[/\\]$/, ""), regeln }).listen(port, "127.0.0.1", () =>
+  erstelleServer({ dist: dist.replace(/[/\\]$/, ""), regeln, compress: process.argv.includes("--compress") }).listen(port, "127.0.0.1", () =>
     console.log(`dist/ mit Headern aus vercel.json auf http://127.0.0.1:${port}${existsSync(dist) ? "" : " (dist/ fehlt!)"}`)
   )
 }

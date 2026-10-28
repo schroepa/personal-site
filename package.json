@@ -18,7 +18,9 @@
     "tokens": "node scripts/export-tokens.mjs design/figma-variables.json src/styles/tokens.css",
     "headers": "node scripts/build-vercel-headers.mjs",
     "test:scripts": "node --test \"scripts/**/*.test.mjs\" \"src/lib/**/*.test.ts\" \"src/scripts/**/*.test.mjs\" \"tests/*.test.mjs\"",
-    "test": "npm run test:scripts && npm run test:e2e"
+    "test": "npm run test:scripts && npm run test:e2e",
+    "lighthouse": "node scripts/lighthouse.mjs",
+    "test:cross-browser": "CROSS_BROWSER=1 playwright test --project=firefox --project=webkit"
   },
   "dependencies": {
     "@astrojs/react": "^4.4.2",
@@ -44,10 +46,12 @@
     "@playwright/test": "^1.61.1",
     "@remotion/cli": "^4.0.486",
     "@remotion/renderer": "^4.0.486",
+    "chrome-launcher": "1.2.2",
     "eslint": "^9.39.4",
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.5.2",
     "globals": "^16.5.0",
+    "lighthouse": "12.8.2",
     "playwright": "^1.61.1",
     "prettier": "^3.8.1",
     "prettier-plugin-astro": "^0.14.1",
