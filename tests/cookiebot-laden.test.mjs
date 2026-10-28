@@ -17,14 +17,82 @@ test("uc.js ist asynchron, steht im <head> und hat ein Preconnect", { skip: vorh
   assert.ok(tag, "Cookiebot-Skript im Kopf")
   assert.match(tag, /\sasync[\s>=]/)
   assert.match(tag, /src="https:\/\/consent\.cookiebot\.com\/uc\.js"/)
+  assert.match(tag, /data-blockingmode="manual"/, "deterministisch: kein Auto-Blocking bei asynchronem Laden")
   assert.match(kopf, /<link rel="preconnect" href="https:\/\/consent\.cookiebot\.com"/)
 })
 
-test("PostHog-Gate hört auf ConsentReady, Accept und Decline und lädt nie ohne Statistik-Einwilligung", () => {
-  const quelle = readFileSync(join(process.cwd(), "src/scripts/posthog-skript.ts"), "utf8")
-  for (const e of ["CookiebotOnConsentReady", "CookiebotOnAccept", "CookiebotOnDecline"]) assert.ok(quelle.includes(e), e)
-  // jeder initPostHog()-Aufruf steht hinter einer Prüfung von consent.statistics
-  const aufrufe = [...quelle.matchAll(/initPostHog\(\)/g)].filter((m) => !quelle.slice(Math.max(0, m.index - 4), m.index).includes("on "))
-  assert.ok(aufrufe.length >= 3)
-  for (const m of aufrufe.slice(1)) assert.match(quelle.slice(m.index - 120, m.index), /consent\.statistics/)
+// Das erzeugte PostHog-Skript (src/scripts/posthog-skript.ts) läuft hier in node:vm gegen ein Fake-window: Ereignisse von Cookiebot werden
+// von Hand ausgelöst, jeder Skript-Einschub (array.js von PostHog) wird gezählt, es gibt keine echten Anfragen.
+import vm from "node:vm"
+import { posthogSkript } from "../src/scripts/posthog-skript.ts"
+
+function umgebung({ vorher } = {}) {
+  const hoerer = {}
+  const eingefuegt = []
+  const w = {
+    addEventListener: (name, fn) => (hoerer[name] ??= []).push(fn),
+    dispatch: (name) => (hoerer[name] ?? []).forEach((fn) => fn({})),
+  }
+  w.window = w
+  w.document = {
+    createElement: () => ({}),
+    getElementsByTagName: () => [{ parentNode: { insertBefore: (el) => eingefuegt.push(el.src) } }],
+  }
+  if (vorher) w.Cookiebot = { consent: { statistics: vorher.statistics } }
+  vm.createContext(w)
+  vm.runInContext(posthogSkript("phc_test", "https://eu.i.posthog.com"), w)
+  const aufrufe = () => (w.posthog ?? []).filter((e) => Array.isArray(e)).map((e) => e[0])
+  const consent = (statistics) => (w.Cookiebot = { consent: { statistics } })
+  return { w, eingefuegt, consent, aufrufe }
+}
+
+test("Gate: Einwilligung besteht schon beim Start, PostHog lädt genau einmal", () => {
+  const u = umgebung({ vorher: { statistics: true } })
+  assert.equal(u.eingefuegt.length, 1)
+  assert.equal(u.eingefuegt[0], "https://eu.i.posthog.com/static/array.js")
+  u.w.dispatch("CookiebotOnConsentReady")
+  u.w.dispatch("CookiebotOnAccept")
+  assert.equal(u.eingefuegt.length, 1)
+})
+
+test("Gate: ohne Einwilligung lädt PostHog nie (kein Cookiebot, Statistik aus, Ereignisse ohne Statistik)", () => {
+  const u = umgebung()
+  u.w.dispatch("CookiebotOnConsentReady") // uc.js noch nicht da: nichts zu lesen
+  u.w.dispatch("CookiebotOnAccept")
+  u.consent(false)
+  u.w.dispatch("CookiebotOnConsentReady")
+  u.w.dispatch("CookiebotOnAccept")
+  u.w.dispatch("CookiebotOnDecline")
+  assert.equal(u.eingefuegt.length, 0)
+  assert.equal(u.w.posthog, undefined)
+})
+
+test("Gate: uc.js trifft später ein, nur CookiebotOnConsentReady kommt (kein OnAccept): PostHog startet bei Einwilligung", () => {
+  const u = umgebung()
+  u.consent(true)
+  u.w.dispatch("CookiebotOnConsentReady")
+  assert.equal(u.eingefuegt.length, 1)
+  assert.equal(u.eingefuegt[0], "https://eu.i.posthog.com/static/array.js")
+})
+
+test("Gate: nur CookiebotOnAccept (Erstzustimmung im Banner) startet PostHog", () => {
+  const u = umgebung()
+  u.consent(true)
+  u.w.dispatch("CookiebotOnAccept")
+  assert.equal(u.eingefuegt.length, 1)
+})
+
+test("Gate: Widerruf nach dem Laden schaltet PostHog aus, erneute Einwilligung wieder ein, ohne zweites Laden", () => {
+  const u = umgebung({ vorher: { statistics: true } })
+  assert.equal(u.eingefuegt.length, 1)
+  u.consent(false)
+  u.w.dispatch("CookiebotOnAccept") // Änderung der Auswahl meldet sich auch als Accept/ConsentReady
+  assert.equal(u.aufrufe().filter((n) => n === "opt_out_capturing").length, 1)
+  u.consent(true)
+  u.w.dispatch("CookiebotOnAccept")
+  assert.equal(u.aufrufe().filter((n) => n === "opt_in_capturing").length, 1)
+  assert.equal(u.eingefuegt.length, 1, "nicht ein zweites Mal geladen")
+  u.consent(false)
+  u.w.dispatch("CookiebotOnDecline")
+  assert.equal(u.aufrufe().filter((n) => n === "opt_out_capturing").length, 2)
 })

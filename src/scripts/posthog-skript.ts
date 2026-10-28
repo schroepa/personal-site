@@ -75,24 +75,29 @@ export function posthogSkript(apiKey: string | undefined, apiHost: string | unde
     initPostHog()
   }
 
-  // Bestehende Einwilligung, wenn uc.js erst nach diesem Skript eintrifft (Cookiebot meldet den Zustand beim Laden)
-  window.addEventListener("CookiebotOnConsentReady", function () {
-    if (window.Cookiebot && window.Cookiebot.consent && window.Cookiebot.consent.statistics) {
+  // Zustand der Statistik-Einwilligung auf PostHog abbilden. Gilt für Erstzustimmung (CookiebotOnAccept), den beim Laden gemeldeten
+  // Zustand (CookiebotOnConsentReady, wichtig wenn uc.js erst nach diesem Skript eintrifft) und spätere Änderungen:
+  //  - Statistik an: PostHog laden; war es schon geladen und ausgeschaltet, wieder einschalten (opt_in_capturing).
+  //  - Statistik aus: ein bereits geladenes PostHog ausschalten (opt_out_capturing); nicht geladen bleibt es ungeladen.
+  function einwilligungAnwenden() {
+    var cb = window.Cookiebot
+    if (!cb || !cb.consent) return
+    if (cb.consent.statistics) {
+      var warGeladen = !!window.__posthog_initialized
       initPostHog()
+      if (warGeladen && window.posthog && window.posthog.opt_in_capturing) window.posthog.opt_in_capturing()
+    } else if (window.posthog && window.posthog.opt_out_capturing) {
+      window.posthog.opt_out_capturing()
     }
-  })
-
-  // Erstzustimmung im Banner
-  window.addEventListener("CookiebotOnAccept", function () {
-    if (Cookiebot.consent.statistics) {
-      initPostHog()
-    }
-  })
+  }
+  window.addEventListener("CookiebotOnConsentReady", einwilligungAnwenden)
+  window.addEventListener("CookiebotOnAccept", einwilligungAnwenden)
 
   // Consent widerrufen: PostHog opt-out
   window.addEventListener("CookiebotOnDecline", function () {
-    if (!Cookiebot.consent.statistics) {
-      window.posthog && window.posthog.opt_out_capturing()
+    var cb = window.Cookiebot
+    if (cb && cb.consent && !cb.consent.statistics && window.posthog && window.posthog.opt_out_capturing) {
+      window.posthog.opt_out_capturing()
     }
   })
 })()
