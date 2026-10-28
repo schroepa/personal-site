@@ -109,7 +109,8 @@ export function erstelleServer({ dist, regeln, compress = false }) {
     res.statusCode = status
     res.setHeader("Content-Type", TYPEN[extname(datei)] ?? "application/octet-stream")
     for (const h of headerFuer(regeln, pfad)) res.setHeader(h.key, h.value)
-    if (compress && KOMPRIMIERBAR.has(extname(datei))) {
+    // ohne Datei (fehlendes dist/) gibt es nichts zu komprimieren: „Not Found“ geht unkomprimiert raus
+    if (compress && existsSync(datei) && KOMPRIMIERBAR.has(extname(datei))) {
       const akzeptiert = String(req.headers["accept-encoding"] ?? "")
       const art = /\bbr\b/.test(akzeptiert) ? "br" : /\bgzip\b/.test(akzeptiert) ? "gzip" : null
       if (art) {
@@ -126,6 +127,10 @@ export function erstelleServer({ dist, regeln, compress = false }) {
 }
 
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
+  if (process.argv.includes("--help") || process.argv.includes("-h")) {
+    console.log("node tests/helpers/serve-dist.mjs [--port 4323] [--dist dist] [--compress]\n  --compress: Text-Antworten mit br/gzip wie Vercel (nur für Lighthouse-Läufe)")
+    process.exit(0)
+  }
   const arg = (name, standard) => {
     const i = process.argv.indexOf(`--${name}`)
     return i > 0 ? process.argv[i + 1] : standard

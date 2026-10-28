@@ -90,3 +90,29 @@ test("Server: Status, Content-Type und Header aus den Regeln", async () => {
   }
   assert.equal(readFileSync(join(d, "index.html"), "utf8"), "start")
 })
+
+test("compress: fehlendes dist/ stürzt nicht ab, geänderte Datei wird neu komprimiert", async () => {
+  const leer = erstelleServer({ dist: join(tmpdir(), "gibt-es-nicht-" + Date.now()), regeln: [], compress: true })
+  await new Promise((r) => leer.listen(0, "127.0.0.1", r))
+  const res = await fetch(`http://127.0.0.1:${leer.address().port}/blog`, { headers: { "accept-encoding": "gzip" } })
+  assert.equal(res.status, 404)
+  leer.closeAllConnections()
+  leer.close()
+
+  const dist = mkdtempSync(join(tmpdir(), "dist-"))
+  writeFileSync(join(dist, "index.html"), "<h1>eins</h1>")
+  const server = erstelleServer({ dist, regeln: [], compress: true })
+  await new Promise((r) => server.listen(0, "127.0.0.1", r))
+  const url = `http://127.0.0.1:${server.address().port}/`
+  const holen = async () => {
+    const r = await fetch(url, { headers: { "accept-encoding": "gzip" } })
+    return { enc: r.headers.get("content-encoding"), text: await r.text() } // fetch entpackt selbst; content-encoding zeigt, dass komprimiert wurde
+  }
+  assert.deepEqual(await holen(), { enc: "gzip", text: "<h1>eins</h1>" })
+  writeFileSync(join(dist, "index.html"), "<h1>zwei</h1>", { flag: "w" })
+  const { utimesSync } = await import("node:fs")
+  utimesSync(join(dist, "index.html"), new Date(), new Date(Date.now() + 5000))
+  assert.equal((await holen()).text, "<h1>zwei</h1>")
+  server.closeAllConnections()
+  server.close()
+})
