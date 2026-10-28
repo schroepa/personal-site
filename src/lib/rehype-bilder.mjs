@@ -2,11 +2,19 @@
 // vor dem Laden Platz reserviert (kein Layoutsprung) und Bilder unterhalb des ersten Bildschirms nicht sofort geladen werden.
 // Nur lokale Bilder (/images/…); Bilder mit eigenen Angaben bleiben unverändert. `.prose img` setzt width:100% und height:auto,
 // die Attribute dienen also nur dem Seitenverhältnis.
-import { existsSync } from "node:fs"
-import { join } from "node:path"
+import { statSync } from "node:fs"
+import { join, sep } from "node:path"
 import sharp from "sharp"
 
 const PUBLIC = join(process.cwd(), "public")
+
+function istDatei(pfad) {
+  try {
+    return statSync(pfad).isFile()
+  } catch {
+    return false
+  }
+}
 
 async function besuche(knoten, fn) {
   await fn(knoten)
@@ -22,9 +30,21 @@ export function rehypeBilder() {
       if (p.decoding === undefined) p.decoding = "async"
       const src = typeof p.src === "string" ? p.src : ""
       if (p.width !== undefined || p.height !== undefined || !src.startsWith("/images/")) return
-      const datei = join(PUBLIC, decodeURIComponent(src.split("?")[0]))
-      if (!datei.startsWith(PUBLIC) || !existsSync(datei)) return
-      const { width, height } = await sharp(datei).metadata()
+      let pfad
+      try {
+        pfad = decodeURIComponent(src.split("?")[0])
+      } catch {
+        return // kaputte %-Kodierung: Bild unverändert lassen, nie den Build brechen
+      }
+      const datei = join(PUBLIC, pfad)
+      if (!datei.startsWith(PUBLIC + sep) || !istDatei(datei)) return
+      let maße
+      try {
+        maße = await sharp(datei).metadata()
+      } catch {
+        return // keine lesbare Bilddatei: ohne Maße lassen
+      }
+      const { width, height } = maße
       if (width && height) {
         p.width = width
         p.height = height
