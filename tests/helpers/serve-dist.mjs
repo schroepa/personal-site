@@ -113,7 +113,7 @@ export function erstelleServer({ dist, regeln, compress = false }) {
       const akzeptiert = String(req.headers["accept-encoding"] ?? "")
       const art = /\bbr\b/.test(akzeptiert) ? "br" : /\bgzip\b/.test(akzeptiert) ? "gzip" : null
       if (art) {
-        const key = `${art}:${datei}`
+        const key = `${art}:${datei}:${statSync(datei).mtimeMs}` // ändert sich die Datei (neuer Build), wird neu komprimiert
         if (!cache.has(key)) cache.set(key, art === "br" ? brotliCompressSync(inhalt) : gzipSync(inhalt))
         inhalt = cache.get(key)
         res.setHeader("Content-Encoding", art)
