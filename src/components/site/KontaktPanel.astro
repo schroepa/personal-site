@@ -1,6 +1,6 @@
 ---
 // Kontakt-Panel (Figma 262:2): Abschluss der Seite auf der Farbfläche. Label, Titel, Text, E-Mail (text/h1),
-// Aktionen und optional das Handschrift-Tag (Slot „tag“, ohne Inhalt wird nichts gerendert).
+// Aktionen und das Handschrift-Tag (Slot „tag“; ohne eigenen Inhalt die Handschrift aus /images/handschrift-tag.svg, als Maske in Textfarbe).
 // data-abschnitt füttert das Blatt im Schriftfeld, data-objekt das Raster („Spalte a–b“, Hervorhebung).
 // Slot „aktionen“ nimmt weitere Knöpfe auf (z. B. Lebenslauf). Kopieren: src/scripts/kopieren.ts.
 import Knopf from "./Knopf.astro"
@@ -17,7 +17,6 @@ const {
   text = "Schreib mir ein paar Zeilen zu deinem Vorhaben. Ich antworte in der Regel innerhalb von zwei Werktagen.",
   email,
 } = Astro.props
-const hatTag = Astro.slots.has("tag")
 ---
 
 <section class="kontakt-panel" aria-labelledby="kontakt-titel" data-kontakt data-abschnitt="Kontakt" data-objekt>
@@ -33,13 +32,9 @@ const hatTag = Astro.slots.has("tag")
     </div>
     <p class="text-small meldung" aria-live="polite" data-meldung></p>
   </div>
-  {
-    hatTag && (
-      <div class="tag" data-tag data-anim="tag">
-        <slot name="tag" />
-      </div>
-    )
-  }
+  <div class="tag" data-tag data-anim="tag">
+    <slot name="tag"><span class="tag-bild" aria-hidden="true"></span></slot>
+  </div>
 </section>
 
 <style>
@@ -96,6 +91,15 @@ const hatTag = Astro.slots.has("tag")
     display: flex;
     flex-wrap: wrap;
     gap: var(--kontakt-panel-aktion-abstand);
+  }
+
+  .tag-bild {
+    display: block;
+    height: var(--kontakt-panel-tag-hoehe);
+    max-width: 100%;
+    aspect-ratio: 259 / 159;
+    background: var(--kontakt-panel-text-farbe);
+    mask: url("/images/handschrift-tag.svg") no-repeat left center / contain;
   }
 
   .tag {

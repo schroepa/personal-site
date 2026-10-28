@@ -168,16 +168,20 @@ test.describe("KontaktPanel", () => {
     expect(await stil(page, ".kontakt-panel [data-email]", "font-size")).toBe(await token(page, "font-size", "--text-h1-size"))
   })
 
-  test("Semantik: section[aria-labelledby] auf den Titel; der Slot „tag“ rendert sein Feld, ohne Slot (Seite /about) nichts", async ({ page }) => {
+  test("Semantik: section[aria-labelledby] auf den Titel; der Slot „tag“ nimmt eigenen Inhalt, ohne Slot steht die Handschrift (Seite /about)", async ({ page }) => {
     await laden(page)
     const id = await page.locator(".kontakt-panel").getAttribute("aria-labelledby")
     await expect(page.locator(`h2#${id}`)).toHaveText("Lass uns reden.")
     // Galerie: Panel mit Platzhalter-SVG im Slot
     await expect(page.locator(".kontakt-panel [data-tag] svg[data-tag-platzhalter]")).toHaveCount(1)
-    // Produktionsseite ohne Slot: kein Tag-Feld
+    // Produktionsseite ohne Slot: die Handschrift als Maske, dekorativ und ohne eigenen Platzhalter
     await page.goto("/about")
     await expect(page.locator(".kontakt-panel")).toHaveCount(1)
-    await expect(page.locator(".kontakt-panel [data-tag]")).toHaveCount(0)
+    await expect(page.locator(".kontakt-panel [data-tag] .tag-bild[aria-hidden='true']")).toHaveCount(1)
+    await expect(page.locator(".kontakt-panel [data-tag] svg[data-tag-platzhalter]")).toHaveCount(0)
+    const maske = await page.locator(".tag-bild").evaluate((e) => getComputedStyle(e).maskImage)
+    expect(maske).toContain("/images/handschrift-tag.svg")
+    expect((await page.request.get("/images/handschrift-tag.svg")).ok()).toBe(true)
   })
 
   test("Klick auf Kopieren füllt den aria-live-Bereich und legt die Adresse ab", async ({ page, context }) => {
