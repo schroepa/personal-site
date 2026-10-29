@@ -142,6 +142,15 @@ export function renderVercelJson(ressourcen) {
   return `${JSON.stringify({ $schema: "https://openapi.vercel.sh/vercel.json", headers: buildHeaders(ressourcen) }, null, 2)}\n`
 }
 
+/** Gleicher JSON-Inhalt (Schlüsselreihenfolge zählt, Formatierung nicht); unlesbares JSON gilt als ungleich. */
+export function gleicherInhalt(ist, soll) {
+  try {
+    return JSON.stringify(JSON.parse(ist)) === JSON.stringify(JSON.parse(soll))
+  } catch {
+    return false
+  }
+}
+
 const wurzel = join(dirname(fileURLToPath(import.meta.url)), "..")
 export const RESSOURCEN_PFAD = join(wurzel, "src/data/externe-ressourcen.json")
 export const VERCEL_JSON_PFAD = join(wurzel, "vercel.json")
@@ -159,14 +168,13 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
     } catch {
       /* fehlt */
     }
-    if (ist !== soll) {
-      // Diagnose: erste abweichende Zeile und Umgebung, damit Abweichungen im Build-Log nachvollziehbar sind.
+    // Inhalt statt Text vergleichen: Vercel schreibt vercel.json im Build-Container einzeilig um (gleicher Inhalt, andere Formatierung).
+    if (!gleicherInhalt(ist, soll)) {
+      // Diagnose: Node-Version und erste abweichende Zeile, damit Abweichungen im Build-Log nachvollziehbar sind.
       const a = ist.split("\n")
       const b = soll.split("\n")
       const i = a.findIndex((z, n) => z !== b[n])
       console.error(`Abweichung ab Zeile ${i + 1} (ist ${a.length} Zeilen, soll ${b.length}); Node ${process.version}`)
-      console.error(`ist:  ${JSON.stringify(a[i] ?? null)}`)
-      console.error(`soll: ${JSON.stringify(b[i] ?? null)}`)
       console.error("vercel.json passt nicht zu src/data/externe-ressourcen.json bzw. scripts/build-vercel-headers.mjs. Beheben: `npm run headers` ausführen und vercel.json committen.")
       process.exit(1)
     }

@@ -4,6 +4,7 @@ import { readFileSync } from "node:fs"
 import {
   buildHeaders,
   cspDirektiven,
+  gleicherInhalt,
   HOST_DIREKTIVEN,
   ladeRessourcen,
   renderCsp,
@@ -164,4 +165,12 @@ test("vercel.json auf der Platte entspricht dem Generator (sonst `npm run header
   const json = JSON.parse(ist)
   // URL-Verhalten bleibt Vercel-Standard (Astro: build.format directory, trailingSlash ignore)
   assert.deepEqual(Object.keys(json).sort(), ["$schema", "headers"])
+})
+
+test("gleicherInhalt: Formatierung egal (Vercel schreibt einzeilig um), Inhalt und Reihenfolge zählen", () => {
+  const soll = renderVercelJson(ladeRessourcen())
+  assert.equal(gleicherInhalt(JSON.stringify(JSON.parse(soll)), soll), true)
+  assert.equal(gleicherInhalt(soll.replace("DENY", "SAMEORIGIN"), soll), false)
+  assert.equal(gleicherInhalt("", soll), false)
+  assert.equal(gleicherInhalt("{kaputt", soll), false)
 })
