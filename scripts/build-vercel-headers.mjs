@@ -160,6 +160,13 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
       /* fehlt */
     }
     if (ist !== soll) {
+      // Diagnose: erste abweichende Zeile und Umgebung, damit Abweichungen im Build-Log nachvollziehbar sind.
+      const a = ist.split("\n")
+      const b = soll.split("\n")
+      const i = a.findIndex((z, n) => z !== b[n])
+      console.error(`Abweichung ab Zeile ${i + 1} (ist ${a.length} Zeilen, soll ${b.length}); Node ${process.version}`)
+      console.error(`ist:  ${JSON.stringify(a[i] ?? null)}`)
+      console.error(`soll: ${JSON.stringify(b[i] ?? null)}`)
       console.error("vercel.json passt nicht zu src/data/externe-ressourcen.json bzw. scripts/build-vercel-headers.mjs. Beheben: `npm run headers` ausführen und vercel.json committen.")
       process.exit(1)
     }
