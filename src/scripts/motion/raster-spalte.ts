@@ -11,6 +11,7 @@
  */
 import { animate, motionValue, type MotionValue } from "motion"
 import { zaehle } from "./einmal"
+import { findeObjekt } from "./objekt"
 import { readSpring } from "./tokens"
 import { mitFeinemZeiger } from "./zeiger"
 
@@ -56,7 +57,7 @@ function anlegen(raster: HTMLElement): () => void {
       return x >= r.left - abstand / 2 && x <= r.right + abstand / 2
     })
     if (unter) soll.add(unter)
-    const objekt = ziel?.closest?.("[data-objekt]")
+    const objekt = findeObjekt(ziel)
     if (objekt) {
       const o = objekt.getBoundingClientRect()
       for (const s of liste) {

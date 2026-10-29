@@ -115,7 +115,7 @@ test.describe("SiteLayout", () => {
       }
     })
     expect(Number(dark.a)).toBe(0)
-    expect(Number(dark.b)).toBeCloseTo(0.13, 2)
+    expect(Number(dark.b)).toBeCloseTo(0.07, 2)
   })
 
   test("Schriftfeld klebt unten (bottom 16px)", async ({ page }) => {

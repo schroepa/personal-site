@@ -49,6 +49,22 @@ const SPALTEN = 12
     background-repeat: no-repeat;
   }
 
+  /* Farbe der Hervorhebung: hell die Textfarbe, dunkel eine mittlere Neutralstufe (volles Weiß lenkt auf dunklem Grund ab).
+     Kein Figma-Token vorhanden; Primitive statt Literal. */
+  [data-raster] {
+    --raster-hover-farbe: var(--theme-text-default);
+  }
+
+  :global(:root[data-theme="dark"]) [data-raster] {
+    --raster-hover-farbe: var(--global-color-neutral-600);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :global(:root:not([data-theme="light"])) [data-raster] {
+      --raster-hover-farbe: var(--global-color-neutral-600);
+    }
+  }
+
   /* Hervorhebung unter dem Zeiger: eigene Ebene mit denselben Kanten in kräftigerer Farbe. Ihre Deckkraft
      (--spalte-an) treibt eine Feder in motion/raster-spalte.ts; ohne das Skript bleibt sie 0. */
   .spalte::before {
@@ -59,12 +75,12 @@ const SPALTEN = 12
     background-image:
       repeating-linear-gradient(
         to bottom,
-        var(--theme-text-default) 0 var(--global-size-2),
+        var(--raster-hover-farbe) 0 var(--global-size-2),
         transparent var(--global-size-2) calc(var(--global-size-2) + var(--global-size-8))
       ),
       repeating-linear-gradient(
         to bottom,
-        var(--theme-text-default) 0 var(--global-size-2),
+        var(--raster-hover-farbe) 0 var(--global-size-2),
         transparent var(--global-size-2) calc(var(--global-size-2) + var(--global-size-8))
       );
     background-size:

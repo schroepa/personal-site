@@ -410,8 +410,8 @@
     --theme-surface-danger-hover: var(--global-color-red-350);
     --theme-surface-danger-pressed: var(--global-color-red-300);
     --theme-text-on-danger: var(--global-color-neutral-950);
-    --border-raster: var(--global-color-neutral-800);
-    --effekt-papierkorn-deckkraft: 13%;
+    --border-raster: var(--global-color-neutral-900);
+    --effekt-papierkorn-deckkraft: 7%;
     --effekt-papierkorn-hell: 0;
     --effekt-papierkorn-dunkel: 1;
     --effekt-lichtband-deckkraft: 50%;
@@ -456,8 +456,8 @@
   --theme-surface-danger-hover: var(--global-color-red-350);
   --theme-surface-danger-pressed: var(--global-color-red-300);
   --theme-text-on-danger: var(--global-color-neutral-950);
-  --border-raster: var(--global-color-neutral-800);
-  --effekt-papierkorn-deckkraft: 13%;
+  --border-raster: var(--global-color-neutral-900);
+  --effekt-papierkorn-deckkraft: 7%;
   --effekt-papierkorn-hell: 0;
   --effekt-papierkorn-dunkel: 1;
   --effekt-lichtband-deckkraft: 50%;
@@ -934,7 +934,7 @@
   --motion-objekt-magnet: var(--dauer-300);
   --motion-objekt-akkordeon: var(--dauer-450);
   --motion-objekt-linie: var(--dauer-600);
-  --motion-lichtband-einblenden: var(--dauer-1600);
+  --motion-lichtband-einblenden: var(--dauer-800);
   --motion-lichtband-bildintervall: var(--dauer-40);
   --motion-easing-standard: var(--easing-ausklingen);
   --motion-easing-nachziehen: var(--easing-gleichmaessig);

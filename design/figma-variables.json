@@ -499,7 +499,7 @@
        "alias": "--global-color-neutral-300"
       },
       "3:1": {
-       "alias": "--global-color-neutral-800"
+       "alias": "--global-color-neutral-900"
       }
      }
     },
@@ -509,7 +509,7 @@
      "type": "FLOAT",
      "values": {
       "3:0": 17,
-      "3:1": 13
+      "3:1": 7
      }
     },
     {
@@ -12750,7 +12750,7 @@
      "type": "FLOAT",
      "values": {
       "221:0": {
-       "alias": "--dauer-1600"
+       "alias": "--dauer-800"
       },
       "221:1": {
        "alias": "--dauer-0"

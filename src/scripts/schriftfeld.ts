@@ -2,6 +2,7 @@
  * Schriftfeld: Blatt (Abschnitt), Raster (Maße oder Spalten unter dem Zeiger), Ortszeit Berlin.
  * Alle Maße kommen aus den Layout-Tokens (--layout-anzeige-*), nichts ist hier festgeschrieben.
  */
+import { findeObjekt } from "./motion/objekt"
 
 const zeitFormat = new Intl.DateTimeFormat("de-DE", {
   timeZone: "Europe/Berlin",
@@ -66,7 +67,7 @@ export function initSchriftfeld(): () => void {
 
     if (raster && matchMedia("(pointer: fine)").matches) {
       const onMove = (e: PointerEvent) => {
-        const objekt = (e.target as Element | null)?.closest<HTMLElement>("[data-objekt]")
+        const objekt = findeObjekt(e.target as Element | null)
         if (!objekt) return zeigeMasse()
         const spalten = [...raster.children]
           .map((c) => c.getBoundingClientRect())

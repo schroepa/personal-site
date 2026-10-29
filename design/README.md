@@ -95,3 +95,13 @@ Sie brauchen einen echten Wert in Figma; danach Dump neu erzeugen.
 - **Motion Reduziert:** `--motion-lichtband-bildintervall` bleibt unter `Reduziert` bei 40ms (`--dauer-40`), so ist es in Figma gesetzt (Absicht). Alle anderen Motion-Dauern zeigen dort auf `--dauer-0` (0ms).
 - **Gemischte Alias-Ziele:** Typography verweist teils auf `--global-font-size-N`, teils auf `--font-size-N` (beide existieren).
 - **Doppelt vorhandene Variable:** `icon/color` (`--icon-color`) gibt es in Icon und Component mit demselben Default-Alias; der Exporter gibt sie einmal aus.
+
+## Abweichungen vom Figma-Stand
+
+Der Dump wurde nach der Vorschau-Abnahme in drei Werten bewusst angepasst (Patrick, 2026-10-29). In Figma nachziehen, sonst überschreibt der nächste Export sie:
+
+| Variable | Figma | Jetzt | Grund |
+| --- | --- | --- | --- |
+| `lichtband/einblenden` (Standard) | `--dauer-1600` | `--dauer-800` | Lichtband wirkte zu langsam |
+| `border/raster` (Dark) | `--global-color-neutral-800` | `--global-color-neutral-900` | Raster im Dunkelmodus zu hell |
+| `effekt/papierkorn-deckkraft` (Dark) | 13 | 7 | Korn im Dunkelmodus zu hell |
